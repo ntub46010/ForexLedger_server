@@ -1,5 +1,6 @@
 package com.vincent.forexledger.service;
 
+import com.vincent.forexledger.exception.DuplicatedKeyException;
 import com.vincent.forexledger.model.user.CreateUserRequest;
 import com.vincent.forexledger.model.user.AppUserResponse;
 import com.vincent.forexledger.repository.AppUserRepository;
@@ -16,6 +17,10 @@ public class UserService {
     }
 
     public AppUserResponse createUser(CreateUserRequest request) {
+        if (appUserRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicatedKeyException("This email has been registered.");
+        }
+
         var user = AppUserConverter.toAppUser(request);
         user.setCreatedTime(new Date());
         appUserRepository.insert(user);
