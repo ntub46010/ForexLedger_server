@@ -1,5 +1,6 @@
 package com.vincent.forexledger.config;
 
+import com.vincent.forexledger.repository.AppUserRepository;
 import com.vincent.forexledger.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class ServiceConfig {
 
     @Bean
-    public UserService userService() {
-        return new UserService();
+    public UserService userService(AppUserRepository appUserRepository) {
+        return new UserService(appUserRepository);
     }
 }
