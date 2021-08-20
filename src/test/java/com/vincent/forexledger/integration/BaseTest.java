@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 public class BaseTest {
 
     protected HttpHeaders httpHeaders;
-    protected ObjectMapper objectMapper;
+    protected final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     protected MockMvc mockMvc;
