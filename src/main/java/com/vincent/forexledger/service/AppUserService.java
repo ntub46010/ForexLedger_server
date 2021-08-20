@@ -8,11 +8,11 @@ import com.vincent.forexledger.util.converter.AppUserConverter;
 
 import java.util.Date;
 
-public class UserService {
+public class AppUserService {
 
     private AppUserRepository appUserRepository;
 
-    public UserService(AppUserRepository appUserRepository) {
+    public AppUserService(AppUserRepository appUserRepository) {
         this.appUserRepository = appUserRepository;
     }
 

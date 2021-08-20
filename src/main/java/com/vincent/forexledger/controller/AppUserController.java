@@ -2,7 +2,7 @@ package com.vincent.forexledger.controller;
 
 import com.vincent.forexledger.constants.APIPathConstants;
 import com.vincent.forexledger.model.user.CreateUserRequest;
-import com.vincent.forexledger.service.UserService;
+import com.vincent.forexledger.service.AppUserService;
 import com.vincent.forexledger.util.URIUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,10 +19,10 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping(value = APIPathConstants.USERS, produces = MediaType.APPLICATION_JSON_VALUE)
-public class UserController {
+public class AppUserController {
 
     @Autowired
-    private UserService userService;
+    private AppUserService appUserService;
 
     @Operation(
             summary = "Create user authenticated by Firebase Auth service.",
@@ -38,7 +38,7 @@ public class UserController {
     )
     @PostMapping
     public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserRequest request) {
-        var response = userService.createUser(request);
+        var response = appUserService.createUser(request);
         var location = URIUtil.create("/{id}", response.getId());
 
         return ResponseEntity.created(location).build();
