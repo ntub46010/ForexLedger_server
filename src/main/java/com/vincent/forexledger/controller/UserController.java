@@ -1,5 +1,6 @@
 package com.vincent.forexledger.controller;
 
+import com.vincent.forexledger.constants.APIPathConstants;
 import com.vincent.forexledger.model.user.CreateUserRequest;
 import com.vincent.forexledger.service.UserService;
 import com.vincent.forexledger.util.URIUtil;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = APIPathConstants.USERS, produces = MediaType.APPLICATION_JSON_VALUE)
 public class UserController {
 
     @Autowired
