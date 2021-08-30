@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
+@Deprecated
 @Document(collection = "app_user")
 public class AppUser {
     @Id
