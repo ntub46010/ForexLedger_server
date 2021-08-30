@@ -15,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 
 public class VerifyTokenFilter extends OncePerRequestFilter {
 
@@ -43,7 +44,8 @@ public class VerifyTokenFilter extends OncePerRequestFilter {
         springUser.setName(token.getName());
         springUser.setEmail(token.getEmail());
 
-        var authentication = new UsernamePasswordAuthenticationToken(springUser, null);
+        var authentication =
+                new UsernamePasswordAuthenticationToken(springUser, null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }
