@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 
+@Deprecated
 public enum SocialLoginProvider {
     FACEBOOK, GOOGLE;
 

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
+@Deprecated
 @RestController
 @RequestMapping(value = APIPathConstants.USERS, produces = MediaType.APPLICATION_JSON_VALUE)
 public class AppUserController {

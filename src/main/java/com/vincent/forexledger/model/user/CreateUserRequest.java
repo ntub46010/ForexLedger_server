@@ -6,6 +6,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+@Deprecated
 public class CreateUserRequest {
     @Schema(description = "Email address associating with social network.")
     @Email

@@ -2,6 +2,7 @@ package com.vincent.forexledger.model.user;
 
 import java.util.Date;
 
+@Deprecated
 public class AppUserResponse {
     private String id;
     private String email;
