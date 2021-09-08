@@ -3,6 +3,7 @@ package com.vincent.forexledger.filter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
+import com.vincent.forexledger.exception.TokenExpiredException;
 import com.vincent.forexledger.security.SpringUser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
@@ -27,14 +28,14 @@ public class VerifyTokenFilter extends OncePerRequestFilter {
         try {
             var headerAuthorization = request.getHeader(HttpHeaders.AUTHORIZATION);
             if (StringUtils.isNotEmpty(headerAuthorization)) {
-                var bearerToken = StringUtils.replaceOnce(headerAuthorization, PREFIX_BEARAR_TOKEN, "");
+                var bearerToken = StringUtils
+                        .replaceOnce(headerAuthorization, PREFIX_BEARAR_TOKEN, "");
                 var firebaseToken = FirebaseAuth.getInstance().verifyIdToken(bearerToken);
                 setAuthentication(firebaseToken);
             }
             filterChain.doFilter(request, response);
         } catch (FirebaseAuthException e) {
-            // TODO: handle token expired
-            logger.error(e.getMessage(), e);
+            throw new TokenExpiredException(e.getMessage());
         }
     }
 
