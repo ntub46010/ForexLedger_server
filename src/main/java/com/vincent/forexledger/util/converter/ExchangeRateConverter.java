@@ -6,7 +6,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 public class ExchangeRateConverter {
+    private static final Map<CurrencyType, Double> richartDiscountMap;
+
+    static {
+        richartDiscountMap = new EnumMap<>(CurrencyType.class);
+        richartDiscountMap.put(CurrencyType.USD, 0.03);
+        richartDiscountMap.put(CurrencyType.CNY, 0.004);
+        richartDiscountMap.put(CurrencyType.JPY, 0.0008);
+        richartDiscountMap.put(CurrencyType.EUR, 0.08);
+        richartDiscountMap.put(CurrencyType.HKD, 0.01);
+        richartDiscountMap.put(CurrencyType.AUD, 0.044);
+        richartDiscountMap.put(CurrencyType.GBP, 0.09);
+    }
+
     private ExchangeRateConverter() {
     }
 
@@ -24,6 +40,19 @@ public class ExchangeRateConverter {
     }
 
     public static FindRateResponse toRichartExRate(FindRateResponse taishinExRate) {
-        return null;
+        double sellingRate = taishinExRate.getSellingRate();
+        double buyingRate = taishinExRate.getBuyingRate();
+
+        Double discount = richartDiscountMap.get(taishinExRate.getCurrencyType());
+        if (discount == null) {
+            discount = (sellingRate - buyingRate) / 5;
+        }
+
+        sellingRate -= discount;
+        buyingRate += discount;
+        taishinExRate.setSellingRate(sellingRate);
+        taishinExRate.setBuyingRate(buyingRate);
+
+        return taishinExRate;
     }
 }

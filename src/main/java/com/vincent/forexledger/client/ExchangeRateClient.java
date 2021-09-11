@@ -19,8 +19,7 @@ public class ExchangeRateClient {
     public List<FindRateResponse> load(BankType bank) throws IOException {
         Document htmlDocument = Jsoup.connect(bank.getExchangeRateUrl()).get();
         Elements tableRowsOfExRates = htmlDocument
-                .select("div#right table")
-                .first()
+                .selectFirst("div#right table")
                 .select("tbody tr")
                 .next();
 
@@ -28,16 +27,12 @@ public class ExchangeRateClient {
                 .stream()
                 .map(ExchangeRateConverter::toFindRateResponse);
 
-        List<FindRateResponse> rates;
         if (bank == BankType.RICHART) {
-            rates = tableRowOfExRatesStream
-                    .map(ExchangeRateConverter::toRichartExRate)
-                    .collect(Collectors.toList());
-        } else {
-            rates = tableRowOfExRatesStream.collect(Collectors.toList());
+            tableRowOfExRatesStream =
+                    tableRowOfExRatesStream.map(ExchangeRateConverter::toRichartExRate);
         }
 
-        return rates;
+        return tableRowOfExRatesStream.collect(Collectors.toList());
     }
 
 }
