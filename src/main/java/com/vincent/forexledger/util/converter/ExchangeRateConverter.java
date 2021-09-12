@@ -6,21 +6,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.EnumMap;
 import java.util.Map;
 
 public class ExchangeRateConverter {
-    private static final Map<CurrencyType, Double> richartDiscountMap;
+    private static final Map<CurrencyType, BigDecimal> richartDiscountMap;
 
     static {
         richartDiscountMap = new EnumMap<>(CurrencyType.class);
-        richartDiscountMap.put(CurrencyType.USD, 0.03);
-        richartDiscountMap.put(CurrencyType.CNY, 0.004);
-        richartDiscountMap.put(CurrencyType.JPY, 0.0008);
-        richartDiscountMap.put(CurrencyType.EUR, 0.08);
-        richartDiscountMap.put(CurrencyType.HKD, 0.01);
-        richartDiscountMap.put(CurrencyType.AUD, 0.044);
-        richartDiscountMap.put(CurrencyType.GBP, 0.09);
+        richartDiscountMap.put(CurrencyType.USD, BigDecimal.valueOf(0.03));
+        richartDiscountMap.put(CurrencyType.CNY, BigDecimal.valueOf(0.004));
+        richartDiscountMap.put(CurrencyType.JPY, BigDecimal.valueOf(0.0008));
+        richartDiscountMap.put(CurrencyType.EUR, BigDecimal.valueOf(0.08));
+        richartDiscountMap.put(CurrencyType.HKD, BigDecimal.valueOf(0.01));
+        richartDiscountMap.put(CurrencyType.AUD, BigDecimal.valueOf(0.044));
+        richartDiscountMap.put(CurrencyType.GBP, BigDecimal.valueOf(0.09));
     }
 
     private ExchangeRateConverter() {
@@ -40,18 +42,20 @@ public class ExchangeRateConverter {
     }
 
     public static FindRateResponse toRichartExRate(FindRateResponse taishinExRate) {
-        double sellingRate = taishinExRate.getSellingRate();
-        double buyingRate = taishinExRate.getBuyingRate();
+        BigDecimal sellingRate = BigDecimal.valueOf(taishinExRate.getSellingRate());
+        BigDecimal buyingRate = BigDecimal.valueOf(taishinExRate.getBuyingRate());
 
-        Double discount = richartDiscountMap.get(taishinExRate.getCurrencyType());
+        BigDecimal discount = richartDiscountMap.get(taishinExRate.getCurrencyType());
         if (discount == null) {
-            discount = (sellingRate - buyingRate) / 5;
+            discount = sellingRate
+                    .subtract(buyingRate)
+                    .divide(BigDecimal.valueOf(5), RoundingMode.HALF_UP);
         }
 
-        sellingRate -= discount;
-        buyingRate += discount;
-        taishinExRate.setSellingRate(sellingRate);
-        taishinExRate.setBuyingRate(buyingRate);
+        sellingRate  = sellingRate.subtract(discount);
+        buyingRate = buyingRate.add(discount);
+        taishinExRate.setSellingRate(sellingRate.doubleValue());
+        taishinExRate.setBuyingRate(buyingRate.doubleValue());
 
         return taishinExRate;
     }
