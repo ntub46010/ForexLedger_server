@@ -1,6 +1,7 @@
 package com.vincent.forexledger.util.converter;
 
 import com.vincent.forexledger.model.CurrencyType;
+import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import com.vincent.forexledger.model.exchangerate.FindRateResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
@@ -58,5 +59,14 @@ public class ExchangeRateConverter {
         taishinExRate.setBuyingRate(buyingRate.doubleValue());
 
         return taishinExRate;
+    }
+
+    public static ExchangeRate toExchangeRate(FindRateResponse response) {
+        ExchangeRate rate = new ExchangeRate();
+        rate.setCurrencyType(response.getCurrencyType());
+        rate.setSellingRate(response.getSellingRate());
+        rate.setBuyingRate(response.getBuyingRate());
+
+        return rate;
     }
 }

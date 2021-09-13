@@ -1,6 +1,7 @@
 package com.vincent.forexledger.unit;
 
 import com.vincent.forexledger.model.CurrencyType;
+import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import com.vincent.forexledger.model.exchangerate.FindRateResponse;
 import com.vincent.forexledger.util.converter.ExchangeRateConverter;
 import org.junit.Assert;
@@ -49,6 +50,16 @@ public class ExchangeRateConverterTest {
         assertExchangeRate(richartRateMap.get(CurrencyType.CHF), 30.294, 30.09);
         assertExchangeRate(richartRateMap.get(CurrencyType.NZD), 19.785, 19.641);
         assertExchangeRate(richartRateMap.get(CurrencyType.SEK), 3.23, 3.19);
+    }
+
+    @Test
+    public void testConvertFindRateResponseToExchangeRate() {
+        FindRateResponse response = createFindRateResponse(CurrencyType.USD, 27.76, 27.66);
+        ExchangeRate exchangeRate = ExchangeRateConverter.toExchangeRate(response);
+
+        Assert.assertEquals(response.getCurrencyType(), exchangeRate.getCurrencyType());
+        Assert.assertEquals(response.getSellingRate(), exchangeRate.getSellingRate(), 0);
+        Assert.assertEquals(response.getBuyingRate(), exchangeRate.getBuyingRate(), 0);
     }
 
     private FindRateResponse createFindRateResponse(CurrencyType type, double sellingRate, double buyingRate) {
