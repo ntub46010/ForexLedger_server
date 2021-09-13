@@ -2,17 +2,28 @@ package com.vincent.forexledger.model.exchangerate;
 
 import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.bank.BankType;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
 @Document(collection = "exchange_rate")
 public class ExchangeRate {
+    @Id
+    private String id;
     private CurrencyType currencyType;
     private BankType bankType;
     private double sellingRate;
     private double buyingRate;
     private Date createTime;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public CurrencyType getCurrencyType() {
         return currencyType;
