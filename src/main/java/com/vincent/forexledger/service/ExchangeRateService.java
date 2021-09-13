@@ -34,8 +34,7 @@ public class ExchangeRateService {
         for (BankType bank : BankType.values()) {
             try {
                 List<FindRateResponse> responses = exchangeRateClient.load(bank);
-                List<ExchangeRate> rates = ExchangeRateConverter.toExchangeRates(responses);
-                rates.forEach(r -> r.setCreateTime(now));
+                List<ExchangeRate> rates = ExchangeRateConverter.toExchangeRates(responses, now);
 
                 allExRates.addAll(rates);
             } catch (IOException e) {

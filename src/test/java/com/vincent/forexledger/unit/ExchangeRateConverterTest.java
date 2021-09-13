@@ -9,6 +9,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -56,11 +57,13 @@ public class ExchangeRateConverterTest {
     @Test
     public void testConvertFindRateResponseToExchangeRate() {
         FindRateResponse response = createFindRateResponse(CurrencyType.USD, BankType.FUBON,27.76, 27.66);
-        ExchangeRate exchangeRate = ExchangeRateConverter.toExchangeRate(response);
+        Date createdTime = new Date();
+        ExchangeRate exchangeRate = ExchangeRateConverter.toExchangeRate(response, createdTime);
 
         Assert.assertEquals(response.getCurrencyType(), exchangeRate.getCurrencyType());
         Assert.assertEquals(response.getSellingRate(), exchangeRate.getSellingRate(), 0);
         Assert.assertEquals(response.getBuyingRate(), exchangeRate.getBuyingRate(), 0);
+        Assert.assertEquals(createdTime, exchangeRate.getCreatedTime());
     }
 
     private FindRateResponse createFindRateResponse(

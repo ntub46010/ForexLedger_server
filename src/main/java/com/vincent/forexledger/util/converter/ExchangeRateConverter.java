@@ -9,6 +9,7 @@ import org.jsoup.select.Elements;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -63,18 +64,19 @@ public class ExchangeRateConverter {
         return response;
     }
 
-    public static List<ExchangeRate> toExchangeRates(List<FindRateResponse> response) {
+    public static List<ExchangeRate> toExchangeRates(List<FindRateResponse> response, Date createdTime) {
         return response.stream()
-                .map(ExchangeRateConverter::toExchangeRate)
+                .map(r -> toExchangeRate(r, createdTime))
                 .collect(Collectors.toList());
     }
 
-    public static ExchangeRate toExchangeRate(FindRateResponse response) {
+    public static ExchangeRate toExchangeRate(FindRateResponse response, Date createdTime) {
         ExchangeRate rate = new ExchangeRate();
         rate.setCurrencyType(response.getCurrencyType());
         rate.setBankType(rate.getBankType());
         rate.setSellingRate(response.getSellingRate());
         rate.setBuyingRate(response.getBuyingRate());
+        rate.setCreatedTime(createdTime);
 
         return rate;
     }

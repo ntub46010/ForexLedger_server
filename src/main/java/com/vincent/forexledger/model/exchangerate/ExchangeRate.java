@@ -15,7 +15,7 @@ public class ExchangeRate {
     private BankType bankType;
     private double sellingRate;
     private double buyingRate;
-    private Date createTime;
+    private Date createdTime;
 
     public String getId() {
         return id;
@@ -57,11 +57,11 @@ public class ExchangeRate {
         this.buyingRate = buyingRate;
     }
 
-    public Date getCreateTime() {
-        return createTime;
+    public Date getCreatedTime() {
+        return createdTime;
     }
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
+    public void setCreatedTime(Date createdTime) {
+        this.createdTime = createdTime;
     }
 }
