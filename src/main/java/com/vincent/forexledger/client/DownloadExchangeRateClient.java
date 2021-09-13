@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
-public class ExchangeRateClient {
+public class DownloadExchangeRateClient {
 
     public List<FindRateResponse> load(BankType bank) throws IOException {
         Document htmlDocument = Jsoup.connect(bank.getExchangeRateUrl()).get();

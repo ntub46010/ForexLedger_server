@@ -1,5 +1,6 @@
 package com.vincent.forexledger.config;
 
+import com.vincent.forexledger.client.DownloadExchangeRateClient;
 import com.vincent.forexledger.repository.AppUserRepository;
 import com.vincent.forexledger.repository.ExchangeRateRepository;
 import com.vincent.forexledger.service.AppUserService;
@@ -16,7 +17,7 @@ public class ServiceConfig {
     }
 
     @Bean
-    public ExchangeRateService exchangeRateService(ExchangeRateRepository repository) {
-        return new ExchangeRateService(repository);
+    public ExchangeRateService exchangeRateService(DownloadExchangeRateClient client, ExchangeRateRepository repository) {
+        return new ExchangeRateService(client, repository);
     }
 }
