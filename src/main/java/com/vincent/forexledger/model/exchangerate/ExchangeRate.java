@@ -1,6 +1,7 @@
 package com.vincent.forexledger.model.exchangerate;
 
 import com.vincent.forexledger.model.CurrencyType;
+import com.vincent.forexledger.model.bank.BankType;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -8,6 +9,7 @@ import java.util.Date;
 @Document(collection = "exchange_rate")
 public class ExchangeRate {
     private CurrencyType currencyType;
+    private BankType bankType;
     private double sellingRate;
     private double buyingRate;
     private Date createTime;
@@ -18,6 +20,14 @@ public class ExchangeRate {
 
     public void setCurrencyType(CurrencyType currencyType) {
         this.currencyType = currencyType;
+    }
+
+    public BankType getBankType() {
+        return bankType;
+    }
+
+    public void setBankType(BankType bankType) {
+        this.bankType = bankType;
     }
 
     public double getSellingRate() {

@@ -32,7 +32,10 @@ public class DownloadExchangeRateClient {
                     tableRowOfExRatesStream.map(ExchangeRateConverter::toRichartExRate);
         }
 
-        return tableRowOfExRatesStream.collect(Collectors.toList());
+        List<FindRateResponse> responses = tableRowOfExRatesStream.collect(Collectors.toList());
+        responses.forEach(r -> r.setBankType(bank));
+
+        return responses;
     }
 
 }
