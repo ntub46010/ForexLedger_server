@@ -5,7 +5,8 @@ import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface ExchangeRateRepository extends MongoRepository<ExchangeRate, String> {
-    void deleteByBankTypeIn(Collection<BankType> banks);
+    List<ExchangeRate> findByBankTypeIn(Collection<BankType> banks);
 }

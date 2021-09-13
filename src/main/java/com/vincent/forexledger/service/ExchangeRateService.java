@@ -28,7 +28,7 @@ public class ExchangeRateService {
     }
 
     @Scheduled(cron = "0 */15 * * * ?")
-    private void refreshExchangeRateData() {
+    public void refreshExchangeRateData() {
         List<ExchangeRate> allExRates = new ArrayList<>();
         Date now = new Date();
         for (BankType bank : BankType.values()) {
@@ -49,11 +49,16 @@ public class ExchangeRateService {
     }
 
     private void overwriteBankExchangeRateSafely(Map<BankType, List<ExchangeRate>> bankExRateMap) {
+        List<ExchangeRate> oldRates = repository.findByBankTypeIn(bankExRateMap.keySet());
+        List<String> oldRateIds = oldRates.stream()
+                .map(ExchangeRate::getId)
+                .collect(Collectors.toList());
+
         List<ExchangeRate> newExRates = new ArrayList<>();
         bankExRateMap.values().forEach(newExRates::addAll);
 
         repository.insert(newExRates);
-        repository.deleteByBankTypeIn(bankExRateMap.keySet());
+        repository.deleteAllById(oldRateIds);
     }
 
 }

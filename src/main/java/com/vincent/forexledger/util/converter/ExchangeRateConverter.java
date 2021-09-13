@@ -73,7 +73,7 @@ public class ExchangeRateConverter {
     public static ExchangeRate toExchangeRate(FindRateResponse response, Date createdTime) {
         ExchangeRate rate = new ExchangeRate();
         rate.setCurrencyType(response.getCurrencyType());
-        rate.setBankType(rate.getBankType());
+        rate.setBankType(response.getBankType());
         rate.setSellingRate(response.getSellingRate());
         rate.setBuyingRate(response.getBuyingRate());
         rate.setCreatedTime(createdTime);
