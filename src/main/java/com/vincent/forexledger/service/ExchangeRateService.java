@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,7 +36,7 @@ public class ExchangeRateService {
                 List<ExchangeRate> rates = ExchangeRateConverter.toExchangeRates(responses, now);
 
                 allExRates.addAll(rates);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error("Failed to download or parse data during download {} exchange rate. {}",
                         bank.name(), e.getMessage());
             }
