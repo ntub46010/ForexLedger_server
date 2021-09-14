@@ -2,6 +2,7 @@ package com.vincent.forexledger.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vincent.forexledger.repository.AppUserRepository;
+import com.vincent.forexledger.repository.ExchangeRateRepository;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,6 +25,9 @@ public class BaseTest {
     @Autowired
     protected AppUserRepository appUserRepository;
 
+    @Autowired
+    protected ExchangeRateRepository exchangeRateRepository;
+
     @Before
     public void init() {
         httpHeaders = new HttpHeaders();
@@ -34,6 +38,7 @@ public class BaseTest {
 
     private void clearDB() {
         appUserRepository.deleteAll();
+        exchangeRateRepository.deleteAll();
     }
 
 }

@@ -1,5 +1,6 @@
 package com.vincent.forexledger.security;
 
+import com.vincent.forexledger.constants.APIPathConstants;
 import com.vincent.forexledger.filter.VerifyTokenFilter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,7 +15,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
+                .antMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/users").permitAll()
+                .antMatchers(HttpMethod.GET, APIPathConstants.EXCHANGE_RATES).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(new VerifyTokenFilter(), UsernamePasswordAuthenticationFilter.class)

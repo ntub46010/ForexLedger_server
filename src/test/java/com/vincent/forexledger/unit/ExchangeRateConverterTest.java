@@ -3,6 +3,7 @@ package com.vincent.forexledger.unit;
 import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.exchangerate.ExchangeRate;
+import com.vincent.forexledger.model.exchangerate.ExchangeRateResponse;
 import com.vincent.forexledger.model.exchangerate.FindRateResponse;
 import com.vincent.forexledger.util.converter.ExchangeRateConverter;
 import org.junit.Assert;
@@ -12,6 +13,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -65,6 +67,28 @@ public class ExchangeRateConverterTest {
         Assert.assertEquals(response.getSellingRate(), exchangeRate.getSellingRate(), 0);
         Assert.assertEquals(response.getBuyingRate(), exchangeRate.getBuyingRate(), 0);
         Assert.assertEquals(createdTime, exchangeRate.getCreatedTime());
+    }
+
+    @Test
+    public void testConvertToResponse() {
+        BiConsumer<ExchangeRate, ExchangeRateResponse> assertFunc = (expected, actual) -> {
+            Assert.assertEquals(expected.getCurrencyType(), actual.getCurrencyType());
+            Assert.assertEquals(expected.getSellingRate(), actual.getSellingRate(), 0);
+            Assert.assertEquals(expected.getBuyingRate(), actual.getBuyingRate(), 0);
+            Assert.assertEquals(expected.getCreatedTime(), actual.getUpdatedTime());
+        };
+
+        var exchangeRate = new ExchangeRate();
+        exchangeRate.setCurrencyType(CurrencyType.USD);
+        exchangeRate.setSellingRate(27.76);
+        exchangeRate.setBuyingRate(27.66);
+        exchangeRate.setCreatedTime(new Date());
+
+        var response = ExchangeRateConverter.toResponse(exchangeRate);
+        assertFunc.accept(exchangeRate, response);
+
+        var responses = ExchangeRateConverter.toResponses(List.of(exchangeRate));
+        assertFunc.accept(exchangeRate, responses.get(0));
     }
 
     private FindRateResponse createFindRateResponse(
