@@ -91,7 +91,7 @@ public class ExchangeRateConverter {
     public static ExchangeRateResponse toResponse(ExchangeRate rate) {
         ExchangeRateResponse response = new ExchangeRateResponse();
         response.setCurrencyType(rate.getCurrencyType());
-        response.setSellingRate(response.getSellingRate());
+        response.setSellingRate(rate.getSellingRate());
         response.setBuyingRate(rate.getBuyingRate());
         response.setUpdatedTime(rate.getCreatedTime());
 
