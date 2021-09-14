@@ -1,6 +1,7 @@
 package com.vincent.forexledger.controller;
 
 import com.vincent.forexledger.constants.APIPathConstants;
+import com.vincent.forexledger.constants.QueryStringConstants;
 import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.exchangerate.ExchangeRateResponse;
 import com.vincent.forexledger.service.ExchangeRateService;
@@ -40,7 +41,7 @@ public class ExchangeRateController {
     @GetMapping
     public ResponseEntity<List<ExchangeRateResponse>> getExchangeRates(
             @Parameter(description = "Bank of exchange rates.", required = true)
-            @RequestParam("bank") BankType bank) {
+            @RequestParam(QueryStringConstants.BANK) BankType bank) {
         List<ExchangeRateResponse> responses = service.loadExchangeRates(bank);
         return ResponseEntity.ok(responses);
     }
