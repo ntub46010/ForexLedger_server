@@ -1,12 +1,15 @@
 package com.vincent.forexledger.unit;
 
 import com.vincent.forexledger.model.CurrencyType;
+import com.vincent.forexledger.model.bank.BankType;
+import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import com.vincent.forexledger.model.exchangerate.FindRateResponse;
 import com.vincent.forexledger.util.converter.ExchangeRateConverter;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -15,21 +18,21 @@ import java.util.stream.Collectors;
 public class ExchangeRateConverterTest {
 
     @Test
-    public void testConvertTaishinRateToRichartRate() {
+    public void testConvertToRichartRate() {
         List<FindRateResponse> taishinRates = Arrays.asList(
-                createFindRateResponse(CurrencyType.USD, 27.76, 27.66),
-                createFindRateResponse(CurrencyType.CNY, 4.318, 4.278),
-                createFindRateResponse(CurrencyType.JPY, 0.2539, 0.2504),
-                createFindRateResponse(CurrencyType.EUR, 32.914, 32.564),
-                createFindRateResponse(CurrencyType.HKD, 3.5877, 3.5377),
-                createFindRateResponse(CurrencyType.AUD, 20.493, 20.273),
-                createFindRateResponse(CurrencyType.ZAR, 1.9894, 1.9094),
-                createFindRateResponse(CurrencyType.CAD, 21.953, 21.713),
-                createFindRateResponse(CurrencyType.GBP, 38.553, 38.153),
-                createFindRateResponse(CurrencyType.SGD, 20.764, 20.544),
-                createFindRateResponse(CurrencyType.CHF, 30.362, 30.022),
-                createFindRateResponse(CurrencyType.NZD, 19.833, 19.593),
-                createFindRateResponse(CurrencyType.SEK, 3.24, 3.18)
+                createFindRateResponse(CurrencyType.USD, BankType.RICHART, 27.76, 27.66),
+                createFindRateResponse(CurrencyType.CNY, BankType.RICHART,4.318, 4.278),
+                createFindRateResponse(CurrencyType.JPY, BankType.RICHART,0.2539, 0.2504),
+                createFindRateResponse(CurrencyType.EUR, BankType.RICHART,32.914, 32.564),
+                createFindRateResponse(CurrencyType.HKD, BankType.RICHART,3.5877, 3.5377),
+                createFindRateResponse(CurrencyType.AUD, BankType.RICHART,20.493, 20.273),
+                createFindRateResponse(CurrencyType.ZAR, BankType.RICHART,1.9894, 1.9094),
+                createFindRateResponse(CurrencyType.CAD, BankType.RICHART,21.953, 21.713),
+                createFindRateResponse(CurrencyType.GBP, BankType.RICHART,38.553, 38.153),
+                createFindRateResponse(CurrencyType.SGD, BankType.RICHART,20.764, 20.544),
+                createFindRateResponse(CurrencyType.CHF, BankType.RICHART,30.362, 30.022),
+                createFindRateResponse(CurrencyType.NZD, BankType.RICHART,19.833, 19.593),
+                createFindRateResponse(CurrencyType.SEK, BankType.RICHART,3.24, 3.18)
         );
 
         Map<CurrencyType, FindRateResponse> richartRateMap = taishinRates.stream()
@@ -51,9 +54,24 @@ public class ExchangeRateConverterTest {
         assertExchangeRate(richartRateMap.get(CurrencyType.SEK), 3.23, 3.19);
     }
 
-    private FindRateResponse createFindRateResponse(CurrencyType type, double sellingRate, double buyingRate) {
+    @Test
+    public void testConvertFindRateResponseToExchangeRate() {
+        FindRateResponse response = createFindRateResponse(CurrencyType.USD, BankType.FUBON,27.76, 27.66);
+        Date createdTime = new Date();
+        ExchangeRate exchangeRate = ExchangeRateConverter.toExchangeRate(response, createdTime);
+
+        Assert.assertEquals(response.getCurrencyType(), exchangeRate.getCurrencyType());
+        Assert.assertEquals(response.getBankType(), exchangeRate.getBankType());
+        Assert.assertEquals(response.getSellingRate(), exchangeRate.getSellingRate(), 0);
+        Assert.assertEquals(response.getBuyingRate(), exchangeRate.getBuyingRate(), 0);
+        Assert.assertEquals(createdTime, exchangeRate.getCreatedTime());
+    }
+
+    private FindRateResponse createFindRateResponse(
+            CurrencyType currencyType, BankType bankType, double sellingRate, double buyingRate) {
         FindRateResponse rate = new FindRateResponse();
-        rate.setCurrencyType(type);
+        rate.setCurrencyType(currencyType);
+        rate.setBankType(bankType);
         rate.setSellingRate(sellingRate);
         rate.setBuyingRate(buyingRate);
 

@@ -1,6 +1,7 @@
 package com.vincent.forexledger.util.converter;
 
 import com.vincent.forexledger.model.CurrencyType;
+import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import com.vincent.forexledger.model.exchangerate.FindRateResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
@@ -8,8 +9,11 @@ import org.jsoup.select.Elements;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Date;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ExchangeRateConverter {
     private static final Map<CurrencyType, BigDecimal> richartDiscountMap;
@@ -41,11 +45,11 @@ public class ExchangeRateConverter {
         return rate;
     }
 
-    public static FindRateResponse toRichartExRate(FindRateResponse taishinExRate) {
-        BigDecimal sellingRate = BigDecimal.valueOf(taishinExRate.getSellingRate());
-        BigDecimal buyingRate = BigDecimal.valueOf(taishinExRate.getBuyingRate());
+    public static FindRateResponse toRichartExRate(FindRateResponse response) {
+        BigDecimal sellingRate = BigDecimal.valueOf(response.getSellingRate());
+        BigDecimal buyingRate = BigDecimal.valueOf(response.getBuyingRate());
 
-        BigDecimal discount = richartDiscountMap.get(taishinExRate.getCurrencyType());
+        BigDecimal discount = richartDiscountMap.get(response.getCurrencyType());
         if (discount == null) {
             discount = sellingRate
                     .subtract(buyingRate)
@@ -54,9 +58,26 @@ public class ExchangeRateConverter {
 
         sellingRate  = sellingRate.subtract(discount);
         buyingRate = buyingRate.add(discount);
-        taishinExRate.setSellingRate(sellingRate.doubleValue());
-        taishinExRate.setBuyingRate(buyingRate.doubleValue());
+        response.setSellingRate(sellingRate.doubleValue());
+        response.setBuyingRate(buyingRate.doubleValue());
 
-        return taishinExRate;
+        return response;
+    }
+
+    public static List<ExchangeRate> toExchangeRates(List<FindRateResponse> response, Date createdTime) {
+        return response.stream()
+                .map(r -> toExchangeRate(r, createdTime))
+                .collect(Collectors.toList());
+    }
+
+    public static ExchangeRate toExchangeRate(FindRateResponse response, Date createdTime) {
+        ExchangeRate rate = new ExchangeRate();
+        rate.setCurrencyType(response.getCurrencyType());
+        rate.setBankType(response.getBankType());
+        rate.setSellingRate(response.getSellingRate());
+        rate.setBuyingRate(response.getBuyingRate());
+        rate.setCreatedTime(createdTime);
+
+        return rate;
     }
 }
