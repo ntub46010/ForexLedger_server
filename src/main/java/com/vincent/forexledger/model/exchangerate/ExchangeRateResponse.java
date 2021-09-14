@@ -1,14 +1,22 @@
 package com.vincent.forexledger.model.exchangerate;
 
 import com.vincent.forexledger.model.CurrencyType;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Date;
 
 public class ExchangeRateResponse {
+    @Schema(example = "USD")
     private CurrencyType currencyType;
+
+    @Schema(description = "The exchange rate that bank selling currency to user.")
     private double sellingRate;
+
+    @Schema(description = "The exchange rate that bank buying currency from user.")
     private double buyingRate;
-    private Date createdTime;
+
+    @Schema(description = "The refreshing time at server of this exchange rate.")
+    private Date updatedTime;
 
     public CurrencyType getCurrencyType() {
         return currencyType;
@@ -34,11 +42,11 @@ public class ExchangeRateResponse {
         this.buyingRate = buyingRate;
     }
 
-    public Date getCreatedTime() {
-        return createdTime;
+    public Date getUpdatedTime() {
+        return updatedTime;
     }
 
-    public void setCreatedTime(Date createdTime) {
-        this.createdTime = createdTime;
+    public void setUpdatedTime(Date updatedTimeime) {
+        this.updatedTime = updatedTimeime;
     }
 }

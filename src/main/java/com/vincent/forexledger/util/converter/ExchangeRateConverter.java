@@ -93,7 +93,7 @@ public class ExchangeRateConverter {
         response.setCurrencyType(rate.getCurrencyType());
         response.setSellingRate(response.getSellingRate());
         response.setBuyingRate(rate.getBuyingRate());
-        response.setCreatedTime(rate.getCreatedTime());
+        response.setUpdatedTime(rate.getCreatedTime());
 
         return response;
     }
