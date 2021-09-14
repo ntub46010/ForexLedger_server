@@ -6,7 +6,6 @@ import com.vincent.forexledger.model.exchangerate.ExchangeRateResponse;
 import com.vincent.forexledger.model.exchangerate.FindRateResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -34,12 +33,12 @@ public class ExchangeRateConverter {
     }
 
     public static FindRateResponse toFindRateResponse(Element tableRow) {
-        Elements tableData = tableRow.select("td");
-        String currencyTypeLabel = tableData.get(0).selectFirst("a").text();
-        String currencyCode = StringUtils.split(currencyTypeLabel, " ")[1];
+        var tableData = tableRow.select("td");
+        var currencyTypeFullName = tableData.get(0).selectFirst("a").text();
+        var currencyCode = StringUtils.split(currencyTypeFullName, " ")[1];
 
-        FindRateResponse rate = new FindRateResponse();
-        rate.setCurrencyType(CurrencyType.fromString(currencyCode));
+        var rate = new FindRateResponse();
+        rate.setCurrencyType(CurrencyType.valueOf(currencyCode));
         rate.setSellingRate(Double.parseDouble(tableData.get(4).text()));
         rate.setBuyingRate(Double.parseDouble(tableData.get(3).text()));
 
@@ -47,10 +46,10 @@ public class ExchangeRateConverter {
     }
 
     public static FindRateResponse toRichartExRate(FindRateResponse response) {
-        BigDecimal sellingRate = BigDecimal.valueOf(response.getSellingRate());
-        BigDecimal buyingRate = BigDecimal.valueOf(response.getBuyingRate());
+        var sellingRate = BigDecimal.valueOf(response.getSellingRate());
+        var buyingRate = BigDecimal.valueOf(response.getBuyingRate());
 
-        BigDecimal discount = richartDiscountMap.get(response.getCurrencyType());
+        var discount = richartDiscountMap.get(response.getCurrencyType());
         if (discount == null) {
             discount = sellingRate
                     .subtract(buyingRate)
@@ -72,7 +71,7 @@ public class ExchangeRateConverter {
     }
 
     public static ExchangeRate toExchangeRate(FindRateResponse response, Date createdTime) {
-        ExchangeRate rate = new ExchangeRate();
+        var rate = new ExchangeRate();
         rate.setCurrencyType(response.getCurrencyType());
         rate.setBankType(response.getBankType());
         rate.setSellingRate(response.getSellingRate());
@@ -89,7 +88,7 @@ public class ExchangeRateConverter {
     }
 
     public static ExchangeRateResponse toResponse(ExchangeRate rate) {
-        ExchangeRateResponse response = new ExchangeRateResponse();
+        var response = new ExchangeRateResponse();
         response.setCurrencyType(rate.getCurrencyType());
         response.setSellingRate(rate.getSellingRate());
         response.setBuyingRate(rate.getBuyingRate());

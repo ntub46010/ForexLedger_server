@@ -5,13 +5,10 @@ import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.exchangerate.FindRateResponse;
 import com.vincent.forexledger.util.converter.ExchangeRateConverter;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class DownloadExchangeRateClient {
     private RestTemplate restTemplate;
@@ -21,14 +18,14 @@ public class DownloadExchangeRateClient {
     }
 
     public List<FindRateResponse> load(BankType bank) {
-        String htmlStr = restTemplate.getForObject(bank.getExchangeRateUrl(), String.class);
-        Document htmlDocument = Jsoup.parse(htmlStr);
-        Elements tableRowsOfExRates = htmlDocument
+        var htmlStr = restTemplate.getForObject(bank.getExchangeRateUrl(), String.class);
+        var htmlDocument = Jsoup.parse(htmlStr);
+        var tableRowsOfExRates = htmlDocument
                 .selectFirst("div#right table")
                 .select("tbody tr")
                 .next();
 
-        Stream<FindRateResponse> tableRowOfExRatesStream = tableRowsOfExRates
+        var tableRowOfExRatesStream = tableRowsOfExRates
                 .stream()
                 .map(ExchangeRateConverter::toFindRateResponse);
 
@@ -38,7 +35,7 @@ public class DownloadExchangeRateClient {
                     .map(ExchangeRateConverter::toRichartExRate);
         }
 
-        List<FindRateResponse> responses = tableRowOfExRatesStream.collect(Collectors.toList());
+        var responses = tableRowOfExRatesStream.collect(Collectors.toList());
         responses.forEach(r -> r.setBankType(bank));
 
         return responses;
