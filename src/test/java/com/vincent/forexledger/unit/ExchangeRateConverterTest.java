@@ -57,16 +57,23 @@ public class ExchangeRateConverterTest {
 
     @Test
     public void testConvertFindRateResponseToExchangeRate() {
+        var createdTime = new Date();
+        BiConsumer<FindRateResponse, ExchangeRate> assertFunc = (expected, actual) -> {
+            Assert.assertEquals(expected.getCurrencyType(), actual.getCurrencyType());
+            Assert.assertEquals(expected.getBankType(), actual.getBankType());
+            Assert.assertEquals(expected.getSellingRate(), actual.getSellingRate(), 0);
+            Assert.assertEquals(expected.getBuyingRate(), actual.getBuyingRate(), 0);
+            Assert.assertEquals(createdTime, actual.getCreatedTime());
+        };
+
         var response = createFindRateResponse(CurrencyType.USD, BankType.FUBON,27.76, 27.66);
 
-        var createdTime = new Date();
         var exchangeRate = ExchangeRateConverter.toExchangeRate(response, createdTime);
+        assertFunc.accept(response, exchangeRate);
 
-        Assert.assertEquals(response.getCurrencyType(), exchangeRate.getCurrencyType());
-        Assert.assertEquals(response.getBankType(), exchangeRate.getBankType());
-        Assert.assertEquals(response.getSellingRate(), exchangeRate.getSellingRate(), 0);
-        Assert.assertEquals(response.getBuyingRate(), exchangeRate.getBuyingRate(), 0);
-        Assert.assertEquals(createdTime, exchangeRate.getCreatedTime());
+        var exchangeRates = ExchangeRateConverter.toExchangeRates(List.of(response), createdTime);
+        Assert.assertEquals(1, exchangeRates.size());
+        assertFunc.accept(response, exchangeRates.get(0));
     }
 
     @Test
@@ -88,6 +95,7 @@ public class ExchangeRateConverterTest {
         assertFunc.accept(exchangeRate, response);
 
         var responses = ExchangeRateConverter.toResponses(List.of(exchangeRate));
+        Assert.assertEquals(1, responses.size());
         assertFunc.accept(exchangeRate, responses.get(0));
     }
 
