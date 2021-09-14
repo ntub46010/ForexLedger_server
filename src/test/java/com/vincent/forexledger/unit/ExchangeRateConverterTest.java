@@ -61,6 +61,7 @@ public class ExchangeRateConverterTest {
         ExchangeRate exchangeRate = ExchangeRateConverter.toExchangeRate(response, createdTime);
 
         Assert.assertEquals(response.getCurrencyType(), exchangeRate.getCurrencyType());
+        Assert.assertEquals(response.getBankType(), exchangeRate.getBankType());
         Assert.assertEquals(response.getSellingRate(), exchangeRate.getSellingRate(), 0);
         Assert.assertEquals(response.getBuyingRate(), exchangeRate.getBuyingRate(), 0);
         Assert.assertEquals(createdTime, exchangeRate.getCreatedTime());

@@ -20,10 +20,8 @@ public class RefreshExchangeRateRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        logger.info("Start to refresh exchange rate.");
         if (isNeededToRefresh) {
             exchangeRateService.refreshExchangeRateData();
         }
-        logger.info("Finish refreshing exchange rate.");
     }
 }

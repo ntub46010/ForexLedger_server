@@ -10,10 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ExchangeRateService {
@@ -26,8 +23,9 @@ public class ExchangeRateService {
         this.repository = repository;
     }
 
-    @Scheduled(cron = "0 */15 * * * ?")
+    @Scheduled(cron = "${cron.exchangerate.refresh}")
     public void refreshExchangeRateData() {
+        logger.info("Start to refresh exchange rate.");
         List<ExchangeRate> allExRates = new ArrayList<>();
         Date now = new Date();
         for (BankType bank : BankType.values()) {
@@ -45,6 +43,7 @@ public class ExchangeRateService {
         Map<BankType, List<ExchangeRate>> bankExRateMap = allExRates.stream()
                 .collect(Collectors.groupingBy(ExchangeRate::getBankType, Collectors.toList()));
         overwriteBankExchangeRateSafely(bankExRateMap);
+        logger.info("Finish refreshing exchange rate.");
     }
 
     private void overwriteBankExchangeRateSafely(Map<BankType, List<ExchangeRate>> bankExRateMap) {
@@ -53,8 +52,9 @@ public class ExchangeRateService {
                 .map(ExchangeRate::getId)
                 .collect(Collectors.toList());
 
-        List<ExchangeRate> newExRates = new ArrayList<>();
-        bankExRateMap.values().forEach(newExRates::addAll);
+        List<ExchangeRate> newExRates = bankExRateMap.values().stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
 
         repository.insert(newExRates);
         repository.deleteAllById(oldRateIds);
