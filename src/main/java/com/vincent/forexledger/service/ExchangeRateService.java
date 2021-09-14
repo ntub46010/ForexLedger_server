@@ -8,6 +8,7 @@ import com.vincent.forexledger.model.exchangerate.ExchangeRateResponse;
 import com.vincent.forexledger.model.exchangerate.FindRateResponse;
 import com.vincent.forexledger.repository.ExchangeRateRepository;
 import com.vincent.forexledger.util.converter.ExchangeRateConverter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -30,7 +31,12 @@ public class ExchangeRateService {
     public List<ExchangeRateResponse> loadExchangeRates(BankType bank) {
         List<ExchangeRateResponse> responses = bankExchangeRateMap.get(bank);
         if (responses == null) {
-            throw new NotFoundException("Can't found exchange rates of " + bank);
+            List<ExchangeRate> dbRates = repository.findByBankTypeIn(List.of(bank));
+            if (CollectionUtils.isEmpty(dbRates)) {
+                throw new NotFoundException("Can't found exchange rates of " + bank);
+            }
+            responses = ExchangeRateConverter.toResponses(dbRates);
+            bankExchangeRateMap.put(bank, responses);
         }
 
         return responses;
