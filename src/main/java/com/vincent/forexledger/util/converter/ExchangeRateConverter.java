@@ -2,6 +2,7 @@ package com.vincent.forexledger.util.converter;
 
 import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.exchangerate.ExchangeRate;
+import com.vincent.forexledger.model.exchangerate.ExchangeRateResponse;
 import com.vincent.forexledger.model.exchangerate.FindRateResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
@@ -79,5 +80,21 @@ public class ExchangeRateConverter {
         rate.setCreatedTime(createdTime);
 
         return rate;
+    }
+
+    public static List<ExchangeRateResponse> toResponses(List<ExchangeRate> rates) {
+        return rates.stream()
+                .map(ExchangeRateConverter::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public static ExchangeRateResponse toResponse(ExchangeRate rate) {
+        ExchangeRateResponse response = new ExchangeRateResponse();
+        response.setCurrencyType(rate.getCurrencyType());
+        response.setSellingRate(response.getSellingRate());
+        response.setBuyingRate(rate.getBuyingRate());
+        response.setCreatedTime(rate.getCreatedTime());
+
+        return response;
     }
 }
