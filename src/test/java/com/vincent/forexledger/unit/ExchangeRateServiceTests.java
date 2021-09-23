@@ -37,28 +37,28 @@ public class ExchangeRateServiceTests {
     @Test
     @SuppressWarnings("unchecked")
     public void testRefreshExchangeRateOf2Banks() {
-        List<FindRateResponse> fubonFindRateResponses = createFakeFindRateResponse(BankType.FUBON,
+        var fubonFindRateResponses = createFakeFindRateResponse(BankType.FUBON,
                 CurrencyType.USD, CurrencyType.CNY, CurrencyType.JPY);
-        List<FindRateResponse> richartFindRateResponses = createFakeFindRateResponse(BankType.RICHART,
+        var richartFindRateResponses = createFakeFindRateResponse(BankType.RICHART,
                 CurrencyType.USD, CurrencyType.EUR, CurrencyType.HKD);
-        List<FindRateResponse> allFindRateResponse = Stream.of(fubonFindRateResponses, richartFindRateResponses)
+        var allFindRateResponse = Stream.of(fubonFindRateResponses, richartFindRateResponses)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-        List<ExchangeRate> fubonOldRates = Arrays.asList(
+        var fubonOldExRates = Arrays.asList(
                 createFakeExchangeRate(BankType.FUBON),
                 createFakeExchangeRate(BankType.FUBON));
-        List<ExchangeRate> richartOldRates = Arrays.asList(
+        var richartOldExRates = Arrays.asList(
                 createFakeExchangeRate(BankType.RICHART),
                 createFakeExchangeRate(BankType.RICHART));
-        List<ExchangeRate> allOldRates = Stream.of(fubonOldRates, richartOldRates)
+        var allOldExRates = Stream.of(fubonOldExRates, richartOldExRates)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
         when(client.load(BankType.FUBON)).thenReturn(fubonFindRateResponses);
         when(client.load(BankType.RICHART)).thenReturn(richartFindRateResponses);
         when(repository.findByBankTypeIn(Set.of(BankType.FUBON, BankType.RICHART)))
-                .thenReturn(allOldRates);
+                .thenReturn(allOldExRates);
 
         service.refreshExchangeRateData();
 
@@ -71,25 +71,25 @@ public class ExchangeRateServiceTests {
         ArgumentCaptor<List<String>> deletedExRateIdsCaptor = ArgumentCaptor.forClass(List.class);
         verify(repository).deleteAllById(deletedExRateIdsCaptor.capture());
 
-        List<TestExchangeRate> expectedSavedRates = allFindRateResponse.stream()
+        var expectedSavedRates = allFindRateResponse.stream()
                 .map(TestExchangeRate::new)
                 .collect(Collectors.toList());
-        Map<BankType, List<CurrencyType>> expectedSavedRateMap = groupBankToCurrencyTypesMap(expectedSavedRates);
+        var expectedBankToSavedCurrencyTypesMap = createBankToCurrencyTypesMap(expectedSavedRates);
 
-        List<TestExchangeRate> actualSavedRates = newExRatesCaptor.getValue().stream()
+        var actualSavedRates = newExRatesCaptor.getValue().stream()
                 .map(TestExchangeRate::new)
                 .collect(Collectors.toList());
-        Map<BankType, List<CurrencyType>> actualSavedRateMap = groupBankToCurrencyTypesMap(actualSavedRates);
+        var actualBankToSavedCurrencyTypesMap = createBankToCurrencyTypesMap(actualSavedRates);
 
         Assert.assertTrue(CollectionUtils.isEqualCollection(
-                expectedSavedRateMap.keySet(), actualSavedRateMap.keySet()));
-        expectedSavedRateMap.forEach((bank, expectedCurrencyTypes) -> {
-            List<CurrencyType> actualCurrencyType = actualSavedRateMap.get(bank);
+                expectedBankToSavedCurrencyTypesMap.keySet(), actualBankToSavedCurrencyTypesMap.keySet()));
+        expectedBankToSavedCurrencyTypesMap.forEach((bank, expectedCurrencyTypes) -> {
+            List<CurrencyType> actualCurrencyType = actualBankToSavedCurrencyTypesMap.get(bank);
             Assert.assertTrue(CollectionUtils.isEqualCollection(
                     actualCurrencyType, expectedCurrencyTypes));
         });
 
-        List<String> oldExRateIds = allOldRates.stream()
+        var oldExRateIds = allOldExRates.stream()
                 .map(ExchangeRate::getId)
                 .collect(Collectors.toList());
         Assert.assertTrue(CollectionUtils.isEqualCollection(
@@ -99,17 +99,17 @@ public class ExchangeRateServiceTests {
     @Test
     @SuppressWarnings("unchecked")
     public void testRefreshExchangeRateBut1BankFailed() {
-        List<FindRateResponse> fubonFindRateResponses = createFakeFindRateResponse(BankType.FUBON,
+        var fubonFindRateResponses = createFakeFindRateResponse(BankType.FUBON,
                 CurrencyType.USD, CurrencyType.CNY, CurrencyType.JPY);
 
         when(client.load(BankType.FUBON)).thenReturn(fubonFindRateResponses);
         when(client.load(BankType.RICHART)).thenThrow(new RuntimeException());
 
-        List<ExchangeRate> fubonOldRates = Arrays.asList(
+        var fubonOldExRates = Arrays.asList(
                 createFakeExchangeRate(BankType.FUBON),
                 createFakeExchangeRate(BankType.FUBON));
         when(repository.findByBankTypeIn(Set.of(BankType.FUBON)))
-                .thenReturn(fubonOldRates);
+                .thenReturn(fubonOldExRates);
 
         service.refreshExchangeRateData();
 
@@ -122,28 +122,28 @@ public class ExchangeRateServiceTests {
         ArgumentCaptor<List<String>> deletedExRateIdsCaptor = ArgumentCaptor.forClass(List.class);
         verify(repository).deleteAllById(deletedExRateIdsCaptor.capture());
 
-        List<ExchangeRate> actualSavedRates = newExRatesCaptor.getValue();
-        actualSavedRates.forEach(rate -> Assert.assertEquals(BankType.FUBON, rate.getBankType()));
-        List<CurrencyType> expectedSavedCurrencyTypes = fubonFindRateResponses.stream()
+        var actualSavedExRates = newExRatesCaptor.getValue();
+        actualSavedExRates.forEach(rate -> Assert.assertEquals(BankType.FUBON, rate.getBankType()));
+        var expectedSavedCurrencyTypes = fubonFindRateResponses.stream()
                 .map(FindRateResponse::getCurrencyType)
                 .collect(Collectors.toList());
-        List<CurrencyType> actualSavedCurrencyTypes = actualSavedRates.stream()
+        var actualSavedCurrencyTypes = actualSavedExRates.stream()
                 .map(ExchangeRate::getCurrencyType)
                 .collect(Collectors.toList());
         Assert.assertTrue(CollectionUtils.isEqualCollection(
                 expectedSavedCurrencyTypes, actualSavedCurrencyTypes));
 
-        List<String> fubonOldRateIds = fubonOldRates.stream()
+        var fubonOldExRateIds = fubonOldExRates.stream()
                 .map(ExchangeRate::getId)
                 .collect(Collectors.toList());
         Assert.assertTrue(CollectionUtils.isEqualCollection(
-                deletedExRateIdsCaptor.getValue(), fubonOldRateIds));
+                deletedExRateIdsCaptor.getValue(), fubonOldExRateIds));
     }
 
     private List<FindRateResponse> createFakeFindRateResponse(BankType bank, CurrencyType... currencyTypes) {
         return Arrays.stream(currencyTypes)
                 .map(currency -> {
-                    FindRateResponse rate = new FindRateResponse();
+                    var rate = new FindRateResponse();
                     rate.setCurrencyType(currency);
                     rate.setBankType(bank);
 
@@ -153,17 +153,17 @@ public class ExchangeRateServiceTests {
     }
 
     private ExchangeRate createFakeExchangeRate(BankType bank) {
-        ExchangeRate rate = new ExchangeRate();
+        var rate = new ExchangeRate();
         rate.setId(ObjectId.get().toHexString());
         rate.setBankType(bank);
 
         return rate;
     }
 
-    private Map<BankType, List<CurrencyType>> groupBankToCurrencyTypesMap(List<TestExchangeRate> rates) {
-        Map<BankType, List<CurrencyType>> resultMap = new EnumMap<>(BankType.class);
-        for (TestExchangeRate rate : rates) {
-            List<CurrencyType> currencyTypes = resultMap.get(rate.getBankType());
+    private Map<BankType, List<CurrencyType>> createBankToCurrencyTypesMap(List<TestExchangeRate> rates) {
+        var resultMap = new EnumMap<BankType, List<CurrencyType>>(BankType.class);
+        for (var rate : rates) {
+            var currencyTypes = resultMap.get(rate.getBankType());
             if (currencyTypes == null) {
                 currencyTypes = new ArrayList<>();
             }

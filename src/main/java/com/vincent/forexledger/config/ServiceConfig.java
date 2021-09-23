@@ -8,7 +8,6 @@ import com.vincent.forexledger.service.ExchangeRateService;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 
@@ -27,7 +26,7 @@ public class ServiceConfig {
 
     @Bean
     public DownloadExchangeRateClient downloadExchangeRateClient() {
-        RestTemplate restTemplate = new RestTemplateBuilder()
+        var restTemplate = new RestTemplateBuilder()
                 .setConnectTimeout(Duration.ofSeconds(10))
                 .build();
         return new DownloadExchangeRateClient(restTemplate);

@@ -42,7 +42,7 @@ public class ExchangeRateController {
     public ResponseEntity<List<ExchangeRateResponse>> getExchangeRates(
             @Parameter(description = "Bank of exchange rates.", required = true)
             @RequestParam(QueryStringConstants.BANK) BankType bank) {
-        List<ExchangeRateResponse> responses = service.loadExchangeRates(bank);
+        var responses = service.loadExchangeRates(bank);
         return ResponseEntity.ok(responses);
     }
 }
