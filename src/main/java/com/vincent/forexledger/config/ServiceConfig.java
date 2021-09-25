@@ -4,6 +4,8 @@ import com.vincent.forexledger.client.DownloadExchangeRateClient;
 import com.vincent.forexledger.repository.AppUserRepository;
 import com.vincent.forexledger.repository.BookRepository;
 import com.vincent.forexledger.repository.ExchangeRateRepository;
+import com.vincent.forexledger.security.FirebaseTokenParser;
+import com.vincent.forexledger.security.IAccessTokenParser;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.service.AppUserService;
 import com.vincent.forexledger.service.BookService;
@@ -38,5 +40,10 @@ public class ServiceConfig {
                 .setConnectTimeout(Duration.ofSeconds(10))
                 .build();
         return new DownloadExchangeRateClient(restTemplate);
+    }
+
+    @Bean
+    public IAccessTokenParser firebaseTokenParser() {
+        return new FirebaseTokenParser();
     }
 }
