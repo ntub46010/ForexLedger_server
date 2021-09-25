@@ -5,6 +5,7 @@ import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.book.CreateBookRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,12 +20,13 @@ public class BookTest extends BaseTest {
 
     @Test
     public void testCreateBook() throws Exception {
+        var userId = ObjectId.get().toString();
+        appendAccessToken(userId, "Vincent");
+
         var request = new CreateBookRequest();
         request.setName("Book Name");
         request.setBank(BankType.FUBON);
         request.setCurrencyType(CurrencyType.USD);
-
-        // TODO: token
 
         var mvcResult = mockMvc.perform(post(APIPathConstants.BOOKS)
                 .headers(httpHeaders)
@@ -40,7 +42,7 @@ public class BookTest extends BaseTest {
         Assert.assertEquals(request.getName(), actualBook.getName());
         Assert.assertEquals(request.getBank(), actualBook.getBank());
         Assert.assertEquals(request.getCurrencyType(), actualBook.getCurrencyType());
-        Assert.assertEquals("", actualBook.getCreator());  // TODO
+        Assert.assertEquals(userId, actualBook.getCreator());
         Assert.assertNotNull(actualBook.getCreatedTime());
     }
 }
