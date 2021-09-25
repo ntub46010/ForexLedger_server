@@ -1,9 +1,6 @@
 package com.vincent.forexledger.filter;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseToken;
-import com.vincent.forexledger.exception.TokenExpiredException;
+import com.vincent.forexledger.security.IAccessTokenParser;
 import com.vincent.forexledger.security.SpringUser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
@@ -22,31 +19,28 @@ public class VerifyTokenFilter extends OncePerRequestFilter {
 
     private static final String PREFIX_BEARAR_TOKEN = "Bearer ";
 
+    private IAccessTokenParser tokenParser;
+
+    public VerifyTokenFilter(IAccessTokenParser tokenParser) {
+        this.tokenParser = tokenParser;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        try {
-            var headerAuthorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-            if (StringUtils.isNotEmpty(headerAuthorization)) {
-                var bearerToken = StringUtils
-                        .replaceOnce(headerAuthorization, PREFIX_BEARAR_TOKEN, "");
-                var firebaseToken = FirebaseAuth.getInstance().verifyIdToken(bearerToken);
-                setAuthentication(firebaseToken);
-            }
-            filterChain.doFilter(request, response);
-        } catch (FirebaseAuthException e) {
-            throw new TokenExpiredException(e.getMessage());
+        var headerAuthorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (StringUtils.isNotEmpty(headerAuthorization)) {
+            var bearerToken = StringUtils
+                    .replaceOnce(headerAuthorization, PREFIX_BEARAR_TOKEN, "");
+            var springUser = tokenParser.parse(bearerToken);
+            setAuthentication(springUser);
         }
+        filterChain.doFilter(request, response);
     }
 
-    private void setAuthentication(FirebaseToken token) {
-        var springUser = new SpringUser();
-        springUser.setId(token.getUid());
-        springUser.setName(token.getName());
-        springUser.setEmail(token.getEmail());
-
+    private void setAuthentication(SpringUser user) {
         var authentication =
-                new UsernamePasswordAuthenticationToken(springUser, null, Collections.emptyList());
+                new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }
