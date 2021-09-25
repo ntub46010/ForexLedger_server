@@ -2,11 +2,10 @@ package com.vincent.forexledger.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vincent.forexledger.config.DummyComponentConfig;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
 import com.vincent.forexledger.repository.AppUserRepository;
 import com.vincent.forexledger.repository.BookRepository;
 import com.vincent.forexledger.repository.ExchangeRateRepository;
+import com.vincent.forexledger.security.SpringUser;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,8 +14,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.HashMap;
 
 @SuppressWarnings("squid:S2187")
 @Import(DummyComponentConfig.class)
@@ -53,16 +50,14 @@ public class BaseTest {
         bookRepository.deleteAll();
     }
 
-    protected void appendAccessToken(String userId, String name) {
-        var tokenInfo = new HashMap<String, Object>();
-        tokenInfo.put("name", name);
+    protected void appendAccessToken(String userId, String name) throws Exception {
+        var springUser = new SpringUser();
+        springUser.setId(userId);
+        springUser.setName(name);
+        springUser.setEmail(name + "@test.com");
 
-        try {
-            var token = FirebaseAuth.getInstance().createCustomToken(userId, tokenInfo);
-            httpHeaders.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-        } catch (FirebaseAuthException e) {
-            throw new RuntimeException(e);
-        }
+        var token = objectMapper.writeValueAsString(springUser);
+        httpHeaders.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
     }
 
 }
