@@ -2,7 +2,10 @@ package com.vincent.forexledger.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vincent.forexledger.config.DummyComponentConfig;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
 import com.vincent.forexledger.repository.AppUserRepository;
+import com.vincent.forexledger.repository.BookRepository;
 import com.vincent.forexledger.repository.ExchangeRateRepository;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.HashMap;
 
 @SuppressWarnings("squid:S2187")
 @Import(DummyComponentConfig.class)
@@ -31,6 +36,9 @@ public class BaseTest {
     @Autowired
     protected ExchangeRateRepository exchangeRateRepository;
 
+    @Autowired
+    protected BookRepository bookRepository;
+
     @Before
     public void init() {
         httpHeaders = new HttpHeaders();
@@ -42,6 +50,19 @@ public class BaseTest {
     private void clearDB() {
         appUserRepository.deleteAll();
         exchangeRateRepository.deleteAll();
+        bookRepository.deleteAll();
+    }
+
+    protected void appendAccessToken(String userId, String name) {
+        var tokenInfo = new HashMap<String, Object>();
+        tokenInfo.put("name", name);
+
+        try {
+            var token = FirebaseAuth.getInstance().createCustomToken(userId, tokenInfo);
+            httpHeaders.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+        } catch (FirebaseAuthException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
