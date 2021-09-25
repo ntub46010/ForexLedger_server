@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-class TokenParseFailedException extends RuntimeException {
+public class TokenParseFailedException extends RuntimeException {
 
-    TokenParseFailedException(Throwable cause) {
+    public TokenParseFailedException(Throwable cause) {
         super(cause);
     }
 }

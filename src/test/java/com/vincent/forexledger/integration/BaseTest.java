@@ -1,17 +1,20 @@
 package com.vincent.forexledger.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vincent.forexledger.config.DummyComponentConfig;
 import com.vincent.forexledger.repository.AppUserRepository;
 import com.vincent.forexledger.repository.ExchangeRateRepository;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SuppressWarnings("squid:S2187")
+@Import(DummyComponentConfig.class)
 @AutoConfigureMockMvc
 @SpringBootTest
 public class BaseTest {
