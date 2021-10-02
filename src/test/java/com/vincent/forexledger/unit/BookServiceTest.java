@@ -53,5 +53,8 @@ public class BookServiceTest {
         Assert.assertEquals(request.getCurrencyType(), actualBook.getCurrencyType());
         Assert.assertEquals(userId, actualBook.getCreator());
         Assert.assertNotNull(actualBook.getCreatedTime());
+        Assert.assertEquals(0, actualBook.getBalance(), 0);
+        Assert.assertNull(actualBook.getTwdProfit());
+        Assert.assertNull(actualBook.getProfitRate());
     }
 }

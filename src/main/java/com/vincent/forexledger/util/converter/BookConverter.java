@@ -12,6 +12,9 @@ public class BookConverter {
         book.setName(request.getName());
         book.setBank(request.getBank());
         book.setCurrencyType(request.getCurrencyType());
+        book.setBalance(0);
+        book.setTwdProfit(null);
+        book.setProfitRate(null);
 
         return book;
     }

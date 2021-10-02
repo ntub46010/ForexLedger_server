@@ -21,5 +21,8 @@ public class BookConverterTest {
         Assert.assertEquals(request.getName(), book.getName());
         Assert.assertEquals(request.getBank(), book.getBank());
         Assert.assertEquals(request.getCurrencyType(), book.getCurrencyType());
+        Assert.assertEquals(0, book.getBalance(), 0);
+        Assert.assertNull(book.getTwdProfit());
+        Assert.assertNull(book.getProfitRate());
     }
 }
