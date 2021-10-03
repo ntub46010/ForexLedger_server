@@ -1,6 +1,7 @@
 package com.vincent.forexledger.controller;
 
 import com.vincent.forexledger.constants.APIPathConstants;
+import com.vincent.forexledger.model.book.BookListResponse;
 import com.vincent.forexledger.model.book.CreateBookRequest;
 import com.vincent.forexledger.service.BookService;
 import com.vincent.forexledger.util.URIUtil;
@@ -10,12 +11,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = APIPathConstants.BOOKS, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -25,7 +24,7 @@ public class BookController {
     private BookService service;
 
     @Operation(
-            summary = "Get exchange rates of specific bank.",
+            summary = "Create book for login user.",
             responses = {
                     @ApiResponse(
                             responseCode = "201",
@@ -46,5 +45,23 @@ public class BookController {
         var location = URIUtil.create("/{id}", bookId);
 
         return ResponseEntity.created(location).build();
+    }
+
+    @Operation(
+            summary = "Get books of login user.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Books are retrieved successfully."),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "The API caller doesn't have effective authorization.",
+                            content = @Content)
+            }
+    )
+    @GetMapping
+    public ResponseEntity<List<BookListResponse>> loadMyBooks() {
+        var books = service.loadMyBooks();
+        return ResponseEntity.ok(books);
     }
 }

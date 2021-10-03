@@ -1,13 +1,25 @@
 package com.vincent.forexledger.model.book;
 
 import com.vincent.forexledger.model.CurrencyType;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class BookListResponse {
+    @Schema(description = "Id of the book.")
     private String id;
+
+    @Schema(description = "Name of the book.")
     private String name;
+
+    @Schema(description = "The currency type of transaction records in this book.", example = "USD")
     private CurrencyType currencyType;
+
+    @Schema(description = "The balance of foreign currency.")
     private double balance;
+
+    @Schema(description = "The profit calculated from transaction history. Unit: TWD.")
     private Integer twdProfit;
+
+    @Schema(description = "The profit rate calculated from transaction history.", example = "-0.1234")
     private Double profitRate;
 
     public String getId() {
