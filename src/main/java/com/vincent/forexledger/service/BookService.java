@@ -1,11 +1,13 @@
 package com.vincent.forexledger.service;
 
+import com.vincent.forexledger.model.book.BookListResponse;
 import com.vincent.forexledger.model.book.CreateBookRequest;
 import com.vincent.forexledger.repository.BookRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.util.converter.BookConverter;
 
 import java.util.Date;
+import java.util.List;
 
 public class BookService {
     private final UserIdentity userIdentity;
@@ -24,5 +26,10 @@ public class BookService {
         repository.insert(book);
 
         return book.getId();
+    }
+
+    public List<BookListResponse> loadMyBooks() {
+        var books = repository.findByCreator(userIdentity.getId());
+        return BookConverter.toBookListResponses(books);
     }
 }

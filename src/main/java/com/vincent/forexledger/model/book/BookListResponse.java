@@ -1,24 +1,26 @@
 package com.vincent.forexledger.model.book;
 
 import com.vincent.forexledger.model.CurrencyType;
-import com.vincent.forexledger.model.bank.BankType;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.util.Date;
-
-@Document(collection = "book")
-public class Book {
-    @Id
+public class BookListResponse {
+    @Schema(description = "Id of the book.")
     private String id;
+
+    @Schema(description = "Name of the book.")
     private String name;
-    private BankType bank;
+
+    @Schema(description = "The currency type of transaction records in this book.", example = "USD")
     private CurrencyType currencyType;
+
+    @Schema(description = "The balance of foreign currency.")
     private double balance;
+
+    @Schema(description = "The profit calculated from transaction history. Unit: TWD.")
     private Integer twdProfit;
+
+    @Schema(description = "The profit rate calculated from transaction history.", example = "-0.1234")
     private Double profitRate;
-    private String creator;
-    private Date createdTime;
 
     public String getId() {
         return id;
@@ -34,14 +36,6 @@ public class Book {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public BankType getBank() {
-        return bank;
-    }
-
-    public void setBank(BankType bank) {
-        this.bank = bank;
     }
 
     public CurrencyType getCurrencyType() {
@@ -74,21 +68,5 @@ public class Book {
 
     public void setProfitRate(Double profitRate) {
         this.profitRate = profitRate;
-    }
-
-    public String getCreator() {
-        return creator;
-    }
-
-    public void setCreator(String creator) {
-        this.creator = creator;
-    }
-
-    public Date getCreatedTime() {
-        return createdTime;
-    }
-
-    public void setCreatedTime(Date createdTime) {
-        this.createdTime = createdTime;
     }
 }
