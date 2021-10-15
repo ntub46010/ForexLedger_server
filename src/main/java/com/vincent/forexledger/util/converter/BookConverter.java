@@ -1,8 +1,11 @@
 package com.vincent.forexledger.util.converter;
 
 import com.vincent.forexledger.model.book.Book;
+import com.vincent.forexledger.model.book.BookDetailResponse;
 import com.vincent.forexledger.model.book.BookListResponse;
 import com.vincent.forexledger.model.book.CreateBookRequest;
+import com.vincent.forexledger.model.exchangerate.ExchangeRate;
+import com.vincent.forexledger.util.CalcUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,5 +42,26 @@ public class BookConverter {
         response.setProfitRate(book.getProfitRate());
 
         return response;
+    }
+
+    public static BookDetailResponse toBookDetail(Book book, ExchangeRate exchangeRate) {
+        var detail = new BookDetailResponse();
+        detail.setId(book.getId());
+        detail.setCurrencyType(book.getCurrencyType());
+        detail.setBankSellingRate(exchangeRate.getSellingRate());
+        detail.setBankBuyingRate(exchangeRate.getBuyingRate());
+        detail.setBalance(book.getBalance());
+        detail.setTwdCurrentValue(CalcUtil.multiplyToInt(book.getBalance(), exchangeRate.getBuyingRate()));
+//        detail.setTwdProfit(0);
+//        detail.setTwdProfitRate(0);
+
+        if (book.getBalance() > 0) {
+//        detail.setBreakEvenPoint(null);
+        }
+
+        detail.setForeignLastInvest(null);
+        detail.setTwdLastInvest(null);
+
+        return detail;
     }
 }

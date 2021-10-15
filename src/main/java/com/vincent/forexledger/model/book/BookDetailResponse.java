@@ -9,11 +9,9 @@ public class BookDetailResponse {
     private double bankBuyingRate;
     private double balance;
     private int twdCurrentValue; // balance * bankBuyingRate
-    private double foreignTotalInvest;
-    private int twdTotalInvest;
-    private int twdProfit; // twdCurrentValue - twdTotalInvest
-    private double twdProfitRate; // twdProfit / twdTotalInvest
-    private Double breakEvenPoint; // twdTotalInvest / balance
+    private int twdProfit; // calc
+    private double twdProfitRate; // calc
+    private Double breakEvenPoint; // calc
     private Double foreignLastInvest;
     private Integer twdLastInvest;
 
@@ -63,22 +61,6 @@ public class BookDetailResponse {
 
     public void setTwdCurrentValue(int twdCurrentValue) {
         this.twdCurrentValue = twdCurrentValue;
-    }
-
-    public double getForeignTotalInvest() {
-        return foreignTotalInvest;
-    }
-
-    public void setForeignTotalInvest(double foreignTotalInvest) {
-        this.foreignTotalInvest = foreignTotalInvest;
-    }
-
-    public int getTwdTotalInvest() {
-        return twdTotalInvest;
-    }
-
-    public void setTwdTotalInvest(int twdTotalInvest) {
-        this.twdTotalInvest = twdTotalInvest;
     }
 
     public int getTwdProfit() {
