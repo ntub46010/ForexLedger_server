@@ -17,13 +17,15 @@ public class CalcUtil {
                 .intValue();
     }
 
-    public static double divideToDouble(int num1, int num2) {
+    public static double divideToDouble(int num1, double num2, int digit) {
         if (num1 == 0) {
             return 0;
         }
 
         return BigDecimal.valueOf(num1)
+                .scaleByPowerOfTen(digit)
                 .divide(BigDecimal.valueOf(num2), RoundingMode.HALF_DOWN)
+                .scaleByPowerOfTen(-digit)
                 .doubleValue();
     }
 }

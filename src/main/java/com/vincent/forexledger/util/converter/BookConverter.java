@@ -4,7 +4,6 @@ import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.book.BookDetailResponse;
 import com.vincent.forexledger.model.book.BookListResponse;
 import com.vincent.forexledger.model.book.CreateBookRequest;
-import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import com.vincent.forexledger.util.CalcUtil;
 
 import java.util.List;
@@ -44,23 +43,23 @@ public class BookConverter {
         return response;
     }
 
-    public static BookDetailResponse toBookDetail(Book book, ExchangeRate exchangeRate) {
+    public static BookDetailResponse toBookDetail(Book book, double bankBuyingRate) {
         var detail = new BookDetailResponse();
         detail.setId(book.getId());
         detail.setCurrencyType(book.getCurrencyType());
-        detail.setBankSellingRate(exchangeRate.getSellingRate());
-        detail.setBankBuyingRate(exchangeRate.getBuyingRate());
+        detail.setBankBuyingRate(bankBuyingRate);
         detail.setBalance(book.getBalance());
-        detail.setTwdCurrentValue(CalcUtil.multiplyToInt(book.getBalance(), exchangeRate.getBuyingRate()));
-//        detail.setTwdProfit(0);
-//        detail.setTwdProfitRate(0);
+        detail.setTwdProfit(book.getTwdProfit());
+        detail.setTwdProfitRate(book.getProfitRate());
+        detail.setBreakEvenPoint(book.getBreakEvenPoint());
+        detail.setForeignLastInvest(book.getLastForeignInvest());
+        detail.setTwdLastInvest(book.getLastTwdInvest());
 
-        if (book.getBalance() > 0) {
-//        detail.setBreakEvenPoint(null);
-        }
+        var currentValue = CalcUtil.multiplyToInt(book.getBalance(), bankBuyingRate);
+        detail.setTwdCurrentValue(currentValue);
 
-        detail.setForeignLastInvest(null);
-        detail.setTwdLastInvest(null);
+        var lastSellingRate = CalcUtil.divideToDouble(detail.getTwdLastInvest(), detail.getForeignLastInvest(), 4);
+        detail.setLastSellingRate(lastSellingRate);
 
         return detail;
     }

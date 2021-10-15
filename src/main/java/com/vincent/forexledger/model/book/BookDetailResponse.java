@@ -5,15 +5,15 @@ import com.vincent.forexledger.model.CurrencyType;
 public class BookDetailResponse {
     private String id;
     private CurrencyType currencyType;
-    private double bankSellingRate;
     private double bankBuyingRate;
     private double balance;
-    private int twdCurrentValue; // balance * bankBuyingRate
-    private int twdProfit; // calc
-    private double twdProfitRate; // calc
-    private Double breakEvenPoint; // calc
+    private int twdCurrentValue;
+    private Integer twdProfit;
+    private Double twdProfitRate;
+    private Double breakEvenPoint;
     private Double foreignLastInvest;
     private Integer twdLastInvest;
+    private Double lastSellingRate;
 
     public String getId() {
         return id;
@@ -29,14 +29,6 @@ public class BookDetailResponse {
 
     public void setCurrencyType(CurrencyType currencyType) {
         this.currencyType = currencyType;
-    }
-
-    public double getBankSellingRate() {
-        return bankSellingRate;
-    }
-
-    public void setBankSellingRate(double bankSellingRate) {
-        this.bankSellingRate = bankSellingRate;
     }
 
     public double getBankBuyingRate() {
@@ -63,19 +55,19 @@ public class BookDetailResponse {
         this.twdCurrentValue = twdCurrentValue;
     }
 
-    public int getTwdProfit() {
+    public Integer getTwdProfit() {
         return twdProfit;
     }
 
-    public void setTwdProfit(int twdProfit) {
+    public void setTwdProfit(Integer twdProfit) {
         this.twdProfit = twdProfit;
     }
 
-    public double getTwdProfitRate() {
+    public Double getTwdProfitRate() {
         return twdProfitRate;
     }
 
-    public void setTwdProfitRate(double twdProfitRate) {
+    public void setTwdProfitRate(Double twdProfitRate) {
         this.twdProfitRate = twdProfitRate;
     }
 
@@ -101,5 +93,13 @@ public class BookDetailResponse {
 
     public void setTwdLastInvest(Integer twdLastInvest) {
         this.twdLastInvest = twdLastInvest;
+    }
+
+    public Double getLastSellingRate() {
+        return lastSellingRate;
+    }
+
+    public void setLastSellingRate(Double lastSellingRate) {
+        this.lastSellingRate = lastSellingRate;
     }
 }

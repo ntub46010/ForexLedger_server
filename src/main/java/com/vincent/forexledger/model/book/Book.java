@@ -17,6 +17,9 @@ public class Book {
     private double balance;
     private Integer twdProfit;
     private Double profitRate;
+    private Double breakEvenPoint;
+    private Double lastForeignInvest;
+    private Integer lastTwdInvest;
     private String creator;
     private Date createdTime;
 
@@ -74,6 +77,30 @@ public class Book {
 
     public void setProfitRate(Double profitRate) {
         this.profitRate = profitRate;
+    }
+
+    public Double getBreakEvenPoint() {
+        return breakEvenPoint;
+    }
+
+    public void setBreakEvenPoint(Double breakEvenPoint) {
+        this.breakEvenPoint = breakEvenPoint;
+    }
+
+    public Double getLastForeignInvest() {
+        return lastForeignInvest;
+    }
+
+    public void setLastForeignInvest(Double lastForeignInvest) {
+        this.lastForeignInvest = lastForeignInvest;
+    }
+
+    public Integer getLastTwdInvest() {
+        return lastTwdInvest;
+    }
+
+    public void setLastTwdInvest(Integer lastTwdInvest) {
+        this.lastTwdInvest = lastTwdInvest;
     }
 
     public String getCreator() {
