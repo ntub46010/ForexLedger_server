@@ -30,7 +30,7 @@ public class BookServiceTest {
 
         var userIdentity = mock(UserIdentity.class);
         var repository = mock(BookRepository.class);
-        var service = new BookService(userIdentity, repository);
+        var service = new BookService(userIdentity, repository, null);
 
         when(userIdentity.getId()).thenReturn(userId);
         when(repository.insert(any(Book.class)))
@@ -80,7 +80,7 @@ public class BookServiceTest {
 
         var userIdentity = mock(UserIdentity.class);
         var repository = mock(BookRepository.class);
-        var service = new BookService(userIdentity, repository);
+        var service = new BookService(userIdentity, repository, null);
 
         when(userIdentity.getId()).thenReturn(userId1);
         when(repository.findByCreator(userId1)).thenReturn(books1);

@@ -6,6 +6,7 @@ import com.vincent.forexledger.constants.APIPathConstants;
 import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.book.CreateBookRequest;
+import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import com.vincent.forexledger.repository.AppUserRepository;
 import com.vincent.forexledger.repository.BookRepository;
 import com.vincent.forexledger.repository.ExchangeRateRepository;
@@ -83,6 +84,16 @@ public class BaseTest {
         var location = mvcResult.getResponse().getHeader(HttpHeaders.LOCATION);
 
         return StringUtils.substringAfterLast(location, '/');
+    }
+
+    protected ExchangeRate createExchangeRate(BankType bank, CurrencyType currencyType, double sellingRate, double buyingRate) {
+        var exchangeRate = new ExchangeRate();
+        exchangeRate.setBankType(bank);
+        exchangeRate.setCurrencyType(currencyType);
+        exchangeRate.setSellingRate(sellingRate);
+        exchangeRate.setBuyingRate(buyingRate);
+
+        return exchangeRateRepository.insert(exchangeRate);
     }
 
 }

@@ -8,6 +8,7 @@ import com.vincent.forexledger.model.book.CreateBookRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.hamcrest.core.IsNull;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -79,4 +81,29 @@ public class BookTest extends BaseTest {
         Assert.assertTrue(CollectionUtils.isEqualCollection(
                 vincentBookIds, responseIds));
     }
+
+    @Test
+    public void testLoadEmptyBookDetail() throws Exception {
+        var userId = ObjectId.get().toString();
+        appendAccessToken(userId, "Vincent");
+
+        var exchangeRate = createExchangeRate(BankType.FUBON, CurrencyType.USD, 27.76, 27.66);
+        var bookId = createBook("Book Name", exchangeRate.getBankType(), exchangeRate.getCurrencyType());
+
+        mockMvc.perform(get(APIPathConstants.BOOKS + "/" + bookId)
+                .headers(httpHeaders))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(bookId))
+                .andExpect(jsonPath("$.currencyType").value(exchangeRate.getCurrencyType().name()))
+                .andExpect(jsonPath("$.bankBuyingRate").value(exchangeRate.getBuyingRate()))
+                .andExpect(jsonPath("$.balance").value(0))
+                .andExpect(jsonPath("$.twdCurrentValue").value(0))
+                .andExpect(jsonPath("$.twdProfit").value(IsNull.nullValue()))
+                .andExpect(jsonPath("$.twdProfitRate").value(IsNull.nullValue()))
+                .andExpect(jsonPath("$.breakEvenPoint").value(IsNull.nullValue()))
+                .andExpect(jsonPath("$.lastForeignInvest").value(IsNull.nullValue()))
+                .andExpect(jsonPath("$.lastTwdInvest").value(IsNull.nullValue()))
+                .andExpect(jsonPath("$.lastSellingRate").value(IsNull.nullValue()));
+    }
+
 }
