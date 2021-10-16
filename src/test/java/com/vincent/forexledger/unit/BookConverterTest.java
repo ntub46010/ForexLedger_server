@@ -30,6 +30,9 @@ public class BookConverterTest {
         Assert.assertEquals(0, book.getBalance(), 0);
         Assert.assertNull(book.getTwdProfit());
         Assert.assertNull(book.getProfitRate());
+        Assert.assertNull(book.getBreakEvenPoint());
+        Assert.assertNull(book.getLastForeignInvest());
+        Assert.assertNull(book.getLastTwdInvest());
     }
 
     @Test
@@ -57,5 +60,65 @@ public class BookConverterTest {
         var responses = BookConverter.toBookListResponses(List.of(book));
         Assert.assertEquals(1, responses.size());
         assertFunc.accept(book, responses.get(0));
+    }
+
+    @Test
+    public void testConvertEmptyBookDetailResponse() {
+        var book = new Book();
+        book.setId(ObjectId.get().toString());
+        book.setName("Book Name");
+        book.setBank(BankType.FUBON);
+        book.setCurrencyType(CurrencyType.ZAR);
+        book.setBalance(0);
+        book.setTwdProfit(null);
+        book.setProfitRate(null);
+        book.setBreakEvenPoint(null);
+        book.setLastForeignInvest(null);
+        book.setLastTwdInvest(null);
+
+        var bankBuyingRate = 1.8507;
+        var detail = BookConverter.toBookDetail(book, bankBuyingRate);
+
+        Assert.assertEquals(book.getId(), detail.getId());
+        Assert.assertEquals(book.getCurrencyType(), detail.getCurrencyType());
+        Assert.assertEquals(bankBuyingRate, detail.getBankBuyingRate(), 0);
+        Assert.assertEquals(book.getBalance(), detail.getBalance(), 0);
+        Assert.assertNull(detail.getTwdProfit());
+        Assert.assertNull(detail.getTwdProfitRate());
+        Assert.assertNull(detail.getBreakEvenPoint());
+        Assert.assertNull(detail.getLastForeignInvest());
+        Assert.assertNull(detail.getLastTwdInvest());
+        Assert.assertEquals(0, detail.getTwdCurrentValue());
+        Assert.assertNull(detail.getLastSellingRate());
+    }
+
+    @Test
+    public void testConvertNotEmptyBookDetailResponse() {
+        var book = new Book();
+        book.setId(ObjectId.get().toString());
+        book.setName("Book Name");
+        book.setBank(BankType.FUBON);
+        book.setCurrencyType(CurrencyType.ZAR);
+        book.setBalance(51475.54);
+        book.setTwdProfit(-1882);
+        book.setProfitRate(-0.0194);
+        book.setBreakEvenPoint(1.8873);
+        book.setLastForeignInvest(33489.9);
+        book.setLastTwdInvest(63533);
+
+        var bankBuyingRate = 1.8507;
+        var detail = BookConverter.toBookDetail(book, bankBuyingRate);
+
+        Assert.assertEquals(book.getId(), detail.getId());
+        Assert.assertEquals(book.getCurrencyType(), detail.getCurrencyType());
+        Assert.assertEquals(bankBuyingRate, detail.getBankBuyingRate(), 0);
+        Assert.assertEquals(book.getBalance(), detail.getBalance(), 0);
+        Assert.assertEquals(book.getTwdProfit(), detail.getTwdProfit());
+        Assert.assertEquals(book.getProfitRate(), detail.getTwdProfitRate());
+        Assert.assertEquals(book.getBreakEvenPoint(), detail.getBreakEvenPoint());
+        Assert.assertEquals(book.getLastForeignInvest(), detail.getLastForeignInvest());
+        Assert.assertEquals(book.getLastTwdInvest(), detail.getLastTwdInvest());
+        Assert.assertEquals(95266, detail.getTwdCurrentValue(), 1);
+        Assert.assertEquals(1.8971, detail.getLastSellingRate(), 1);
     }
 }

@@ -52,14 +52,16 @@ public class BookConverter {
         detail.setTwdProfit(book.getTwdProfit());
         detail.setTwdProfitRate(book.getProfitRate());
         detail.setBreakEvenPoint(book.getBreakEvenPoint());
-        detail.setForeignLastInvest(book.getLastForeignInvest());
-        detail.setTwdLastInvest(book.getLastTwdInvest());
+        detail.setLastForeignInvest(book.getLastForeignInvest());
+        detail.setLastTwdInvest(book.getLastTwdInvest());
 
         var currentValue = CalcUtil.multiplyToInt(book.getBalance(), bankBuyingRate);
         detail.setTwdCurrentValue(currentValue);
 
-        var lastSellingRate = CalcUtil.divideToDouble(detail.getTwdLastInvest(), detail.getForeignLastInvest(), 4);
-        detail.setLastSellingRate(lastSellingRate);
+        if (detail.getLastTwdInvest() != null && detail.getLastForeignInvest() != null) {
+            var lastSellingRate = CalcUtil.divideToDouble(detail.getLastTwdInvest(), detail.getLastForeignInvest(), 4);
+            detail.setLastSellingRate(lastSellingRate);
+        }
 
         return detail;
     }

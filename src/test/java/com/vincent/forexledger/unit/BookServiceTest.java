@@ -61,6 +61,9 @@ public class BookServiceTest {
         Assert.assertEquals(0, actualBook.getBalance(), 0);
         Assert.assertNull(actualBook.getTwdProfit());
         Assert.assertNull(actualBook.getProfitRate());
+        Assert.assertNull(actualBook.getBreakEvenPoint());
+        Assert.assertNull(actualBook.getLastForeignInvest());
+        Assert.assertNull(actualBook.getLastTwdInvest());
     }
 
     @Test

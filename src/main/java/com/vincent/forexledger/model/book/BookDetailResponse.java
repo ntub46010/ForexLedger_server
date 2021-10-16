@@ -11,8 +11,8 @@ public class BookDetailResponse {
     private Integer twdProfit;
     private Double twdProfitRate;
     private Double breakEvenPoint;
-    private Double foreignLastInvest;
-    private Integer twdLastInvest;
+    private Double lastForeignInvest;
+    private Integer lastTwdInvest;
     private Double lastSellingRate;
 
     public String getId() {
@@ -79,20 +79,20 @@ public class BookDetailResponse {
         this.breakEvenPoint = breakEvenPoint;
     }
 
-    public Double getForeignLastInvest() {
-        return foreignLastInvest;
+    public Double getLastForeignInvest() {
+        return lastForeignInvest;
     }
 
-    public void setForeignLastInvest(Double foreignLastInvest) {
-        this.foreignLastInvest = foreignLastInvest;
+    public void setLastForeignInvest(Double lastForeignInvest) {
+        this.lastForeignInvest = lastForeignInvest;
     }
 
-    public Integer getTwdLastInvest() {
-        return twdLastInvest;
+    public Integer getLastTwdInvest() {
+        return lastTwdInvest;
     }
 
-    public void setTwdLastInvest(Integer twdLastInvest) {
-        this.twdLastInvest = twdLastInvest;
+    public void setLastTwdInvest(Integer lastTwdInvest) {
+        this.lastTwdInvest = lastTwdInvest;
     }
 
     public Double getLastSellingRate() {
