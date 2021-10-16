@@ -68,6 +68,7 @@ public class BookController {
 
     @GetMapping("/{id}")
     public ResponseEntity<BookDetailResponse> loadBookDetail(@PathVariable("id") String id) {
-        return ResponseEntity.ok().build();
+        var book = service.loadBookDetail(id);
+        return ResponseEntity.ok(book);
     }
 }

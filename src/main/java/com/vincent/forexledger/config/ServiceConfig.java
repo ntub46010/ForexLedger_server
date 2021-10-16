@@ -30,8 +30,9 @@ public class ServiceConfig {
     }
 
     @Bean
-    public BookService bookService(UserIdentity userIdentity, BookRepository repository) {
-        return new BookService(userIdentity, repository);
+    public BookService bookService(UserIdentity userIdentity, BookRepository repository,
+                                   ExchangeRateService exchangeRateService) {
+        return new BookService(userIdentity, repository, exchangeRateService);
     }
 
     @Bean

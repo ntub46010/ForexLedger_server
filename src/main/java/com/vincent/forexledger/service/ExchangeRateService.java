@@ -2,6 +2,7 @@ package com.vincent.forexledger.service;
 
 import com.vincent.forexledger.client.DownloadExchangeRateClient;
 import com.vincent.forexledger.exception.NotFoundException;
+import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import com.vincent.forexledger.model.exchangerate.ExchangeRateResponse;
@@ -32,13 +33,22 @@ public class ExchangeRateService {
         if (responses == null) {
             var dbRates = repository.findByBankTypeIn(List.of(bank));
             if (CollectionUtils.isEmpty(dbRates)) {
-                throw new NotFoundException("Can't found exchange rates of " + bank);
+                throw new NotFoundException("Can't found exchange rates of bank: " + bank);
             }
             responses = ExchangeRateConverter.toResponses(dbRates);
             bankToExchangeRatesMap.put(bank, responses);
         }
 
         return responses;
+    }
+
+    public ExchangeRateResponse loadExchangeRate(BankType bank, CurrencyType currencyType) {
+        var bankExRates = loadExchangeRates(bank);
+        return bankExRates.stream()
+                .filter(rate -> rate.getCurrencyType() == currencyType)
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(String.format("Can't find exchange rate. " +
+                        "Bank: %s. Currency type: %s.", bank.name(), currencyType.name())));
     }
 
     @Scheduled(cron = "${cron.exchangerate.refresh}")
