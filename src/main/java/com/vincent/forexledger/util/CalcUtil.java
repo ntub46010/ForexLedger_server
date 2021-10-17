@@ -23,9 +23,8 @@ public class CalcUtil {
         }
 
         return BigDecimal.valueOf(num1)
-                .scaleByPowerOfTen(digit)
+                .setScale(digit, RoundingMode.HALF_DOWN)
                 .divide(BigDecimal.valueOf(num2), RoundingMode.HALF_DOWN)
-                .scaleByPowerOfTen(-digit)
                 .doubleValue();
     }
 }
