@@ -39,10 +39,12 @@ public class BookConverter {
 
         // FIXME: bankBuyingRate
         var currentValue = CalcUtil.multiplyToInt(book.getBalance(), 1);
-        var profit = currentValue - book.getRemainingTwdFund();
-        var profitRate = CalcUtil.divideToDouble(profit, book.getRemainingTwdFund(), 4);
-        response.setTwdProfit(profit);
-        response.setProfitRate(profitRate);
+        if (book.getBalance() > 0) {
+            var profit = currentValue - book.getRemainingTwdFund();
+            var profitRate = CalcUtil.divideToDouble(profit, book.getRemainingTwdFund(), 4);
+            response.setTwdProfit(profit);
+            response.setProfitRate(profitRate);
+        }
 
         return response;
     }
@@ -60,10 +62,12 @@ public class BookConverter {
         var currentValue = CalcUtil.multiplyToInt(book.getBalance(), bankBuyingRate);
         detail.setTwdCurrentValue(currentValue);
 
-        var profit = currentValue - book.getRemainingTwdFund();
-        var profitRate = CalcUtil.divideToDouble(profit, book.getRemainingTwdFund(), 4);
-        detail.setTwdProfit(profit);
-        detail.setTwdProfitRate(profitRate);
+        if (book.getBalance() > 0) {
+            var profit = currentValue - book.getRemainingTwdFund();
+            var profitRate = CalcUtil.divideToDouble(profit, book.getRemainingTwdFund(), 4);
+            detail.setTwdProfit(profit);
+            detail.setTwdProfitRate(profitRate);
+        }
 
         if (detail.getLastTwdInvest() != null && detail.getLastForeignInvest() != null) {
             var lastSellingRate = CalcUtil.divideToDouble(detail.getLastTwdInvest(), detail.getLastForeignInvest(), 4);

@@ -52,7 +52,7 @@ public class ExchangeRateConverterTest {
         assertExchangeRate(currencyToRichartRateMap.get(CurrencyType.SGD), 20.72, 20.588);
         assertExchangeRate(currencyToRichartRateMap.get(CurrencyType.CHF), 30.294, 30.09);
         assertExchangeRate(currencyToRichartRateMap.get(CurrencyType.NZD), 19.785, 19.641);
-        assertExchangeRate(currencyToRichartRateMap.get(CurrencyType.SEK), 3.23, 3.19);
+        assertExchangeRate(currencyToRichartRateMap.get(CurrencyType.SEK), 3.228, 3.192);
     }
 
     @Test

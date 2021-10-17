@@ -103,9 +103,9 @@ public class BookServiceTest {
         var book = new Book();
         book.setId(ObjectId.get().toString());
         book.setName("Book Name");
-        book.setCurrencyType(CurrencyType.USD);
-        book.setBalance(1947.33);
-        book.setRemainingTwdFund(0);
+        book.setCurrencyType(CurrencyType.GBP);
+        book.setBalance(621.77);
+        book.setRemainingTwdFund(23877);
         book.setCreator(creator);
 
         return book;
