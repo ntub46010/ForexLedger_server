@@ -15,8 +15,7 @@ public class Book {
     private BankType bank;
     private CurrencyType currencyType;
     private double balance;
-    private Integer twdProfit;
-    private Double profitRate;
+    private int remainingTwdFund;
     private Double breakEvenPoint;
     private Double lastForeignInvest;
     private Integer lastTwdInvest;
@@ -63,20 +62,12 @@ public class Book {
         this.balance = balance;
     }
 
-    public Integer getTwdProfit() {
-        return twdProfit;
+    public int getRemainingTwdFund() {
+        return remainingTwdFund;
     }
 
-    public void setTwdProfit(Integer twdProfit) {
-        this.twdProfit = twdProfit;
-    }
-
-    public Double getProfitRate() {
-        return profitRate;
-    }
-
-    public void setProfitRate(Double profitRate) {
-        this.profitRate = profitRate;
+    public void setRemainingTwdFund(int remainingTwdFund) {
+        this.remainingTwdFund = remainingTwdFund;
     }
 
     public Double getBreakEvenPoint() {

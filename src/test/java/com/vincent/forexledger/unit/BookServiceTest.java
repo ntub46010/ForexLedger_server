@@ -59,8 +59,7 @@ public class BookServiceTest {
         Assert.assertEquals(userId, actualBook.getCreator());
         Assert.assertNotNull(actualBook.getCreatedTime());
         Assert.assertEquals(0, actualBook.getBalance(), 0);
-        Assert.assertNull(actualBook.getTwdProfit());
-        Assert.assertNull(actualBook.getProfitRate());
+        Assert.assertEquals(0, actualBook.getRemainingTwdFund());
         Assert.assertNull(actualBook.getBreakEvenPoint());
         Assert.assertNull(actualBook.getLastForeignInvest());
         Assert.assertNull(actualBook.getLastTwdInvest());
@@ -106,8 +105,7 @@ public class BookServiceTest {
         book.setName("Book Name");
         book.setCurrencyType(CurrencyType.USD);
         book.setBalance(1947.33);
-        book.setTwdProfit(-3671);
-        book.setProfitRate(-0.0189);
+        book.setRemainingTwdFund(0);
         book.setCreator(creator);
 
         return book;

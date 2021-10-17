@@ -28,8 +28,7 @@ public class BookConverterTest {
         Assert.assertEquals(request.getBank(), book.getBank());
         Assert.assertEquals(request.getCurrencyType(), book.getCurrencyType());
         Assert.assertEquals(0, book.getBalance(), 0);
-        Assert.assertNull(book.getTwdProfit());
-        Assert.assertNull(book.getProfitRate());
+        Assert.assertEquals(0, book.getRemainingTwdFund());
         Assert.assertNull(book.getBreakEvenPoint());
         Assert.assertNull(book.getLastForeignInvest());
         Assert.assertNull(book.getLastTwdInvest());
@@ -42,17 +41,16 @@ public class BookConverterTest {
             Assert.assertEquals(expected.getName(), actual.getName());
             Assert.assertEquals(expected.getCurrencyType(), actual.getCurrencyType());
             Assert.assertEquals(expected.getBalance(), actual.getBalance(), 0);
-            Assert.assertEquals(expected.getTwdProfit(), actual.getTwdProfit());
-            Assert.assertEquals(expected.getProfitRate(), actual.getProfitRate());
+            Assert.assertEquals(-359, actual.getTwdProfit(), 1);
+            Assert.assertEquals(-0.0151, actual.getProfitRate(), 0);
         };
 
         var book = new Book();
         book.setId(ObjectId.get().toString());
         book.setName("Book Name");
-        book.setCurrencyType(CurrencyType.USD);
-        book.setBalance(1947.33);
-        book.setTwdProfit(-3671);
-        book.setProfitRate(-0.0189);
+        book.setCurrencyType(CurrencyType.GBP);
+        book.setBalance(621.77);
+        book.setRemainingTwdFund(23877);
 
         var response = BookConverter.toBookListResponse(book);
         assertFunc.accept(book, response);
@@ -70,8 +68,7 @@ public class BookConverterTest {
         book.setBank(BankType.FUBON);
         book.setCurrencyType(CurrencyType.ZAR);
         book.setBalance(0);
-        book.setTwdProfit(null);
-        book.setProfitRate(null);
+        book.setRemainingTwdFund(0);
         book.setBreakEvenPoint(null);
         book.setLastForeignInvest(null);
         book.setLastTwdInvest(null);
@@ -100,8 +97,7 @@ public class BookConverterTest {
         book.setBank(BankType.FUBON);
         book.setCurrencyType(CurrencyType.ZAR);
         book.setBalance(51475.54);
-        book.setTwdProfit(-1882);
-        book.setProfitRate(-0.0194);
+        book.setRemainingTwdFund(97148);
         book.setBreakEvenPoint(1.8873);
         book.setLastForeignInvest(33489.9);
         book.setLastTwdInvest(63533);
@@ -113,12 +109,12 @@ public class BookConverterTest {
         Assert.assertEquals(book.getCurrencyType(), detail.getCurrencyType());
         Assert.assertEquals(bankBuyingRate, detail.getBankBuyingRate(), 0);
         Assert.assertEquals(book.getBalance(), detail.getBalance(), 0);
-        Assert.assertEquals(book.getTwdProfit(), detail.getTwdProfit());
-        Assert.assertEquals(book.getProfitRate(), detail.getTwdProfitRate());
+        Assert.assertEquals(-1882, detail.getTwdProfit(), 1);
+        Assert.assertEquals(-0.0194, detail.getTwdProfitRate(), 1);
         Assert.assertEquals(book.getBreakEvenPoint(), detail.getBreakEvenPoint());
         Assert.assertEquals(book.getLastForeignInvest(), detail.getLastForeignInvest());
         Assert.assertEquals(book.getLastTwdInvest(), detail.getLastTwdInvest());
         Assert.assertEquals(95266, detail.getTwdCurrentValue(), 1);
-        Assert.assertEquals(1.8971, detail.getLastSellingRate(), 1);
+        Assert.assertEquals(1.8971, detail.getLastSellingRate(), 0.0001);
     }
 }

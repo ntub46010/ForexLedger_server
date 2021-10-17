@@ -19,8 +19,7 @@ public class BookConverter {
         book.setBank(request.getBank());
         book.setCurrencyType(request.getCurrencyType());
         book.setBalance(0);
-        book.setTwdProfit(null);
-        book.setProfitRate(null);
+        book.setRemainingTwdFund(0);
 
         return book;
     }
@@ -37,8 +36,13 @@ public class BookConverter {
         response.setName(book.getName());
         response.setCurrencyType(book.getCurrencyType());
         response.setBalance(book.getBalance());
-        response.setTwdProfit(book.getTwdProfit());
-        response.setProfitRate(book.getProfitRate());
+
+        // FIXME: bankBuyingRate
+        var currentValue = CalcUtil.multiplyToInt(book.getBalance(), 1);
+        var profit = currentValue - book.getRemainingTwdFund();
+        var profitRate = CalcUtil.divideToDouble(profit, book.getRemainingTwdFund(), 4);
+        response.setTwdProfit(profit);
+        response.setProfitRate(profitRate);
 
         return response;
     }
@@ -49,14 +53,17 @@ public class BookConverter {
         detail.setCurrencyType(book.getCurrencyType());
         detail.setBankBuyingRate(bankBuyingRate);
         detail.setBalance(book.getBalance());
-        detail.setTwdProfit(book.getTwdProfit());
-        detail.setTwdProfitRate(book.getProfitRate());
         detail.setBreakEvenPoint(book.getBreakEvenPoint());
         detail.setLastForeignInvest(book.getLastForeignInvest());
         detail.setLastTwdInvest(book.getLastTwdInvest());
 
         var currentValue = CalcUtil.multiplyToInt(book.getBalance(), bankBuyingRate);
         detail.setTwdCurrentValue(currentValue);
+
+        var profit = currentValue - book.getRemainingTwdFund();
+        var profitRate = CalcUtil.divideToDouble(profit, book.getRemainingTwdFund(), 4);
+        detail.setTwdProfit(profit);
+        detail.setTwdProfitRate(profitRate);
 
         if (detail.getLastTwdInvest() != null && detail.getLastForeignInvest() != null) {
             var lastSellingRate = CalcUtil.divideToDouble(detail.getLastTwdInvest(), detail.getLastForeignInvest(), 4);
