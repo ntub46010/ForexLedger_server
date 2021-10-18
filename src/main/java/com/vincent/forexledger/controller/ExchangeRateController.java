@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Collection;
 
 @RestController
 @RequestMapping(value = APIPathConstants.EXCHANGE_RATES, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -39,7 +39,7 @@ public class ExchangeRateController {
             }
     )
     @GetMapping
-    public ResponseEntity<List<ExchangeRateResponse>> getExchangeRates(
+    public ResponseEntity<Collection<ExchangeRateResponse>> getExchangeRates(
             @Parameter(description = "Bank of exchange rates.", required = true)
             @RequestParam(QueryStringConstants.BANK) BankType bank) {
         var responses = service.loadExchangeRates(bank);

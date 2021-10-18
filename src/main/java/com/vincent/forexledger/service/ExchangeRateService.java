@@ -20,23 +20,24 @@ public class ExchangeRateService {
     private Logger logger = LoggerFactory.getLogger(getClass());
     private DownloadExchangeRateClient exchangeRateClient;
     private ExchangeRateRepository repository;
-    private Map<BankType, List<ExchangeRateResponse>> bankToExchangeRatesMap;
+    private ExchangeRateTable exchangeRateTable;
 
-    public ExchangeRateService(DownloadExchangeRateClient client, ExchangeRateRepository repository) {
+    public ExchangeRateService(DownloadExchangeRateClient client, ExchangeRateRepository repository,
+                               ExchangeRateTable exchangeRateTable) {
         this.exchangeRateClient = client;
         this.repository = repository;
-        this.bankToExchangeRatesMap = new EnumMap<>(BankType.class);
+        this.exchangeRateTable = exchangeRateTable;
     }
 
-    public List<ExchangeRateResponse> loadExchangeRates(BankType bank) {
-        var responses = bankToExchangeRatesMap.get(bank);
-        if (responses == null) {
+    public Collection<ExchangeRateResponse> loadExchangeRates(BankType bank) {
+        var responses = exchangeRateTable.get(bank);
+        if (CollectionUtils.isEmpty(responses)) {
             var dbRates = repository.findByBankTypeIn(List.of(bank));
             if (CollectionUtils.isEmpty(dbRates)) {
                 throw new NotFoundException("Can't found exchange rates of bank: " + bank);
             }
             responses = ExchangeRateConverter.toResponses(dbRates);
-            bankToExchangeRatesMap.put(bank, responses);
+            exchangeRateTable.put(bank, responses);
         }
 
         return responses;
@@ -89,7 +90,7 @@ public class ExchangeRateService {
 
         bankToExRatesMap.forEach((bank, rates) -> {
             var responses = ExchangeRateConverter.toResponses(rates);
-            bankToExchangeRatesMap.put(bank, responses);
+            exchangeRateTable.put(bank, responses);
         });
     }
 
