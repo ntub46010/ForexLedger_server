@@ -1,5 +1,7 @@
 package com.vincent.forexledger.util.converter;
 
+import com.vincent.forexledger.model.CurrencyType;
+import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.book.BookDetailResponse;
 import com.vincent.forexledger.model.book.BookListResponse;
@@ -7,6 +9,7 @@ import com.vincent.forexledger.model.book.CreateBookRequest;
 import com.vincent.forexledger.util.CalcUtil;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class BookConverter {
@@ -24,21 +27,24 @@ public class BookConverter {
         return book;
     }
 
-    public static List<BookListResponse> toBookListResponses(List<Book> books) {
+    public static List<BookListResponse> toBookListResponses(
+            List<Book> books, Map<BankType, Map<CurrencyType, Double>> bankBuyingRateMap) {
         return books.stream()
-                .map(BookConverter::toBookListResponse)
+                .map(book -> {
+                    var buyingRate = bankBuyingRateMap.get(book.getBank()).get(book.getCurrencyType());
+                    return toBookListResponse(book, buyingRate);
+                })
                 .collect(Collectors.toList());
     }
 
-    public static BookListResponse toBookListResponse(Book book) {
+    public static BookListResponse toBookListResponse(Book book, double bankBuyingRate) {
         var response = new BookListResponse();
         response.setId(book.getId());
         response.setName(book.getName());
         response.setCurrencyType(book.getCurrencyType());
         response.setBalance(book.getBalance());
 
-        // FIXME: bankBuyingRate
-        var currentValue = CalcUtil.multiplyToInt(book.getBalance(), 1);
+        var currentValue = CalcUtil.multiplyToInt(book.getBalance(), bankBuyingRate);
         if (book.getBalance() > 0) {
             var profit = currentValue - book.getRemainingTwdFund();
             var profitRate = CalcUtil.divideToDouble(profit, book.getRemainingTwdFund(), 4);

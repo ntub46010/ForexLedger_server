@@ -84,6 +84,7 @@ public class BookServiceTest {
         when(userIdentity.getId()).thenReturn(userId1);
         when(repository.findByCreator(userId1)).thenReturn(books1);
         when(repository.findByCreator(userId2)).thenReturn(books2);
+        // TODO: mock table
 
         var responses = service.loadMyBooks();
 
@@ -103,6 +104,7 @@ public class BookServiceTest {
         var book = new Book();
         book.setId(ObjectId.get().toString());
         book.setName("Book Name");
+        book.setBank(BankType.FUBON);
         book.setCurrencyType(CurrencyType.GBP);
         book.setBalance(621.77);
         book.setRemainingTwdFund(23877);

@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class BookConverterTest {
@@ -41,21 +42,24 @@ public class BookConverterTest {
             Assert.assertEquals(expected.getName(), actual.getName());
             Assert.assertEquals(expected.getCurrencyType(), actual.getCurrencyType());
             Assert.assertEquals(expected.getBalance(), actual.getBalance(), 0);
-            Assert.assertEquals(-359, actual.getTwdProfit(), 1);
-            Assert.assertEquals(-0.0151, actual.getProfitRate(), 0);
+            Assert.assertEquals(-347, actual.getTwdProfit(), 1);
+            Assert.assertEquals(-0.0146, actual.getProfitRate(), 0);
         };
 
         var book = new Book();
         book.setId(ObjectId.get().toString());
         book.setName("Book Name");
+        book.setBank(BankType.FUBON);
         book.setCurrencyType(CurrencyType.GBP);
         book.setBalance(621.77);
         book.setRemainingTwdFund(23877);
 
-        var response = BookConverter.toBookListResponse(book);
+        var response = BookConverter.toBookListResponse(book, 37.8428);
         assertFunc.accept(book, response);
 
-        var responses = BookConverter.toBookListResponses(List.of(book));
+        var responses = BookConverter.toBookListResponses(
+                List.of(book),
+                Map.of(BankType.FUBON, Map.of(CurrencyType.GBP, 37.8428)));
         Assert.assertEquals(1, responses.size());
         assertFunc.accept(book, responses.get(0));
     }

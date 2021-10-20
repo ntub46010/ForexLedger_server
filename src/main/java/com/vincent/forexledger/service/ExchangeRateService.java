@@ -43,6 +43,7 @@ public class ExchangeRateService {
         return responses;
     }
 
+    @Deprecated
     public ExchangeRateResponse loadExchangeRate(BankType bank, CurrencyType currencyType) {
         var bankExRates = loadExchangeRates(bank);
         return bankExRates.stream()

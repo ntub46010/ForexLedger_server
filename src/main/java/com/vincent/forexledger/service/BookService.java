@@ -7,20 +7,22 @@ import com.vincent.forexledger.model.book.CreateBookRequest;
 import com.vincent.forexledger.repository.BookRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.util.converter.BookConverter;
+import org.springframework.data.util.Pair;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BookService {
     private final UserIdentity userIdentity;
     private final BookRepository repository;
-    private final ExchangeRateService exchangeRateService;
+    private final ExchangeRateTable exchangeRateTable;
 
     public BookService(UserIdentity userIdentity, BookRepository repository,
-                       ExchangeRateService exchangeRateService) {
+                       ExchangeRateTable exchangeRateTable) {
         this.userIdentity = userIdentity;
         this.repository = repository;
-        this.exchangeRateService = exchangeRateService;
+        this.exchangeRateTable = exchangeRateTable;
     }
 
     public String createBook(CreateBookRequest request) {
@@ -35,13 +37,17 @@ public class BookService {
 
     public List<BookListResponse> loadMyBooks() {
         var books = repository.findByCreator(userIdentity.getId());
-        return BookConverter.toBookListResponses(books);
+        var bankCurrencyTypePairs = books.stream()
+                .map(book -> Pair.of(book.getBank(), book.getCurrencyType()))
+                .collect(Collectors.toSet());
+
+        return BookConverter.toBookListResponses(books, exchangeRateTable.getBuyingRates(bankCurrencyTypePairs));
     }
 
     public BookDetailResponse loadBookDetail(String id) {
         var book = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Can't find book."));
-        var exchangeRate = exchangeRateService.loadExchangeRate(book.getBank(), book.getCurrencyType());
+        var exchangeRate = exchangeRateTable.get(book.getBank(), book.getCurrencyType());
 
         return BookConverter.toBookDetail(book, exchangeRate.getBuyingRate());
     }
