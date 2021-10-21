@@ -67,6 +67,9 @@ public class BookTest extends BaseTest {
         var vincentBookIds = List.of(
                 createBook("Fubon USD", BankType.FUBON, CurrencyType.USD),
                 createBook("Richart EUR", BankType.RICHART, CurrencyType.EUR));
+        createExchangeRate(BankType.FUBON, CurrencyType.JPY, 0.246, 0.2424);
+        createExchangeRate(BankType.FUBON, CurrencyType.USD, 27.9655, 27.8655);
+        createExchangeRate(BankType.RICHART, CurrencyType.EUR, 32.599, 32.409);
 
         var mvcResult = mockMvc.perform(get(APIPathConstants.BOOKS)
                 .headers(httpHeaders))

@@ -1,11 +1,17 @@
 package com.vincent.forexledger.model.exchangerate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vincent.forexledger.model.CurrencyType;
+import com.vincent.forexledger.model.bank.BankType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Date;
 
 public class ExchangeRateResponse {
+
+    @JsonIgnore
+    private BankType bank;
+
     @Schema(example = "USD")
     private CurrencyType currencyType;
 
@@ -17,6 +23,14 @@ public class ExchangeRateResponse {
 
     @Schema(description = "The refreshing time at server of this exchange rate.")
     private Date updatedTime;
+
+    public BankType getBank() {
+        return bank;
+    }
+
+    public void setBank(BankType bank) {
+        this.bank = bank;
+    }
 
     public CurrencyType getCurrencyType() {
         return currencyType;

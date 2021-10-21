@@ -16,6 +16,10 @@ public class ExchangeRateTable {
         table = HashBasedTable.create();
     }
 
+    public void put(Collection<ExchangeRateResponse> exchangeRates) {
+        exchangeRates.forEach(rate -> table.put(rate.getBank(), rate.getCurrencyType(), rate));
+    }
+
     public void put(BankType bank, Collection<ExchangeRateResponse> exchangeRates) {
         exchangeRates.forEach(rate -> table.put(bank, rate.getCurrencyType(), rate));
     }
@@ -44,6 +48,7 @@ public class ExchangeRateTable {
             var rate = table.get(bank, currencyType);
             Objects.requireNonNull(rate);
             currencyTypeToRateMap.put(currencyType, rate.getBuyingRate());
+            result.put(bank, currencyTypeToRateMap);
         });
 
         return result;

@@ -2,7 +2,6 @@ package com.vincent.forexledger.service;
 
 import com.vincent.forexledger.client.DownloadExchangeRateClient;
 import com.vincent.forexledger.exception.NotFoundException;
-import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import com.vincent.forexledger.model.exchangerate.ExchangeRateResponse;
@@ -43,18 +42,8 @@ public class ExchangeRateService {
         return responses;
     }
 
-    @Deprecated
-    public ExchangeRateResponse loadExchangeRate(BankType bank, CurrencyType currencyType) {
-        var bankExRates = loadExchangeRates(bank);
-        return bankExRates.stream()
-                .filter(rate -> rate.getCurrencyType() == currencyType)
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException(String.format("Can't find exchange rate. " +
-                        "Bank: %s. Currency type: %s.", bank.name(), currencyType.name())));
-    }
-
     @Scheduled(cron = "${cron.exchangerate.refresh}")
-    public void refreshExchangeRateData() {
+    public void refreshExchangeRateFromRemote() {
         logger.info("Start to refresh exchange rate.");
         var allSavingExchangeRates = new ArrayList<ExchangeRate>();
         var now = new Date();
@@ -74,6 +63,13 @@ public class ExchangeRateService {
                 .collect(Collectors.groupingBy(ExchangeRate::getBankType, Collectors.toList()));
         overwriteBankExchangeRateSafely(bankToSavingExRatesMap);
         logger.info("Finish refreshing exchange rate.");
+    }
+
+    // TODO: unit test
+    public void refreshExchangeRateFromLocal() {
+        var exchangeRates = repository.findAll();
+        var exchangeResponses = ExchangeRateConverter.toResponses(exchangeRates);
+        exchangeRateTable.put(exchangeResponses);
     }
 
     private void overwriteBankExchangeRateSafely(Map<BankType, List<ExchangeRate>> bankToExRatesMap) {

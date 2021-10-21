@@ -79,6 +79,7 @@ public class ExchangeRateConverterTest {
     @Test
     public void testConvertToResponse() {
         BiConsumer<ExchangeRate, ExchangeRateResponse> assertFunc = (expected, actual) -> {
+            Assert.assertEquals(expected.getBankType(), actual.getBank());
             Assert.assertEquals(expected.getCurrencyType(), actual.getCurrencyType());
             Assert.assertEquals(expected.getSellingRate(), actual.getSellingRate(), 0);
             Assert.assertEquals(expected.getBuyingRate(), actual.getBuyingRate(), 0);
@@ -86,6 +87,7 @@ public class ExchangeRateConverterTest {
         };
 
         var exchangeRate = new ExchangeRate();
+        exchangeRate.setBankType(BankType.FUBON);
         exchangeRate.setCurrencyType(CurrencyType.USD);
         exchangeRate.setSellingRate(27.76);
         exchangeRate.setBuyingRate(27.66);

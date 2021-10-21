@@ -8,6 +8,7 @@ import com.vincent.forexledger.model.book.CreateBookRequest;
 import com.vincent.forexledger.repository.BookRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.service.BookService;
+import com.vincent.forexledger.service.ExchangeRateTable;
 import org.apache.commons.collections4.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
@@ -16,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -71,25 +73,31 @@ public class BookServiceTest {
         var userId2 = ObjectId.get().toString();
 
         var books1 = List.of(
-                createBook(userId1),
-                createBook(userId1));
+                createEmptyBook(userId1, BankType.FUBON, CurrencyType.USD),
+                createEmptyBook(userId1, BankType.FUBON, CurrencyType.GBP));
         var books2 = List.of(
-                createBook(userId2),
-                createBook(userId2));
+                createEmptyBook(userId2, BankType.RICHART, CurrencyType.USD),
+                createEmptyBook(userId2, BankType.RICHART, CurrencyType.GBP));
+        var buyingRateMap = Map.of(
+                BankType.FUBON, Map.of(CurrencyType.USD, 27.8655, CurrencyType.GBP, 38.2206),
+                BankType.RICHART, Map.of(CurrencyType.USD, 27.89, CurrencyType.GBP, 38.464));
 
         var userIdentity = mock(UserIdentity.class);
         var repository = mock(BookRepository.class);
-        var service = new BookService(userIdentity, repository, null);
+        var exchangeTable = mock(ExchangeRateTable.class);
+        var service = new BookService(userIdentity, repository, exchangeTable);
 
         when(userIdentity.getId()).thenReturn(userId1);
         when(repository.findByCreator(userId1)).thenReturn(books1);
         when(repository.findByCreator(userId2)).thenReturn(books2);
-        // TODO: mock table
+        when(exchangeTable.getBuyingRates(anyCollection())).thenReturn(buyingRateMap);
 
         var responses = service.loadMyBooks();
 
+        verify(userIdentity).getId();
         verify(repository).findByCreator(userId1);
         verify(repository, times(0)).findByCreator(userId2);
+        verify(exchangeTable).getBuyingRates(anyCollection());
 
         var bookIds1 = books1.stream()
                 .map(Book::getId)
@@ -100,14 +108,14 @@ public class BookServiceTest {
         Assert.assertTrue(CollectionUtils.isEqualCollection(bookIds1, responseIds));
     }
 
-    private Book createBook(String creator) {
+    private Book createEmptyBook(String creator, BankType bank, CurrencyType currencyType) {
         var book = new Book();
         book.setId(ObjectId.get().toString());
         book.setName("Book Name");
-        book.setBank(BankType.FUBON);
-        book.setCurrencyType(CurrencyType.GBP);
-        book.setBalance(621.77);
-        book.setRemainingTwdFund(23877);
+        book.setBank(bank);
+        book.setCurrencyType(currencyType);
+        book.setBalance(0);
+        book.setRemainingTwdFund(0);
         book.setCreator(creator);
 
         return book;

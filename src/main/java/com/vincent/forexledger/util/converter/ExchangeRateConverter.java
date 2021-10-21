@@ -87,6 +87,7 @@ public class ExchangeRateConverter {
 
     public static ExchangeRateResponse toResponse(ExchangeRate rate) {
         var response = new ExchangeRateResponse();
+        response.setBank(rate.getBankType());
         response.setCurrencyType(rate.getCurrencyType());
         response.setSellingRate(rate.getSellingRate());
         response.setBuyingRate(rate.getBuyingRate());

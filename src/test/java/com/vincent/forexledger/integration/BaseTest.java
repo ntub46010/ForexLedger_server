@@ -21,6 +21,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Date;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -92,6 +94,7 @@ public class BaseTest {
         exchangeRate.setCurrencyType(currencyType);
         exchangeRate.setSellingRate(sellingRate);
         exchangeRate.setBuyingRate(buyingRate);
+        exchangeRate.setCreatedTime(new Date());
 
         return exchangeRateRepository.insert(exchangeRate);
     }

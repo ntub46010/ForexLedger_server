@@ -61,7 +61,7 @@ public class ExchangeRateServiceTests {
         when(repository.findByBankTypeIn(Set.of(BankType.FUBON, BankType.RICHART)))
                 .thenReturn(allOldExRates);
 
-        service.refreshExchangeRateData();
+        service.refreshExchangeRateFromRemote();
 
         verify(client).load(BankType.FUBON);
         verify(client).load(BankType.RICHART);
@@ -112,7 +112,7 @@ public class ExchangeRateServiceTests {
         when(repository.findByBankTypeIn(Set.of(BankType.FUBON)))
                 .thenReturn(fubonOldExRates);
 
-        service.refreshExchangeRateData();
+        service.refreshExchangeRateFromRemote();
 
         verify(client).load(BankType.FUBON);
         verify(client).load(BankType.RICHART);
