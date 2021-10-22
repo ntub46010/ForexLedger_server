@@ -67,9 +67,6 @@ public class BookTest extends BaseTest {
         var vincentBookIds = List.of(
                 createBook("Fubon USD", BankType.FUBON, CurrencyType.USD),
                 createBook("Richart EUR", BankType.RICHART, CurrencyType.EUR));
-        createExchangeRate(BankType.FUBON, CurrencyType.JPY, 0.246, 0.2424);
-        createExchangeRate(BankType.FUBON, CurrencyType.USD, 27.9655, 27.8655);
-        createExchangeRate(BankType.RICHART, CurrencyType.EUR, 32.599, 32.409);
 
         var mvcResult = mockMvc.perform(get(APIPathConstants.BOOKS)
                 .headers(httpHeaders))
@@ -90,8 +87,8 @@ public class BookTest extends BaseTest {
         var userId = ObjectId.get().toString();
         appendAccessToken(userId, "Vincent");
 
-        var exchangeRate = createExchangeRate(BankType.FUBON, CurrencyType.USD, 27.76, 27.66);
-        var bookId = createBook("Book Name", exchangeRate.getBankType(), exchangeRate.getCurrencyType());
+        var bookId = createBook("Book Name", BankType.FUBON, CurrencyType.USD);
+        var exchangeRate = exchangeRateTable.get(BankType.FUBON, CurrencyType.USD);
 
         mockMvc.perform(get(APIPathConstants.BOOKS + "/" + bookId)
                 .headers(httpHeaders))
