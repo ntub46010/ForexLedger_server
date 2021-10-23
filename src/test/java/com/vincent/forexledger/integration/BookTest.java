@@ -80,6 +80,8 @@ public class BookTest extends BaseTest {
                 .collect(Collectors.toList());
         Assert.assertTrue(CollectionUtils.isEqualCollection(
                 vincentBookIds, responseIds));
+
+        // TODO: test profit value
     }
 
     @Test
@@ -87,8 +89,8 @@ public class BookTest extends BaseTest {
         var userId = ObjectId.get().toString();
         appendAccessToken(userId, "Vincent");
 
-        var bookId = createBook("Book Name", BankType.FUBON, CurrencyType.USD);
         var exchangeRate = exchangeRateTable.get(BankType.FUBON, CurrencyType.USD);
+        var bookId = createBook("Book Name", BankType.FUBON, CurrencyType.USD);
 
         mockMvc.perform(get(APIPathConstants.BOOKS + "/" + bookId)
                 .headers(httpHeaders))
@@ -104,6 +106,40 @@ public class BookTest extends BaseTest {
                 .andExpect(jsonPath("$.lastForeignInvest").value(IsNull.nullValue()))
                 .andExpect(jsonPath("$.lastTwdInvest").value(IsNull.nullValue()))
                 .andExpect(jsonPath("$.lastSellingRate").value(IsNull.nullValue()));
+    }
+
+    @Test
+    public void testLoadNotEmptyBookDetail() throws Exception {
+        var userId = ObjectId.get().toString();
+        appendAccessToken(userId, "Vincent");
+
+        var exchangeRate = exchangeRateTable.get(BankType.FUBON, CurrencyType.GBP);
+
+        var bookId = createBook("Book Name", BankType.FUBON, CurrencyType.GBP);
+        var book = bookRepository.findById(bookId).orElseThrow();
+
+        book.setBalance(621.77);
+        book.setRemainingTwdFund(23877);
+        book.setBreakEvenPoint(38.421);
+        book.setLastForeignInvest(78.44);
+        book.setLastTwdInvest(3000);
+        bookRepository.save(book);
+
+        mockMvc.perform(get(APIPathConstants.BOOKS + "/" + bookId)
+                .headers(httpHeaders))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(bookId))
+                .andExpect(jsonPath("$.currencyType").value(exchangeRate.getCurrencyType().name()))
+                .andExpect(jsonPath("$.bankBuyingRate").value(exchangeRate.getBuyingRate()))
+                .andExpect(jsonPath("$.balance").value(book.getBalance()))
+                .andExpect(jsonPath("$.twdCurrentValue").value(23738))
+                .andExpect(jsonPath("$.twdProfit").value(-139))
+                .andExpect(jsonPath("$.twdProfitRate").value(-0.0058))
+                .andExpect(jsonPath("$.breakEvenPoint").value(book.getBreakEvenPoint()))
+                .andExpect(jsonPath("$.lastForeignInvest").value(book.getLastForeignInvest()))
+                .andExpect(jsonPath("$.lastTwdInvest").value(book.getLastTwdInvest()))
+                .andExpect(jsonPath("$.lastSellingRate").value(38.2458));
+
     }
 
 }
