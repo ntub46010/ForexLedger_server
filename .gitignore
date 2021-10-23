@@ -1,4 +1,5 @@
 src/main/resources/config/firebase-service-account.json
+src/test/resources/config/firebase-service-account.json
 
 HELP.md
 target/
