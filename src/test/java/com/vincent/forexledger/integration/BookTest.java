@@ -3,6 +3,7 @@ package com.vincent.forexledger.integration;
 import com.vincent.forexledger.constants.APIPathConstants;
 import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.bank.BankType;
+import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.book.BookListResponse;
 import com.vincent.forexledger.model.book.CreateBookRequest;
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,7 +17,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -75,13 +78,23 @@ public class BookTest extends BaseTest {
         var responseStr = mvcResult.getResponse().getContentAsString();
         BookListResponse[] responses = objectMapper.readValue(responseStr, BookListResponse[].class);
 
-        var responseIds = Arrays.stream(responses)
-                .map(BookListResponse::getId)
-                .collect(Collectors.toList());
+        var expectedBookMap = new HashMap<String, Book>();
+        bookRepository.findAllById(vincentBookIds)
+                .forEach(book -> expectedBookMap.put(book.getId(), book));
+        var actualBookMap = Arrays.stream(responses)
+                .collect(Collectors.toMap(BookListResponse::getId, Function.identity()));
         Assert.assertTrue(CollectionUtils.isEqualCollection(
-                vincentBookIds, responseIds));
+                expectedBookMap.keySet(), actualBookMap.keySet()));
 
-        // TODO: test profit value
+        actualBookMap.keySet().forEach(resId -> {
+            var expectedBook = expectedBookMap.get(resId);
+            var actualBook = actualBookMap.get(resId);
+            Assert.assertEquals(expectedBook.getName(), actualBook.getName());
+            Assert.assertEquals(expectedBook.getCurrencyType(), actualBook.getCurrencyType());
+            Assert.assertEquals(expectedBook.getBalance(), actualBook.getBalance(), 0);
+            Assert.assertNull(actualBook.getTwdProfit());
+            Assert.assertNull(actualBook.getProfitRate());
+        });
     }
 
     @Test
