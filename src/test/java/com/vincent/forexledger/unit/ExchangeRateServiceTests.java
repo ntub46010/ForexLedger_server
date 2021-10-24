@@ -7,6 +7,7 @@ import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import com.vincent.forexledger.model.exchangerate.FindRateResponse;
 import com.vincent.forexledger.repository.ExchangeRateRepository;
 import com.vincent.forexledger.service.ExchangeRateService;
+import com.vincent.forexledger.service.ExchangeRateTable;
 import org.apache.commons.collections4.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
@@ -31,7 +32,7 @@ public class ExchangeRateServiceTests {
     public void setup() {
         client = mock(DownloadExchangeRateClient.class);
         repository = mock(ExchangeRateRepository.class);
-        service = new ExchangeRateService(client, repository);
+        service = new ExchangeRateService(client, repository, new ExchangeRateTable());
     }
 
     @Test
@@ -60,7 +61,7 @@ public class ExchangeRateServiceTests {
         when(repository.findByBankTypeIn(Set.of(BankType.FUBON, BankType.RICHART)))
                 .thenReturn(allOldExRates);
 
-        service.refreshExchangeRateData();
+        service.refreshExchangeRateFromRemote();
 
         verify(client).load(BankType.FUBON);
         verify(client).load(BankType.RICHART);
@@ -111,7 +112,7 @@ public class ExchangeRateServiceTests {
         when(repository.findByBankTypeIn(Set.of(BankType.FUBON)))
                 .thenReturn(fubonOldExRates);
 
-        service.refreshExchangeRateData();
+        service.refreshExchangeRateFromRemote();
 
         verify(client).load(BankType.FUBON);
         verify(client).load(BankType.RICHART);

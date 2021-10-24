@@ -18,7 +18,9 @@ public class RefreshExchangeRateRunner implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (isNeededToRefresh) {
-            exchangeRateService.refreshExchangeRateData();
+            exchangeRateService.refreshExchangeRateFromRemote();
+        } else {
+            exchangeRateService.refreshExchangeRateFromLocal();
         }
     }
 }

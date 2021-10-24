@@ -1,6 +1,7 @@
 package com.vincent.forexledger.controller;
 
 import com.vincent.forexledger.constants.APIPathConstants;
+import com.vincent.forexledger.model.book.BookDetailResponse;
 import com.vincent.forexledger.model.book.BookListResponse;
 import com.vincent.forexledger.model.book.CreateBookRequest;
 import com.vincent.forexledger.service.BookService;
@@ -63,5 +64,11 @@ public class BookController {
     public ResponseEntity<List<BookListResponse>> loadMyBooks() {
         var books = service.loadMyBooks();
         return ResponseEntity.ok(books);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BookDetailResponse> loadBookDetail(@PathVariable("id") String id) {
+        var book = service.loadBookDetail(id);
+        return ResponseEntity.ok(book);
     }
 }

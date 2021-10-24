@@ -4,6 +4,7 @@ import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import com.vincent.forexledger.model.exchangerate.ExchangeRateResponse;
 import com.vincent.forexledger.model.exchangerate.FindRateResponse;
+import com.vincent.forexledger.util.CalcUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 
@@ -46,20 +47,17 @@ public class ExchangeRateConverter {
     }
 
     public static FindRateResponse toRichartExRate(FindRateResponse response) {
-        var sellingRate = BigDecimal.valueOf(response.getSellingRate());
-        var buyingRate = BigDecimal.valueOf(response.getBuyingRate());
-
         var discount = richartDiscountMap.get(response.getCurrencyType());
         if (discount == null) {
-            discount = sellingRate
-                    .subtract(buyingRate)
-                    .divide(BigDecimal.valueOf(5), RoundingMode.HALF_UP);
+            discount = CalcUtil.subtractToDecimal(response.getSellingRate(), response.getBuyingRate());
+            discount = CalcUtil.divideToDecimal(discount, 5, 4);
         }
 
-        sellingRate  = sellingRate.subtract(discount);
-        buyingRate = buyingRate.add(discount);
-        response.setSellingRate(sellingRate.doubleValue());
-        response.setBuyingRate(buyingRate.doubleValue());
+        var sellingRate = CalcUtil.subtractToDouble(response.getSellingRate(), discount);
+        response.setSellingRate(sellingRate);
+
+        var buyingRate = CalcUtil.addToDouble(response.getBuyingRate(), discount);
+        response.setBuyingRate(buyingRate);
 
         return response;
     }
@@ -89,6 +87,7 @@ public class ExchangeRateConverter {
 
     public static ExchangeRateResponse toResponse(ExchangeRate rate) {
         var response = new ExchangeRateResponse();
+        response.setBank(rate.getBankType());
         response.setCurrencyType(rate.getCurrencyType());
         response.setSellingRate(rate.getSellingRate());
         response.setBuyingRate(rate.getBuyingRate());

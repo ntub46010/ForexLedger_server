@@ -1,26 +1,19 @@
 package com.vincent.forexledger.model.book;
 
 import com.vincent.forexledger.model.CurrencyType;
-import com.vincent.forexledger.model.bank.BankType;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
-
-@Document(collection = "book")
-public class Book {
-    @Id
+public class BookDetailResponse {
     private String id;
-    private String name;
-    private BankType bank;
     private CurrencyType currencyType;
+    private double bankBuyingRate;
     private double balance;
-    private int remainingTwdFund;
+    private int twdCurrentValue;
+    private Integer twdProfit;
+    private Double twdProfitRate;
     private Double breakEvenPoint;
     private Double lastForeignInvest;
     private Integer lastTwdInvest;
-    private String creator;
-    private Date createdTime;
+    private Double lastSellingRate;
 
     public String getId() {
         return id;
@@ -28,22 +21,6 @@ public class Book {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public BankType getBank() {
-        return bank;
-    }
-
-    public void setBank(BankType bank) {
-        this.bank = bank;
     }
 
     public CurrencyType getCurrencyType() {
@@ -54,6 +31,14 @@ public class Book {
         this.currencyType = currencyType;
     }
 
+    public double getBankBuyingRate() {
+        return bankBuyingRate;
+    }
+
+    public void setBankBuyingRate(double bankBuyingRate) {
+        this.bankBuyingRate = bankBuyingRate;
+    }
+
     public double getBalance() {
         return balance;
     }
@@ -62,12 +47,28 @@ public class Book {
         this.balance = balance;
     }
 
-    public int getRemainingTwdFund() {
-        return remainingTwdFund;
+    public int getTwdCurrentValue() {
+        return twdCurrentValue;
     }
 
-    public void setRemainingTwdFund(int remainingTwdFund) {
-        this.remainingTwdFund = remainingTwdFund;
+    public void setTwdCurrentValue(int twdCurrentValue) {
+        this.twdCurrentValue = twdCurrentValue;
+    }
+
+    public Integer getTwdProfit() {
+        return twdProfit;
+    }
+
+    public void setTwdProfit(Integer twdProfit) {
+        this.twdProfit = twdProfit;
+    }
+
+    public Double getTwdProfitRate() {
+        return twdProfitRate;
+    }
+
+    public void setTwdProfitRate(Double twdProfitRate) {
+        this.twdProfitRate = twdProfitRate;
     }
 
     public Double getBreakEvenPoint() {
@@ -94,19 +95,11 @@ public class Book {
         this.lastTwdInvest = lastTwdInvest;
     }
 
-    public String getCreator() {
-        return creator;
+    public Double getLastSellingRate() {
+        return lastSellingRate;
     }
 
-    public void setCreator(String creator) {
-        this.creator = creator;
-    }
-
-    public Date getCreatedTime() {
-        return createdTime;
-    }
-
-    public void setCreatedTime(Date createdTime) {
-        this.createdTime = createdTime;
+    public void setLastSellingRate(Double lastSellingRate) {
+        this.lastSellingRate = lastSellingRate;
     }
 }
