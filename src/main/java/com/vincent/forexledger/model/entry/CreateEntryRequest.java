@@ -17,7 +17,7 @@ public class CreateEntryRequest {
 
     @Positive
     private double foreignAmount;
-    private Double twdAmount;
+    private Integer twdAmount;
     private String anotherBookId;
 
     public String getBookId() {
@@ -52,11 +52,11 @@ public class CreateEntryRequest {
         this.foreignAmount = foreignAmount;
     }
 
-    public Double getTwdAmount() {
+    public Integer getTwdAmount() {
         return twdAmount;
     }
 
-    public void setTwdAmount(Double twdAmount) {
+    public void setTwdAmount(Integer twdAmount) {
         this.twdAmount = twdAmount;
     }
 
