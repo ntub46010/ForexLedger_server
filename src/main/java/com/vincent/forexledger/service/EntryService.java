@@ -7,6 +7,7 @@ import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.util.converter.EntryConverter;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -21,6 +22,7 @@ public class EntryService {
         this.bookService = bookService;
     }
 
+    @Transactional
     public String createEntry(CreateEntryRequest request) {
         validate(request);
 
@@ -29,7 +31,8 @@ public class EntryService {
         entry.setCreatedTime(new Date());
         repository.insert(entry);
 
-        // TODO: write data in book
+        // TODO: unit test
+        bookService.updateMetaData(entry.getBookId(), entry);
 
         return entry.getId();
     }

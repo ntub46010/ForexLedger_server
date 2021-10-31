@@ -4,6 +4,7 @@ import com.vincent.forexledger.exception.NotFoundException;
 import com.vincent.forexledger.model.book.BookDetailResponse;
 import com.vincent.forexledger.model.book.BookListResponse;
 import com.vincent.forexledger.model.book.CreateBookRequest;
+import com.vincent.forexledger.model.entry.Entry;
 import com.vincent.forexledger.repository.BookRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.util.converter.BookConverter;
@@ -50,5 +51,8 @@ public class BookService {
         var exchangeRate = exchangeRateTable.get(book.getBank(), book.getCurrencyType());
 
         return BookConverter.toBookDetail(book, exchangeRate.getBuyingRate());
+    }
+
+    public void updateMetaData(String bookId, Entry entry) {
     }
 }
