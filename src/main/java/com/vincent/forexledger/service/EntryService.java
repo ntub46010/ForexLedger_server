@@ -35,11 +35,6 @@ public class EntryService {
     }
 
     private void validate(CreateEntryRequest request) {
-        if (request.getTransactionType() == TransactionType.TRANSFER_IN_FROM_INTEREST &&
-                request.getTwdAmount() != null) {
-            throw new BadRequestException("TWD amount is unnecessary.");
-        }
-
         if (StringUtils.isEmpty(request.getAnotherBookId()) &&
                 (request.getTransactionType() == TransactionType.TRANSFER_IN_FROM_FOREIGN ||
                 request.getTransactionType() == TransactionType.TRANSFER_OUT_TO_FOREIGN)) {

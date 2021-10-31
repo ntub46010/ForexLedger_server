@@ -1,5 +1,6 @@
 package com.vincent.forexledger.unit;
 
+import com.vincent.forexledger.exception.BadRequestException;
 import com.vincent.forexledger.model.entry.CreateEntryRequest;
 import com.vincent.forexledger.model.entry.Entry;
 import com.vincent.forexledger.model.entry.TransactionType;
@@ -10,7 +11,6 @@ import com.vincent.forexledger.service.EntryService;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
 
@@ -66,5 +66,41 @@ public class EntryServiceTest {
         Assert.assertEquals(request.getAnotherBookId(), actualEntry.getAnotherBookId());
         Assert.assertEquals(userId, actualEntry.getCreator());
         Assert.assertNotNull(actualEntry.getCreatedTime());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void createTransferInFromForeignEntryWithoutRelatedBookId() {
+        var userIdentity = mock(UserIdentity.class);
+        var repository = mock(EntryRepository.class);
+        var bookService = mock(BookService.class);
+        var service = new EntryService(userIdentity, repository, bookService);
+
+        var request = new CreateEntryRequest();
+        request.setBookId(ObjectId.get().toString());
+        request.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
+        request.setTransactionDate(new Date());
+        request.setForeignAmount(12487.5);
+        request.setTwdAmount(null);
+        request.setAnotherBookId(null);
+
+        service.createEntry(request);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void createTransferOutToForeignEntryWithoutRelatedBookId() {
+        var userIdentity = mock(UserIdentity.class);
+        var repository = mock(EntryRepository.class);
+        var bookService = mock(BookService.class);
+        var service = new EntryService(userIdentity, repository, bookService);
+
+        var request = new CreateEntryRequest();
+        request.setBookId(ObjectId.get().toString());
+        request.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
+        request.setTransactionDate(new Date());
+        request.setForeignAmount(150);
+        request.setTwdAmount(null);
+        request.setAnotherBookId(null);
+
+        service.createEntry(request);
     }
 }
