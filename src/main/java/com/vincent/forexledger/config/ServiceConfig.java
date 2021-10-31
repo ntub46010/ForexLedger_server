@@ -41,8 +41,9 @@ public class ServiceConfig {
     }
 
     @Bean
-    public EntryService entryService(EntryRepository repository, BookService bookService) {
-        return new EntryService(repository, bookService);
+    public EntryService entryService(UserIdentity userIdentity, EntryRepository repository,
+                                     BookService bookService) {
+        return new EntryService(userIdentity, repository, bookService);
     }
 
     @Bean
