@@ -35,10 +35,10 @@ public class EntryService {
     }
 
     private void validate(CreateEntryRequest request) {
-        if (StringUtils.isEmpty(request.getAnotherBookId()) &&
+        if (StringUtils.isEmpty(request.getRelatedBookId()) &&
                 (request.getTransactionType() == TransactionType.TRANSFER_IN_FROM_FOREIGN ||
                 request.getTransactionType() == TransactionType.TRANSFER_OUT_TO_FOREIGN)) {
-                throw new BadRequestException("Id of another book is required.");
+                throw new BadRequestException("Id of related book is required.");
         }
     }
 }

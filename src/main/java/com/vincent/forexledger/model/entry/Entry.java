@@ -12,7 +12,7 @@ public class Entry {
     private Date transactionDate;
     private double foreignAmount;
     private Integer twdAmount;
-    private String anotherBookId;
+    private String relatedBookId;
     private String creator;
     private Date createdTime;
 
@@ -64,12 +64,12 @@ public class Entry {
         this.twdAmount = twdAmount;
     }
 
-    public String getAnotherBookId() {
-        return anotherBookId;
+    public String getRelatedBookId() {
+        return relatedBookId;
     }
 
-    public void setAnotherBookId(String anotherBookId) {
-        this.anotherBookId = anotherBookId;
+    public void setRelatedBookId(String relatedBookId) {
+        this.relatedBookId = relatedBookId;
     }
 
     public String getCreator() {

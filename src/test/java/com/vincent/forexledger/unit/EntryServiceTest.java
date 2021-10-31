@@ -47,7 +47,7 @@ public class EntryServiceTest {
         request.setTransactionDate(new Date());
         request.setForeignAmount(78.44);
         request.setTwdAmount(3000);
-        request.setAnotherBookId(ObjectId.get().toString());
+        request.setRelatedBookId(ObjectId.get().toString());
         var actualEntryId = service.createEntry(request);
 
         verify(userIdentity).getId();
@@ -63,7 +63,7 @@ public class EntryServiceTest {
         Assert.assertEquals(request.getTransactionDate(), actualEntry.getTransactionDate());
         Assert.assertEquals(request.getForeignAmount(), actualEntry.getForeignAmount(), 0);
         Assert.assertEquals(request.getTwdAmount(), actualEntry.getTwdAmount());
-        Assert.assertEquals(request.getAnotherBookId(), actualEntry.getAnotherBookId());
+        Assert.assertEquals(request.getRelatedBookId(), actualEntry.getRelatedBookId());
         Assert.assertEquals(userId, actualEntry.getCreator());
         Assert.assertNotNull(actualEntry.getCreatedTime());
     }
@@ -81,7 +81,7 @@ public class EntryServiceTest {
         request.setTransactionDate(new Date());
         request.setForeignAmount(12487.5);
         request.setTwdAmount(null);
-        request.setAnotherBookId(null);
+        request.setRelatedBookId(null);
 
         service.createEntry(request);
     }
@@ -99,7 +99,7 @@ public class EntryServiceTest {
         request.setTransactionDate(new Date());
         request.setForeignAmount(150);
         request.setTwdAmount(null);
-        request.setAnotherBookId(null);
+        request.setRelatedBookId(null);
 
         service.createEntry(request);
     }

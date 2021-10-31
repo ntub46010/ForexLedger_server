@@ -19,7 +19,7 @@ public class EntryConvertTest {
         request.setTransactionDate(new Date());
         request.setForeignAmount(78.44);
         request.setTwdAmount(3000);
-        request.setAnotherBookId(ObjectId.get().toString());
+        request.setRelatedBookId(ObjectId.get().toString());
 
         var entry = EntryConverter.toEntry(request);
 
@@ -28,6 +28,6 @@ public class EntryConvertTest {
         Assert.assertEquals(request.getTransactionDate(), entry.getTransactionDate());
         Assert.assertEquals(request.getForeignAmount(), entry.getForeignAmount(), 0);
         Assert.assertEquals(request.getTwdAmount(), entry.getTwdAmount());
-        Assert.assertEquals(request.getAnotherBookId(), entry.getAnotherBookId());
+        Assert.assertEquals(request.getRelatedBookId(), entry.getRelatedBookId());
     }
 }
