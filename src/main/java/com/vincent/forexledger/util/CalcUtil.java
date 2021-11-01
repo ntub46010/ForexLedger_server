@@ -7,9 +7,23 @@ public class CalcUtil {
     private CalcUtil() {
     }
 
+    // TODO: unit test
+    public static double addToDouble(double num1, double num2) {
+        return BigDecimal.valueOf(num1)
+                .add(BigDecimal.valueOf(num2))
+                .doubleValue();
+    }
+
     public static double addToDouble(double num1, BigDecimal num2) {
         return BigDecimal.valueOf(num1)
                 .add(num2)
+                .doubleValue();
+    }
+
+    // TODO: unit test
+    public static double subtractToDouble(double num1, double num2) {
+        return BigDecimal.valueOf(num1)
+                .subtract(BigDecimal.valueOf(num2))
                 .doubleValue();
     }
 
