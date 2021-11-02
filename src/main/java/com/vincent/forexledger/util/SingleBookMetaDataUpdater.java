@@ -32,7 +32,7 @@ public class SingleBookMetaDataUpdater {
         if (entry.getTransactionType().isTransferIn()) {
             return CalcUtil.addToDouble(currentBalance, entry.getForeignAmount());
         } else {
-            if (currentBalance > entry.getForeignAmount()) {
+            if (currentBalance < entry.getForeignAmount()) {
                 throw new InsufficientBalanceException(currentBalance, entry.getForeignAmount());
             }
 
