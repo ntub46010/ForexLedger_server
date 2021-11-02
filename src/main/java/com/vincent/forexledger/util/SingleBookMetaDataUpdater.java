@@ -12,21 +12,37 @@ public class SingleBookMetaDataUpdater {
     }
 
     public void update(Entry entry) {
-        //
+        var balance = calcBalance(entry);
+        book.setBalance(balance);
+
+        var remainingTwdFund = calcRemainingTwdFund(entry);
+        book.setRemainingTwdFund(remainingTwdFund);
+
+        var breakEvenPoint = CalcUtil.divideToDouble(book.getRemainingTwdFund(), book.getBalance(), 4);
+        book.setBreakEvenPoint(breakEvenPoint);
+
+        if (entry.getTransactionType().isTransferIn()) {
+            book.setLastForeignInvest(entry.getForeignAmount());
+            book.setLastTwdInvest(entry.getTwdAmount());
+        }
     }
 
-    private void updateBalance(Entry entry) {
+    private double calcBalance(Entry entry) {
         var currentBalance = book.getBalance();
         if (entry.getTransactionType().isTransferIn()) {
-            var balance = CalcUtil.addToDouble(currentBalance, entry.getForeignAmount());
-            book.setBalance(balance);
+            return CalcUtil.addToDouble(currentBalance, entry.getForeignAmount());
         } else {
             if (currentBalance > entry.getForeignAmount()) {
                 throw new InsufficientBalanceException(currentBalance, entry.getForeignAmount());
             }
 
-            var balance = CalcUtil.subtractToDouble(currentBalance, entry.getForeignAmount());
-            book.setBalance(balance);
+            return CalcUtil.subtractToDouble(currentBalance, entry.getForeignAmount());
         }
+    }
+
+    private int calcRemainingTwdFund(Entry entry) {
+        return entry.getTransactionType().isTransferIn()
+                ? book.getRemainingTwdFund() + entry.getTwdAmount()
+                : book.getRemainingTwdFund() - entry.getTwdAmount();
     }
 }
