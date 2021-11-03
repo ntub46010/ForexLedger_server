@@ -1,17 +1,22 @@
 package com.vincent.forexledger.service;
 
 import com.vincent.forexledger.exception.NotFoundException;
+import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.book.BookDetailResponse;
 import com.vincent.forexledger.model.book.BookListResponse;
 import com.vincent.forexledger.model.book.CreateBookRequest;
 import com.vincent.forexledger.model.entry.Entry;
 import com.vincent.forexledger.repository.BookRepository;
 import com.vincent.forexledger.security.UserIdentity;
+import com.vincent.forexledger.util.DoubleBookMetaDataUpdater;
+import com.vincent.forexledger.util.SingleBookMetaDataUpdater;
 import com.vincent.forexledger.util.converter.BookConverter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.util.Pair;
 
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class BookService {
@@ -46,13 +51,30 @@ public class BookService {
     }
 
     public BookDetailResponse loadBookDetail(String id) {
-        var book = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Can't find book."));
+        var book = loadBookById(id);
         var exchangeRate = exchangeRateTable.get(book.getBank(), book.getCurrencyType());
 
         return BookConverter.toBookDetail(book, exchangeRate.getBuyingRate());
     }
 
     public void updateMetaData(String bookId, Entry entry) {
+        var relatedBookId = entry.getRelatedBookId();
+
+        if (StringUtils.isEmpty(relatedBookId)) {
+            var book = loadBookById(bookId);
+            new SingleBookMetaDataUpdater(book).update(entry);
+            repository.save(book);
+        } else {
+            var bookMap = repository.findByIdIn(List.of(bookId, relatedBookId))
+                    .stream()
+                    .collect(Collectors.toMap(Book::getId, Function.identity()));
+            new DoubleBookMetaDataUpdater(bookMap.get(bookId), bookMap.get(relatedBookId)).update(entry);
+            repository.saveAll(bookMap.values());
+        }
+    }
+
+    private Book loadBookById(String id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Can't find book."));
     }
 }
