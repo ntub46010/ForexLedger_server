@@ -14,13 +14,32 @@ public class DoubleBookMetaDataUpdater {
         this.relatedBook = relatedBook;
     }
 
-
     public void update(Entry entry) {
         if (entry.getTransactionType() != TransactionType.TRANSFER_IN_FROM_FOREIGN &&
                 entry.getTransactionType() != TransactionType.TRANSFER_OUT_TO_FOREIGN) {
             throw new IllegalArgumentException("Invalid transaction type: " + entry.getTransactionType().name());
         }
-        //
+
+        primaryBook.setBalance(calcPrimaryBookBalance(entry));
+        relatedBook.setBalance(calcRelatedBookBalance(entry));
+
+        primaryBook.setRemainingTwdFund(calcPrimaryBookRemainingTwdFund(entry));
+        relatedBook.setRemainingTwdFund(calcRelatedBookRemainingTwdFund(entry));
+
+        if (entry.getTransactionType().isTransferIn()) {
+            var primaryBreakEvenPoint =
+                    CalcUtil.divideToDouble(primaryBook.getRemainingTwdFund(), primaryBook.getBalance(), 4);
+            primaryBook.setBreakEvenPoint(primaryBreakEvenPoint);
+        } else {
+            var relatedBreakEvenPoint =
+                    CalcUtil.divideToDouble(relatedBook.getRemainingTwdFund(), relatedBook.getBalance(), 4);
+            relatedBook.setBreakEvenPoint(relatedBreakEvenPoint);
+        }
+
+        if (entry.getTransactionType().isTransferIn()) {
+            primaryBook.setLastForeignInvest(entry.getForeignAmount());
+            primaryBook.setLastTwdInvest(entry.getTwdAmount());
+        }
     }
 
     private double calcPrimaryBookBalance(Entry entry) {
@@ -45,13 +64,13 @@ public class DoubleBookMetaDataUpdater {
         return CalcUtil.subtractToDouble(relatedBook.getBalance(), entry.getForeignAmount());
     }
 
-    private double calcPrimaryBookRemainingTwdFund(Entry entry) {
+    private int calcPrimaryBookRemainingTwdFund(Entry entry) {
         return entry.getTransactionType().isTransferIn()
                 ? primaryBook.getRemainingTwdFund() + entry.getTwdAmount()
                 : primaryBook.getRemainingTwdFund() - entry.getTwdAmount();
     }
 
-    private double calcRelatedBookRemainingTwdFund(Entry entry) {
+    private int calcRelatedBookRemainingTwdFund(Entry entry) {
         return entry.getTransactionType().isTransferIn()
                 ? relatedBook.getRemainingTwdFund() - entry.getTwdAmount()
                 : relatedBook.getRemainingTwdFund() + entry.getTwdAmount();
