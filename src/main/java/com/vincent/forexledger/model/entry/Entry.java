@@ -13,6 +13,7 @@ public class Entry {
     private double foreignAmount;
     private Integer twdAmount;
     private String relatedBookId;
+    private Double relatedForeignAmount;
     private String creator;
     private Date createdTime;
 
@@ -70,6 +71,14 @@ public class Entry {
 
     public void setRelatedBookId(String relatedBookId) {
         this.relatedBookId = relatedBookId;
+    }
+
+    public Double getRelatedForeignAmount() {
+        return relatedForeignAmount;
+    }
+
+    public void setRelatedForeignAmount(Double relatedForeignAmount) {
+        this.relatedForeignAmount = relatedForeignAmount;
     }
 
     public String getCreator() {

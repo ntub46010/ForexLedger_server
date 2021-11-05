@@ -19,6 +19,7 @@ public class CreateEntryRequest {
     private double foreignAmount;
     private Integer twdAmount;
     private String relatedBookId;
+    private Double relatedBookForeignAmount;
 
     public String getBookId() {
         return bookId;
@@ -66,5 +67,13 @@ public class CreateEntryRequest {
 
     public void setRelatedBookId(String relatedBookId) {
         this.relatedBookId = relatedBookId;
+    }
+
+    public Double getRelatedBookForeignAmount() {
+        return relatedBookForeignAmount;
+    }
+
+    public void setRelatedBookForeignAmount(Double relatedBookForeignAmount) {
+        this.relatedBookForeignAmount = relatedBookForeignAmount;
     }
 }
