@@ -48,6 +48,22 @@ public class CalcUtil {
                 .intValue();
     }
 
+    // TODO: unit test
+    public static double divideToDouble(double num1, double num2, int digit) {
+        if (num1 == 0) {
+            return 0;
+        }
+
+        if (num1 == num2) {
+            return 1;
+        }
+
+        return BigDecimal.valueOf(num1)
+                .setScale(digit, RoundingMode.HALF_DOWN)
+                .divide(BigDecimal.valueOf(num2), RoundingMode.HALF_DOWN)
+                .doubleValue();
+    }
+
     public static double divideToDouble(int num1, double num2, int digit) {
         if (num1 == 0) {
             return 0;
