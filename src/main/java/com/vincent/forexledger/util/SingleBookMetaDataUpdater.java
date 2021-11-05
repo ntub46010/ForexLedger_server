@@ -31,13 +31,13 @@ public class SingleBookMetaDataUpdater {
         var currentBalance = book.getBalance();
         if (entry.getTransactionType().isTransferIn()) {
             return CalcUtil.addToDouble(currentBalance, entry.getForeignAmount());
-        } else {
-            if (currentBalance < entry.getForeignAmount()) {
-                throw new InsufficientBalanceException(currentBalance, entry.getForeignAmount());
-            }
-
-            return CalcUtil.subtractToDouble(currentBalance, entry.getForeignAmount());
         }
+
+        if (currentBalance < entry.getForeignAmount()) {
+            throw new InsufficientBalanceException(currentBalance, entry.getForeignAmount());
+        }
+
+        return CalcUtil.subtractToDouble(currentBalance, entry.getForeignAmount());
     }
 
     private int calcRemainingTwdFund(Entry entry) {
