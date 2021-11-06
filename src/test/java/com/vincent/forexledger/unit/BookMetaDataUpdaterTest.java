@@ -4,6 +4,7 @@ import com.vincent.forexledger.exception.InsufficientBalanceException;
 import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.entry.Entry;
 import com.vincent.forexledger.model.entry.TransactionType;
+import com.vincent.forexledger.util.DoubleBookMetaDataUpdater;
 import com.vincent.forexledger.util.SingleBookMetaDataUpdater;
 import org.junit.Assert;
 import org.junit.Test;
@@ -89,7 +90,39 @@ public class BookMetaDataUpdaterTest {
         entry.setTransactionType(TransactionType.TRANSFER_OUT_TO_TWD);
         entry.setForeignAmount(700);
         entry.setTwdAmount(26149);
+
         updater.update(entry);
     }
 
+    @Test
+    public void testPrimaryBookTransferIn() {
+        var primaryBook = new Book();
+        var relatedBook = new Book();
+        relatedBook.setBalance(621.77);
+        relatedBook.setRemainingTwdFund(23877);
+        relatedBook.setBreakEvenPoint(38.4017);
+        relatedBook.setLastForeignInvest(78.44);
+        relatedBook.setLastTwdInvest(3000);
+
+        var updater = new DoubleBookMetaDataUpdater(primaryBook, relatedBook);
+
+        var entry = new Entry();
+        entry.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
+        entry.setForeignAmount(100);
+        entry.setRelatedForeignAmount(133.89);
+
+        updater.update(entry);
+
+        Assert.assertEquals(100, primaryBook.getBalance(), 0);
+        Assert.assertEquals(5141, primaryBook.getRemainingTwdFund());
+        Assert.assertEquals(51.41, primaryBook.getBreakEvenPoint(), 0);
+        Assert.assertEquals(100, primaryBook.getLastForeignInvest(), 0);
+        Assert.assertEquals(5141, primaryBook.getLastTwdInvest(), 0);
+
+        Assert.assertEquals(487.88, relatedBook.getBalance(), 0);
+        Assert.assertEquals(18736, relatedBook.getRemainingTwdFund());
+        Assert.assertEquals(38.4017, relatedBook.getBreakEvenPoint(), 0);
+        Assert.assertEquals(78.44, relatedBook.getLastForeignInvest(), 0);
+        Assert.assertEquals(3000, relatedBook.getLastTwdInvest(), 0);
+    }
 }

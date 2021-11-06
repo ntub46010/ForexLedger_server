@@ -45,6 +45,28 @@ public class CalcUtil {
 
         return BigDecimal.valueOf(num1)
                 .multiply(BigDecimal.valueOf(num2))
+                .divide(BigDecimal.ONE, 0, RoundingMode.HALF_DOWN)
+                .intValue();
+    }
+
+    // TODO: unit test
+    public static BigDecimal multiplyToDecimal(double num1, double num2) {
+        return BigDecimal.valueOf(num1).multiply(BigDecimal.valueOf(num2));
+    }
+
+    // TODO: unit test
+    public static int divideToInt(BigDecimal num1, double num2) {
+        if (BigDecimal.ZERO.equals(num1)) {
+            return 0;
+        }
+
+        var num2Dec = BigDecimal.valueOf(num2);
+        if (num1.equals(num2Dec)) {
+            return 1;
+        }
+
+        return num1
+                .divide(num2Dec, RoundingMode.HALF_DOWN)
                 .intValue();
     }
 
