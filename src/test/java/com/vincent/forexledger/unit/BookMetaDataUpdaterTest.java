@@ -125,4 +125,70 @@ public class BookMetaDataUpdaterTest {
         Assert.assertEquals(78.44, relatedBook.getLastForeignInvest(), 0);
         Assert.assertEquals(3000, relatedBook.getLastTwdInvest(), 0);
     }
+
+    @Test(expected = InsufficientBalanceException.class)
+    public void testPrimaryBookTransferInButRelatedBookIsInsufficient() {
+        var primaryBook = new Book();
+        var relatedBook = new Book();
+        var updater = new DoubleBookMetaDataUpdater(primaryBook, relatedBook);
+
+        var entry = new Entry();
+        entry.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
+        entry.setForeignAmount(100);
+        entry.setRelatedForeignAmount(133.89);
+
+        updater.update(entry);
+    }
+
+    @Test
+    public void testPrimaryBookTransferOut() {
+        var primaryBook = new Book();
+        primaryBook.setBalance(621.77);
+        primaryBook.setRemainingTwdFund(23877);
+        primaryBook.setBreakEvenPoint(38.4017);
+        primaryBook.setLastForeignInvest(78.44);
+        primaryBook.setLastTwdInvest(3000);
+
+        var relatedBook = new Book();
+        var updater = new DoubleBookMetaDataUpdater(primaryBook, relatedBook);
+
+        var entry = new Entry();
+        entry.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
+        entry.setForeignAmount(133.89);
+        entry.setRelatedForeignAmount(100.0);
+
+        updater.update(entry);
+
+        Assert.assertEquals(487.88, primaryBook.getBalance(), 0);
+        Assert.assertEquals(18736, primaryBook.getRemainingTwdFund());
+        Assert.assertEquals(38.4017, primaryBook.getBreakEvenPoint(), 0);
+        Assert.assertEquals(78.44, primaryBook.getLastForeignInvest(), 0);
+        Assert.assertEquals(3000, primaryBook.getLastTwdInvest(), 0);
+
+        Assert.assertEquals(100, relatedBook.getBalance(), 0);
+        Assert.assertEquals(5141, relatedBook.getRemainingTwdFund());
+        Assert.assertEquals(51.41, relatedBook.getBreakEvenPoint(), 0);
+        Assert.assertEquals(100, relatedBook.getLastForeignInvest(), 0);
+        Assert.assertEquals(5141, relatedBook.getLastTwdInvest(), 0);
+    }
+
+    @Test
+    public void testPrimaryBookTransferOutButBalanceIsInsufficient() {
+        var primaryBook = new Book();
+        primaryBook.setBalance(621.77);
+        primaryBook.setRemainingTwdFund(23877);
+        primaryBook.setBreakEvenPoint(38.4017);
+        primaryBook.setLastForeignInvest(78.44);
+        primaryBook.setLastTwdInvest(3000);
+
+        var relatedBook = new Book();
+        var updater = new DoubleBookMetaDataUpdater(primaryBook, relatedBook);
+
+        var entry = new Entry();
+        entry.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
+        entry.setForeignAmount(267.78);
+        entry.setRelatedForeignAmount(200.0);
+
+        updater.update(entry);
+    }
 }
