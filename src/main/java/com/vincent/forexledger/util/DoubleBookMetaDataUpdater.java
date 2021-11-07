@@ -85,6 +85,7 @@ public class DoubleBookMetaDataUpdater {
             throw new InsufficientBalanceException(primaryBook.getBalance(), entry.getForeignAmount());
         }
 
+        // FIXME
         var ratio = CalcUtil.divideToDouble(entry.getForeignAmount(), primaryBook.getBalance(), 4);
         var deltaTwdFund = CalcUtil.multiplyToInt(primaryBook.getRemainingTwdFund(), ratio);
 
@@ -105,6 +106,7 @@ public class DoubleBookMetaDataUpdater {
             throw new InsufficientBalanceException(relatedBook.getBalance(), entry.getRelatedForeignAmount());
         }
 
+        // FIXME
         var ratio = CalcUtil.divideToDouble(entry.getRelatedForeignAmount(), relatedBook.getBalance(), 4);
         var deltaTwdFund = CalcUtil.multiplyToInt(relatedBook.getRemainingTwdFund(), ratio);
 

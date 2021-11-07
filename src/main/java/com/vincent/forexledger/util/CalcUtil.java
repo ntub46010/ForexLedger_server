@@ -66,7 +66,7 @@ public class CalcUtil {
         }
 
         return num1
-                .divide(num2Dec, RoundingMode.HALF_DOWN)
+                .divide(num2Dec, RoundingMode.HALF_UP)
                 .intValue();
     }
 
@@ -81,8 +81,8 @@ public class CalcUtil {
         }
 
         return BigDecimal.valueOf(num1)
-                .setScale(digit, RoundingMode.HALF_DOWN)
-                .divide(BigDecimal.valueOf(num2), RoundingMode.HALF_DOWN)
+                .setScale(digit, RoundingMode.HALF_UP)
+                .divide(BigDecimal.valueOf(num2), RoundingMode.HALF_UP)
                 .doubleValue();
     }
 
@@ -92,8 +92,8 @@ public class CalcUtil {
         }
 
         return BigDecimal.valueOf(num1)
-                .setScale(digit, RoundingMode.HALF_DOWN)
-                .divide(BigDecimal.valueOf(num2), RoundingMode.HALF_DOWN)
+                .setScale(digit, RoundingMode.HALF_UP)
+                .divide(BigDecimal.valueOf(num2), RoundingMode.HALF_UP)
                 .doubleValue();
     }
 
@@ -103,7 +103,7 @@ public class CalcUtil {
         }
 
         return num1
-                .setScale(digit, RoundingMode.HALF_DOWN)
-                .divide(BigDecimal.valueOf(num2), RoundingMode.HALF_DOWN);
+                .setScale(digit, RoundingMode.HALF_UP)
+                .divide(BigDecimal.valueOf(num2), RoundingMode.HALF_UP);
     }
 }
