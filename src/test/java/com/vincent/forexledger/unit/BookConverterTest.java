@@ -43,7 +43,7 @@ public class BookConverterTest {
             Assert.assertEquals(expected.getCurrencyType(), actual.getCurrencyType());
             Assert.assertEquals(expected.getBalance(), actual.getBalance(), 0);
             Assert.assertEquals(-347, actual.getTwdProfit(), 1);
-            Assert.assertEquals(-0.0146, actual.getProfitRate(), 0);
+            Assert.assertEquals(-0.0145, actual.getProfitRate(), 0);
         };
 
         var book = new Book();

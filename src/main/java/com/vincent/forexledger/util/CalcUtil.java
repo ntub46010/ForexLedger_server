@@ -45,7 +45,7 @@ public class CalcUtil {
 
         return BigDecimal.valueOf(num1)
                 .multiply(BigDecimal.valueOf(num2))
-                .divide(BigDecimal.ONE, 0, RoundingMode.HALF_DOWN)
+                .divide(BigDecimal.ONE, 0, RoundingMode.HALF_UP)
                 .intValue();
     }
 

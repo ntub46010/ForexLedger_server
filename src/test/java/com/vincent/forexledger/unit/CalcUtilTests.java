@@ -27,7 +27,7 @@ public class CalcUtilTests {
     public void testMultiplyToInt() {
         Assert.assertEquals(0, CalcUtil.multiplyToInt(0, 37.8428));
         Assert.assertEquals(0, CalcUtil.multiplyToInt(621.77, 0));
-        Assert.assertEquals(23529, CalcUtil.multiplyToInt(621.77, 37.8428)); // 23529.5
+        Assert.assertEquals(23530, CalcUtil.multiplyToInt(621.77, 37.8428)); // 23529.5
     }
 
     @Test
