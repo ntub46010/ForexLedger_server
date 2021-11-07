@@ -31,8 +31,7 @@ public class EntryService {
         entry.setCreatedTime(new Date());
         repository.insert(entry);
 
-        // TODO: unit test
-        bookService.updateMetaData(entry.getBookId(), entry);
+        bookService.updateMetaData(entry);
 
         return entry.getId();
     }

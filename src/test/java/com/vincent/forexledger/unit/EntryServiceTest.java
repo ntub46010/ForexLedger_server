@@ -55,9 +55,8 @@ public class EntryServiceTest {
         var insertEntryCaptor = ArgumentCaptor.forClass(Entry.class);
         verify(repository).insert(insertEntryCaptor.capture());
 
-        Assert.assertEquals(entryId, actualEntryId);
-
         var actualEntry = insertEntryCaptor.getValue();
+        Assert.assertEquals(entryId, actualEntryId);
         Assert.assertEquals(request.getBookId(), actualEntry.getBookId());
         Assert.assertEquals(request.getTransactionType(), actualEntry.getTransactionType());
         Assert.assertEquals(request.getTransactionDate(), actualEntry.getTransactionDate());
@@ -66,6 +65,8 @@ public class EntryServiceTest {
         Assert.assertEquals(request.getRelatedBookId(), actualEntry.getRelatedBookId());
         Assert.assertEquals(userId, actualEntry.getCreator());
         Assert.assertNotNull(actualEntry.getCreatedTime());
+
+        verify(bookService).updateMetaData(actualEntry);
     }
 
     @Test(expected = BadRequestException.class)

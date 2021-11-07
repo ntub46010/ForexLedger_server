@@ -57,7 +57,9 @@ public class BookService {
         return BookConverter.toBookDetail(book, exchangeRate.getBuyingRate());
     }
 
-    public void updateMetaData(String bookId, Entry entry) {
+    // TODO: unit test
+    public void updateMetaData(Entry entry) {
+        var bookId = entry.getBookId();
         var relatedBookId = entry.getRelatedBookId();
 
         if (StringUtils.isEmpty(relatedBookId)) {

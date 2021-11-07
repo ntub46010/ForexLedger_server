@@ -172,7 +172,7 @@ public class BookMetaDataUpdaterTest {
         Assert.assertEquals(5141, relatedBook.getLastTwdInvest(), 0);
     }
 
-    @Test
+    @Test(expected = InsufficientBalanceException.class)
     public void testPrimaryBookTransferOutButBalanceIsInsufficient() {
         var primaryBook = new Book();
         primaryBook.setBalance(621.77);
@@ -186,8 +186,8 @@ public class BookMetaDataUpdaterTest {
 
         var entry = new Entry();
         entry.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
-        entry.setForeignAmount(267.78);
-        entry.setRelatedForeignAmount(200.0);
+        entry.setForeignAmount(1338.6);
+        entry.setRelatedForeignAmount(1000.0);
 
         updater.update(entry);
     }
