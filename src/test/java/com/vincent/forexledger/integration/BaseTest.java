@@ -9,6 +9,7 @@ import com.vincent.forexledger.model.book.CreateBookRequest;
 import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import com.vincent.forexledger.repository.AppUserRepository;
 import com.vincent.forexledger.repository.BookRepository;
+import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.repository.ExchangeRateRepository;
 import com.vincent.forexledger.security.SpringUser;
 import com.vincent.forexledger.service.ExchangeRateTable;
@@ -53,6 +54,9 @@ public class BaseTest {
     @Autowired
     protected BookRepository bookRepository;
 
+    @Autowired
+    protected EntryRepository entryRepository;
+
     @Before
     public void init() {
         httpHeaders = new HttpHeaders();
@@ -66,6 +70,7 @@ public class BaseTest {
         appUserRepository.deleteAll();
         exchangeRateRepository.deleteAll();
         bookRepository.deleteAll();
+        entryRepository.deleteAll();
     }
 
     private void insertDefaultExchangeRate() {
