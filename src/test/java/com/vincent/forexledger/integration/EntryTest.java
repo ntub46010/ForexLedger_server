@@ -144,4 +144,99 @@ public class EntryTest extends BaseTest {
         Assert.assertEquals(78.44, relatedBook.getLastForeignInvest(), 0);
         Assert.assertEquals(3000, (int) relatedBook.getLastTwdInvest());
     }
+
+    @Test
+    public void testPrimaryBookTransferInButRelatedBookIsInsufficient() throws Exception {
+        appendAccessToken(ObjectId.get().toString(), "Vincent");
+        var primaryBookId = createBook("Primary Book", BankType.FUBON, CurrencyType.USD);
+        var relatedBookId = createBook("Related Book", BankType.FUBON, CurrencyType.GBP);
+
+        var relatedBook = bookRepository.findById(relatedBookId).orElseThrow();
+        relatedBook.setBalance(621.77);
+        relatedBook.setRemainingTwdFund(23877);
+        relatedBook.setBreakEvenPoint(38.4017);
+        relatedBook.setLastForeignInvest(78.44);
+        relatedBook.setLastTwdInvest(3000);
+        bookRepository.save(relatedBook);
+
+        var entryReq = new CreateEntryRequest();
+        entryReq.setBookId(primaryBookId);
+        entryReq.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
+        entryReq.setTransactionDate(new Date());
+        entryReq.setForeignAmount(1000);
+        entryReq.setRelatedBookForeignAmount(1338.9);
+        entryReq.setRelatedBookId(relatedBookId);
+
+        mockMvc.perform(post(APIPathConstants.ENTRIES)
+                .headers(httpHeaders)
+                .content(objectMapper.writeValueAsString(entryReq)))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @SuppressWarnings({"java:S3415"})
+    @Test
+    public void testPrimaryBookTransferOut() throws Exception {
+        appendAccessToken(ObjectId.get().toString(), "Vincent");
+        var primaryBookId = createBook("Primary Book", BankType.FUBON, CurrencyType.GBP);
+        var relatedBookId = createBook("Related Book", BankType.FUBON, CurrencyType.USD);
+
+        var primaryBook = bookRepository.findById(primaryBookId).orElseThrow();
+        primaryBook.setBalance(621.77);
+        primaryBook.setRemainingTwdFund(23877);
+        primaryBook.setBreakEvenPoint(38.4017);
+        primaryBook.setLastForeignInvest(78.44);
+        primaryBook.setLastTwdInvest(3000);
+        bookRepository.save(primaryBook);
+
+        var entryReq = new CreateEntryRequest();
+        entryReq.setBookId(primaryBookId);
+        entryReq.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
+        entryReq.setTransactionDate(new Date());
+        entryReq.setForeignAmount(133.89);
+        entryReq.setRelatedBookForeignAmount(100.0);
+        entryReq.setRelatedBookId(relatedBookId);
+        createEntry(entryReq);
+
+        primaryBook = bookRepository.findById(primaryBookId).orElseThrow();
+        Assert.assertEquals(487.88, primaryBook.getBalance(), 0);
+        Assert.assertEquals(18735, primaryBook.getRemainingTwdFund());
+        Assert.assertEquals(38.4017, primaryBook.getBreakEvenPoint(), 0);
+        Assert.assertEquals(78.44, primaryBook.getLastForeignInvest(), 0);
+        Assert.assertEquals(3000, (int) primaryBook.getLastTwdInvest());
+
+        var relatedBook = bookRepository.findById(relatedBookId).orElseThrow();
+        Assert.assertEquals(entryReq.getRelatedBookForeignAmount(), relatedBook.getBalance(), 0);
+        Assert.assertEquals(5142, relatedBook.getRemainingTwdFund());
+        Assert.assertEquals(51.42, relatedBook.getBreakEvenPoint(), 0);
+        Assert.assertEquals(100, relatedBook.getLastForeignInvest(), 0);
+        Assert.assertEquals(5142, (int) relatedBook.getLastTwdInvest());
+    }
+
+    @Test
+    public void testPrimaryBookTransferOutButBalanceIsInsufficient() throws Exception {
+        appendAccessToken(ObjectId.get().toString(), "Vincent");
+        var primaryBookId = createBook("Primary Book", BankType.FUBON, CurrencyType.GBP);
+        var relatedBookId = createBook("Related Book", BankType.FUBON, CurrencyType.USD);
+
+        var primaryBook = bookRepository.findById(primaryBookId).orElseThrow();
+        primaryBook.setBalance(621.77);
+        primaryBook.setRemainingTwdFund(23877);
+        primaryBook.setBreakEvenPoint(38.4017);
+        primaryBook.setLastForeignInvest(78.44);
+        primaryBook.setLastTwdInvest(3000);
+        bookRepository.save(primaryBook);
+
+        var entryReq = new CreateEntryRequest();
+        entryReq.setBookId(primaryBookId);
+        entryReq.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
+        entryReq.setTransactionDate(new Date());
+        entryReq.setForeignAmount(1338.9);
+        entryReq.setRelatedBookForeignAmount(1000.0);
+        entryReq.setRelatedBookId(relatedBookId);
+
+        mockMvc.perform(post(APIPathConstants.ENTRIES)
+                .headers(httpHeaders)
+                .content(objectMapper.writeValueAsString(entryReq)))
+                .andExpect(status().isUnprocessableEntity());
+    }
 }
