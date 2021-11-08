@@ -15,7 +15,7 @@ public class EntryConverter {
         entry.setForeignAmount(request.getForeignAmount());
         entry.setTwdAmount(request.getTwdAmount());
         entry.setRelatedBookId(request.getRelatedBookId());
-        entry.setRelatedForeignAmount(request.getRelatedBookForeignAmount());
+        entry.setRelatedBookForeignAmount(request.getRelatedBookForeignAmount());
 
         return entry;
     }

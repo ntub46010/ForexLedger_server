@@ -30,6 +30,6 @@ public class EntryConvertTest {
         Assert.assertEquals(request.getForeignAmount(), entry.getForeignAmount(), 0);
         Assert.assertEquals(request.getTwdAmount(), entry.getTwdAmount());
         Assert.assertEquals(request.getRelatedBookId(), entry.getRelatedBookId());
-        Assert.assertEquals(request.getRelatedBookForeignAmount(), entry.getRelatedForeignAmount());
+        Assert.assertEquals(request.getRelatedBookForeignAmount(), entry.getRelatedBookForeignAmount());
     }
 }

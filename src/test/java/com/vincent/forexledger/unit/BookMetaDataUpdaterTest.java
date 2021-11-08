@@ -109,18 +109,18 @@ public class BookMetaDataUpdaterTest {
         var entry = new Entry();
         entry.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
         entry.setForeignAmount(100);
-        entry.setRelatedForeignAmount(133.89);
+        entry.setRelatedBookForeignAmount(133.89);
 
         updater.update(entry);
 
         Assert.assertEquals(100, primaryBook.getBalance(), 0);
-        Assert.assertEquals(5141, primaryBook.getRemainingTwdFund());
-        Assert.assertEquals(51.41, primaryBook.getBreakEvenPoint(), 0);
+        Assert.assertEquals(5142, primaryBook.getRemainingTwdFund());
+        Assert.assertEquals(51.42, primaryBook.getBreakEvenPoint(), 0);
         Assert.assertEquals(100, primaryBook.getLastForeignInvest(), 0);
-        Assert.assertEquals(5141, primaryBook.getLastTwdInvest(), 0);
+        Assert.assertEquals(5142, primaryBook.getLastTwdInvest(), 0);
 
         Assert.assertEquals(487.88, relatedBook.getBalance(), 0);
-        Assert.assertEquals(18736, relatedBook.getRemainingTwdFund());
+        Assert.assertEquals(18735, relatedBook.getRemainingTwdFund());
         Assert.assertEquals(38.4017, relatedBook.getBreakEvenPoint(), 0);
         Assert.assertEquals(78.44, relatedBook.getLastForeignInvest(), 0);
         Assert.assertEquals(3000, relatedBook.getLastTwdInvest(), 0);
@@ -135,7 +135,7 @@ public class BookMetaDataUpdaterTest {
         var entry = new Entry();
         entry.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
         entry.setForeignAmount(100);
-        entry.setRelatedForeignAmount(133.89);
+        entry.setRelatedBookForeignAmount(133.89);
 
         updater.update(entry);
     }
@@ -155,12 +155,12 @@ public class BookMetaDataUpdaterTest {
         var entry = new Entry();
         entry.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
         entry.setForeignAmount(133.89);
-        entry.setRelatedForeignAmount(100.0);
+        entry.setRelatedBookForeignAmount(100.0);
 
         updater.update(entry);
 
         Assert.assertEquals(487.88, primaryBook.getBalance(), 0);
-        Assert.assertEquals(18736, primaryBook.getRemainingTwdFund());
+        Assert.assertEquals(18735, primaryBook.getRemainingTwdFund());
         Assert.assertEquals(38.4017, primaryBook.getBreakEvenPoint(), 0);
         Assert.assertEquals(78.44, primaryBook.getLastForeignInvest(), 0);
         Assert.assertEquals(3000, primaryBook.getLastTwdInvest(), 0);
@@ -187,7 +187,7 @@ public class BookMetaDataUpdaterTest {
         var entry = new Entry();
         entry.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
         entry.setForeignAmount(1338.6);
-        entry.setRelatedForeignAmount(1000.0);
+        entry.setRelatedBookForeignAmount(1000.0);
 
         updater.update(entry);
     }

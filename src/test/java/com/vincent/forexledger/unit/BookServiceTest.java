@@ -164,7 +164,7 @@ public class BookServiceTest {
         entry.setBookId(primaryBook.getId());
         entry.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
         entry.setForeignAmount(100);
-        entry.setRelatedForeignAmount(133.89);
+        entry.setRelatedBookForeignAmount(133.89);
         entry.setRelatedBookId(relatedBook.getId());
 
         var repository = mock(BookRepository.class);
@@ -196,7 +196,7 @@ public class BookServiceTest {
         entry.setBookId(primaryBook.getId());
         entry.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
         entry.setForeignAmount(700);
-        entry.setRelatedForeignAmount(523.0);
+        entry.setRelatedBookForeignAmount(523.0);
         entry.setRelatedBookId(relatedBook.getId());
 
         var repository = mock(BookRepository.class);

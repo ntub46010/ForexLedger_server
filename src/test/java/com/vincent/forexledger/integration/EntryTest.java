@@ -48,7 +48,7 @@ public class EntryTest extends BaseTest {
         Assert.assertEquals(entry.getForeignAmount(), entryReq.getForeignAmount(), 0);
         Assert.assertEquals(entry.getTwdAmount(), entryReq.getTwdAmount());
         Assert.assertNull(entry.getRelatedBookId());
-        Assert.assertNull(entry.getRelatedForeignAmount());
+        Assert.assertNull(entry.getRelatedBookForeignAmount());
 
         var book = bookRepository.findById(bookId).orElseThrow();
         Assert.assertEquals(entryReq.getForeignAmount(), book.getBalance(), 0);
@@ -78,11 +78,7 @@ public class EntryTest extends BaseTest {
         entryReq.setTransactionDate(new Date());
         entryReq.setForeignAmount(900);
         entryReq.setTwdAmount(28111);
-
-        mockMvc.perform(post(APIPathConstants.ENTRIES)
-                .headers(httpHeaders)
-                .content(objectMapper.writeValueAsString(entryReq)))
-                .andExpect(status().isCreated());
+        createEntry(entryReq);
 
         book = bookRepository.findById(bookId).orElseThrow();
         Assert.assertEquals(600, book.getBalance(), 0);
@@ -108,5 +104,44 @@ public class EntryTest extends BaseTest {
                 .headers(httpHeaders)
                 .content(objectMapper.writeValueAsString(entryReq)))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @SuppressWarnings({"java:S3415"})
+    @Test
+    public void testPrimaryBookTransferIn() throws Exception {
+        appendAccessToken(ObjectId.get().toString(), "Vincent");
+        var primaryBookId = createBook("Primary Book", BankType.FUBON, CurrencyType.USD);
+        var relatedBookId = createBook("Related Book", BankType.FUBON, CurrencyType.GBP);
+
+        var relatedBook = bookRepository.findById(relatedBookId).orElseThrow();
+        relatedBook.setBalance(621.77);
+        relatedBook.setRemainingTwdFund(23877);
+        relatedBook.setBreakEvenPoint(38.4017);
+        relatedBook.setLastForeignInvest(78.44);
+        relatedBook.setLastTwdInvest(3000);
+        bookRepository.save(relatedBook);
+
+        var entryReq = new CreateEntryRequest();
+        entryReq.setBookId(primaryBookId);
+        entryReq.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
+        entryReq.setTransactionDate(new Date());
+        entryReq.setForeignAmount(100);
+        entryReq.setRelatedBookForeignAmount(133.89);
+        entryReq.setRelatedBookId(relatedBookId);
+        createEntry(entryReq);
+
+        var primaryBook = bookRepository.findById(primaryBookId).orElseThrow();
+        Assert.assertEquals(entryReq.getForeignAmount(), primaryBook.getBalance(), 0);
+        Assert.assertEquals(5142, primaryBook.getRemainingTwdFund());
+        Assert.assertEquals(51.42, primaryBook.getBreakEvenPoint(), 0);
+        Assert.assertEquals(100, primaryBook.getLastForeignInvest(), 0);
+        Assert.assertEquals(5142, (int) primaryBook.getLastTwdInvest());
+
+        relatedBook = bookRepository.findById(relatedBookId).orElseThrow();
+        Assert.assertEquals(487.88, relatedBook.getBalance(), 0);
+        Assert.assertEquals(18735, relatedBook.getRemainingTwdFund());
+        Assert.assertEquals(38.4017, relatedBook.getBreakEvenPoint(), 0);
+        Assert.assertEquals(78.44, relatedBook.getLastForeignInvest(), 0);
+        Assert.assertEquals(3000, (int) relatedBook.getLastTwdInvest());
     }
 }

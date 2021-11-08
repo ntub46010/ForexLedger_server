@@ -67,6 +67,7 @@ public class CalcUtil {
 
         return num1
                 .divide(num2Dec, RoundingMode.HALF_UP)
+                .divide(BigDecimal.ONE, 0, RoundingMode.HALF_UP)
                 .intValue();
     }
 
