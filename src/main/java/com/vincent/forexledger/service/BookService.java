@@ -14,8 +14,10 @@ import com.vincent.forexledger.util.converter.BookConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.util.Pair;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -57,6 +59,13 @@ public class BookService {
         return BookConverter.toBookDetail(book, exchangeRate.getBuyingRate());
     }
 
+    // TODO: unit test
+    public void updateMetaData2(Map<Book, Entry> bookToEntryMap) {
+        bookToEntryMap.forEach((book, entry) ->
+                new SingleBookMetaDataUpdater(book).update(entry));
+        repository.saveAll(bookToEntryMap.keySet());
+    }
+
     public void updateMetaData(Entry entry) {
         var bookId = entry.getBookId();
         var relatedBookId = entry.getRelatedBookId();
@@ -74,8 +83,12 @@ public class BookService {
         }
     }
 
-    private Book loadBookById(String id) {
+    public Book loadBookById(String id) {
         return repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Can't find book."));
+    }
+
+    public List<Book> loadBooksByIds(Collection<String> bookIds) {
+        return repository.findByIdIn(bookIds);
     }
 }
