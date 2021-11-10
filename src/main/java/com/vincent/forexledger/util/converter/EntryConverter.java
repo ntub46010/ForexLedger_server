@@ -23,13 +23,15 @@ public class EntryConverter {
         return entry;
     }
 
-    // TODO: unit test
-    public static Entry toRelatedBookEntry(String relatedBookId, double relatedBookBalance, Entry primaryBookEntry) {
+    public static Entry toRelatedBookEntry(Book relatedBook, Entry primaryBookEntry) {
         var entry = new Entry();
-        entry.setBookId(relatedBookId);
+        entry.setBookId(relatedBook.getId());
         entry.setForeignAmount(primaryBookEntry.getRelatedBookForeignAmount());
         entry.setRelatedBookId(primaryBookEntry.getBookId());
         entry.setRelatedBookForeignAmount(primaryBookEntry.getForeignAmount());
+        entry.setCreatedTime(primaryBookEntry.getCreatedTime());
+        entry.setTransactionDate(primaryBookEntry.getTransactionDate());
+        entry.setCreator(primaryBookEntry.getCreator());
 
         if (primaryBookEntry.getTransactionType() == TransactionType.TRANSFER_IN_FROM_FOREIGN) {
             entry.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
@@ -38,8 +40,8 @@ public class EntryConverter {
         }
 
         var twdAmount = CalcUtil.divideToInt(
-                CalcUtil.multiplyToDecimal(relatedBookBalance, entry.getForeignAmount()),
-                relatedBookBalance
+                CalcUtil.multiplyToDecimal(relatedBook.getRemainingTwdFund(), entry.getForeignAmount()),
+                relatedBook.getBalance()
         );
         entry.setTwdAmount(twdAmount);
 

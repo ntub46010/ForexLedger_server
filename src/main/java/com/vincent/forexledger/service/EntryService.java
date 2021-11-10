@@ -87,12 +87,8 @@ public class EntryService {
             throw new InsufficientBalanceException(relatedBook.getBalance(), primaryBookEntry.getRelatedBookForeignAmount());
         }
 
-        var entry = EntryConverter
-                .toRelatedBookEntry(relatedBook.getId(), relatedBook.getBalance(), primaryBookEntry);
-        relatedBook.setCreator(userIdentity.getId());
-        relatedBook.setCreatedTime(primaryBookEntry.getCreatedTime());
-
-        return entry;
+        return EntryConverter
+                .toRelatedBookEntry(relatedBook, primaryBookEntry);
     }
 
     // TODO: enhance
