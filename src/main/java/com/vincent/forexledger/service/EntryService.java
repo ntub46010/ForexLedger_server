@@ -5,7 +5,6 @@ import com.vincent.forexledger.exception.InsufficientBalanceException;
 import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.entry.CreateEntryRequest;
 import com.vincent.forexledger.model.entry.Entry;
-import com.vincent.forexledger.model.entry.TransactionType;
 import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.util.converter.EntryConverter;
@@ -39,7 +38,6 @@ public class EntryService {
         var involvedBookIds = Stream.of(request.getBookId(), request.getRelatedBookId())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        var isRelatedToAnotherBook = involvedBookIds.size() > 1;
 
         var entries = new ArrayList<Entry>(involvedBookIds.size());
         var books = bookService.loadBooksByIds(involvedBookIds);
@@ -51,7 +49,7 @@ public class EntryService {
         primaryEntry.setCreatedTime(new Date());
         entries.add(primaryEntry);
 
-        if (isRelatedToAnotherBook) {
+        if (involvedBookIds.size() > 1) {
             var relatedBook = bookMap.get(request.getRelatedBookId());
             var relatedEntry = toRelatedBookEntry(relatedBook, primaryEntry);
             entries.add(relatedEntry);
@@ -91,12 +89,38 @@ public class EntryService {
                 .toRelatedBookEntry(relatedBook, primaryBookEntry);
     }
 
-    // TODO: enhance
     private void validate(CreateEntryRequest request) {
-        if (StringUtils.isEmpty(request.getRelatedBookId()) &&
-                (request.getTransactionType() == TransactionType.TRANSFER_IN_FROM_FOREIGN ||
-                request.getTransactionType() == TransactionType.TRANSFER_OUT_TO_FOREIGN)) {
-                throw new BadRequestException("Id of related book is required.");
+        var isNotValid = false;
+        var transactionType = request.getTransactionType();
+
+        switch (transactionType) {
+            case TRANSFER_IN_FROM_TWD:
+            case TRANSFER_OUT_TO_TWD:
+                var twdAmount = request.getTwdAmount();
+                isNotValid = twdAmount == null || twdAmount <= 0;
+                break;
+            case TRANSFER_IN_FROM_FOREIGN:
+            case TRANSFER_OUT_TO_FOREIGN:
+                isNotValid = request.getTwdAmount() != null ||
+                        StringUtils.isBlank(request.getRelatedBookId())||
+                        request.getRelatedBookForeignAmount() == null;
+                break;
+            case TRANSFER_IN_FROM_INTEREST:
+                isNotValid = request.getTwdAmount() != null ||
+                        StringUtils.isNotBlank(request.getRelatedBookId()) ||
+                        request.getRelatedBookForeignAmount() != null;
+                break;
+            case TRANSFER_IN_FROM_OTHER:
+            case TRANSFER_OUT_TO_OTHER:
+                isNotValid = request.getTwdAmount() != null ||
+                        StringUtils.isNotBlank(request.getRelatedBookId())
+                        || request.getRelatedBookForeignAmount() != null;
+                break;
+        }
+
+        if (isNotValid) {
+            var msg = String.format("Incorrect data for entry of %s type.", transactionType.name());
+            throw new BadRequestException(msg);
         }
     }
 }
