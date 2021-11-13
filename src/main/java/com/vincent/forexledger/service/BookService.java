@@ -66,6 +66,7 @@ public class BookService {
         repository.saveAll(bookToEntryMap.keySet());
     }
 
+    @Deprecated
     public void updateMetaData(Entry entry) {
         var bookId = entry.getBookId();
         var relatedBookId = entry.getRelatedBookId();

@@ -65,6 +65,7 @@ public class EntryService {
         return primaryEntry.getId();
     }
 
+    @Deprecated
     @Transactional
     public String createEntry(CreateEntryRequest request) {
         validate(request);
@@ -89,6 +90,7 @@ public class EntryService {
                 .toRelatedBookEntry(relatedBook, primaryBookEntry);
     }
 
+    // TODO: enhance
     private void validate(CreateEntryRequest request) {
         var isNotValid = false;
         var transactionType = request.getTransactionType();

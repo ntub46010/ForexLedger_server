@@ -1,6 +1,7 @@
 package com.vincent.forexledger.unit;
 
 import com.vincent.forexledger.exception.BadRequestException;
+import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.entry.CreateEntryRequest;
 import com.vincent.forexledger.model.entry.Entry;
 import com.vincent.forexledger.model.entry.TransactionType;
@@ -15,6 +16,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -24,15 +27,21 @@ import static org.mockito.Mockito.when;
 public class EntryServiceTest {
 
     @Test
-    public void createEntry() {
+    public void createEntryForSingleBook() {
         var userId = ObjectId.get().toString();
+        var bookId = ObjectId.get().toString();
         var entryId = ObjectId.get().toString();
+
+        var book = new Book();
+        book.setId(bookId);
 
         var userIdentity = mock(UserIdentity.class);
         var repository = mock(EntryRepository.class);
         var bookService = mock(BookService.class);
-        var service = new EntryService(userIdentity, repository, bookService);
+        var entryService = new EntryService(userIdentity, repository, bookService);
 
+        when(bookService.loadBooksByIds(List.of(bookId)))
+                .thenReturn(List.of(book));
         when(userIdentity.getId()).thenReturn(userId);
         when(repository.insert(any(Entry.class)))
                 .then((Answer<Entry>) invocationOnMock -> {
@@ -42,15 +51,12 @@ public class EntryServiceTest {
                 });
 
         var request = new CreateEntryRequest();
-        request.setBookId(ObjectId.get().toString());
+        request.setBookId(bookId);
         request.setTransactionType(TransactionType.TRANSFER_IN_FROM_TWD);
         request.setTransactionDate(new Date());
         request.setForeignAmount(78.44);
         request.setTwdAmount(3000);
-        request.setRelatedBookId(ObjectId.get().toString());
-        var actualEntryId = service.createEntry(request);
-
-        verify(userIdentity).getId();
+        var actualEntryId = entryService.createEntry2(request);
 
         var insertEntryCaptor = ArgumentCaptor.forClass(Entry.class);
         verify(repository).insert(insertEntryCaptor.capture());
@@ -62,11 +68,12 @@ public class EntryServiceTest {
         Assert.assertEquals(request.getTransactionDate(), actualEntry.getTransactionDate());
         Assert.assertEquals(request.getForeignAmount(), actualEntry.getForeignAmount(), 0);
         Assert.assertEquals(request.getTwdAmount(), actualEntry.getTwdAmount());
-        Assert.assertEquals(request.getRelatedBookId(), actualEntry.getRelatedBookId());
+        Assert.assertNull(actualEntry.getRelatedBookId());
+        Assert.assertNull(actualEntry.getRelatedBookForeignAmount());
         Assert.assertEquals(userId, actualEntry.getCreator());
         Assert.assertNotNull(actualEntry.getCreatedTime());
 
-        verify(bookService).updateMetaData(actualEntry);
+        verify(bookService).updateMetaData2(Map.of(book, actualEntry));
     }
 
     @Test(expected = BadRequestException.class)
