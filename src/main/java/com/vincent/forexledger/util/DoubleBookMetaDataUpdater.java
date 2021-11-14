@@ -5,6 +5,7 @@ import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.entry.Entry;
 import com.vincent.forexledger.model.entry.TransactionType;
 
+@Deprecated
 public class DoubleBookMetaDataUpdater {
     private Book primaryBook;
     private Book relatedBook;

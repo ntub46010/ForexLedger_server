@@ -52,6 +52,7 @@ public class EntryService {
         if (involvedBookIds.size() > 1) {
             var relatedBook = bookMap.get(request.getRelatedBookId());
             var relatedEntry = toRelatedBookEntry(relatedBook, primaryEntry);
+            primaryEntry.setTwdAmount(relatedEntry.getTwdAmount());
             entries.add(relatedEntry);
             repository.insert(List.of(primaryEntry, relatedEntry));
         } else {
