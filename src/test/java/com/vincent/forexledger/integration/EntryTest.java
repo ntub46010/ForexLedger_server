@@ -140,7 +140,7 @@ public class EntryTest extends BaseTest {
         relatedBook = bookRepository.findById(relatedBookId).orElseThrow();
         Assert.assertEquals(487.88, relatedBook.getBalance(), 0);
         Assert.assertEquals(18735, relatedBook.getRemainingTwdFund());
-        Assert.assertEquals(38.4017, relatedBook.getBreakEvenPoint(), 0);
+        Assert.assertEquals(38.4008, relatedBook.getBreakEvenPoint(), 0);
         Assert.assertEquals(78.44, relatedBook.getLastForeignInvest(), 0);
         Assert.assertEquals(3000, (int) relatedBook.getLastTwdInvest());
     }
@@ -200,7 +200,7 @@ public class EntryTest extends BaseTest {
         primaryBook = bookRepository.findById(primaryBookId).orElseThrow();
         Assert.assertEquals(487.88, primaryBook.getBalance(), 0);
         Assert.assertEquals(18735, primaryBook.getRemainingTwdFund());
-        Assert.assertEquals(38.4017, primaryBook.getBreakEvenPoint(), 0);
+        Assert.assertEquals(38.4008, primaryBook.getBreakEvenPoint(), 0);
         Assert.assertEquals(78.44, primaryBook.getLastForeignInvest(), 0);
         Assert.assertEquals(3000, (int) primaryBook.getLastTwdInvest());
 

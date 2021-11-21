@@ -38,20 +38,20 @@ public class EntryConvertTest {
     @SuppressWarnings({"java:S3415"})
     @Test
     public void testConvertToRelatedBookEntry() {
+        var relatedBook = new Book();
+        relatedBook.setId(ObjectId.get().toString());
+        relatedBook.setBalance(621.77);
+        relatedBook.setRemainingTwdFund(23877);
+
         var primaryBookEntry = new Entry();
         primaryBookEntry.setBookId(ObjectId.get().toString());
         primaryBookEntry.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
         primaryBookEntry.setTransactionDate(new Date(1));
         primaryBookEntry.setForeignAmount(100);
-        primaryBookEntry.setRelatedBookId(ObjectId.get().toString());
+        primaryBookEntry.setRelatedBookId(relatedBook.getId());
         primaryBookEntry.setRelatedBookForeignAmount(133.89);
         primaryBookEntry.setCreator(ObjectId.get().toString());
         primaryBookEntry.setCreatedTime(new Date(2));
-
-        var relatedBook = new Book();
-        relatedBook.setId(ObjectId.get().toString());
-        relatedBook.setBalance(621.77);
-        relatedBook.setRemainingTwdFund(23877);
 
         var relatedBookEntry = EntryConverter
                 .toRelatedBookEntry(relatedBook, primaryBookEntry);

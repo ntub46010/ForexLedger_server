@@ -30,7 +30,7 @@ public class EntryService {
         this.bookService = bookService;
     }
 
-    @Transactional
+//    @Transactional
     public String createEntry(CreateEntryRequest request) {
         validate(request);
 
@@ -49,11 +49,13 @@ public class EntryService {
         entries.add(primaryEntry);
 
         if (involvedBookIds.size() > 1) {
-            var relatedBook = bookMap.get(request.getRelatedBookId());
-            var relatedEntry = toRelatedBookEntry(relatedBook, primaryEntry);
+            var transferOutBook = primaryEntry.getTransactionType().isTransferIn()
+                    ? bookMap.get(request.getRelatedBookId())
+                    : bookMap.get(request.getBookId());
+            var relatedEntry = toRelatedBookEntry(transferOutBook, primaryEntry);
             primaryEntry.setTwdAmount(relatedEntry.getTwdAmount());
             entries.add(relatedEntry);
-            repository.insert(List.of(primaryEntry, relatedEntry));
+            repository.insert(entries);
         } else {
             repository.insert(primaryEntry);
         }
@@ -65,14 +67,14 @@ public class EntryService {
         return primaryEntry.getId();
     }
 
-    private Entry toRelatedBookEntry(Book relatedBook, Entry primaryBookEntry) {
+    private Entry toRelatedBookEntry(Book transferOutBook, Entry primaryBookEntry) {
         if (primaryBookEntry.getTransactionType().isTransferIn()
-                && relatedBook.getBalance() < primaryBookEntry.getRelatedBookForeignAmount()) {
-            throw new InsufficientBalanceException(relatedBook.getBalance(), primaryBookEntry.getRelatedBookForeignAmount());
+                && transferOutBook.getBalance() < primaryBookEntry.getRelatedBookForeignAmount()) {
+            throw new InsufficientBalanceException(transferOutBook.getBalance(), primaryBookEntry.getRelatedBookForeignAmount());
         }
 
         return EntryConverter
-                .toRelatedBookEntry(relatedBook, primaryBookEntry);
+                .toRelatedBookEntry(transferOutBook, primaryBookEntry);
     }
 
     // TODO: enhance
