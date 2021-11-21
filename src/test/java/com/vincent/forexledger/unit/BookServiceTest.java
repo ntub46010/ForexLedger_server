@@ -1,6 +1,5 @@
 package com.vincent.forexledger.unit;
 
-import com.vincent.forexledger.exception.InsufficientBalanceException;
 import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.book.Book;
@@ -19,9 +18,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -113,8 +110,11 @@ public class BookServiceTest {
     }
 
     @Test
-    public void testUpdateMetaDataForSingleBookWhenTransferIn() {
+    @SuppressWarnings("unchecked")
+    public void testUpdateMetaDataForBook() {
         var book = new Book();
+        book.setId(ObjectId.get().toString());
+
         var entry = new Entry();
         entry.setBookId(ObjectId.get().toString());
         entry.setTransactionType(TransactionType.TRANSFER_IN_FROM_TWD);
@@ -122,88 +122,13 @@ public class BookServiceTest {
         entry.setTwdAmount(13011);
 
         var repository = mock(BookRepository.class);
-        when(repository.findById(entry.getBookId()))
-                .thenReturn(Optional.of(book));
+        var service = new BookService(null, repository, null);
+        service.updateMetaData(Collections.singletonMap(book, entry));
 
-        new BookService(null, repository, null).updateMetaData(entry);
-
-        verify(repository).save(book);
-    }
-
-    @Test(expected = InsufficientBalanceException.class)
-    public void testUpdateMetaDataForSingleBookWhenTransferOutButInsufficient() {
-        var book = new Book();
-        var entry = new Entry();
-        entry.setBookId(ObjectId.get().toString());
-        entry.setTransactionType(TransactionType.TRANSFER_OUT_TO_TWD);
-        entry.setForeignAmount(350);
-        entry.setTwdAmount(13011);
-
-        var repository = mock(BookRepository.class);
-        when(repository.findById(entry.getBookId()))
-                .thenReturn(Optional.of(book));
-
-        new BookService(null, repository, null).updateMetaData(entry);
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void testUpdateMetaDataForPrimaryBookWhenTransferIn() {
-        var primaryBook = new Book();
-        primaryBook.setId(ObjectId.get().toString());
-
-        var relatedBook = new Book();
-        relatedBook.setId(ObjectId.get().toString());
-        relatedBook.setBalance(621.77);
-        relatedBook.setRemainingTwdFund(23877);
-        relatedBook.setBreakEvenPoint(38.4017);
-        relatedBook.setLastForeignInvest(78.44);
-        relatedBook.setLastTwdInvest(3000);
-
-        var entry = new Entry();
-        entry.setBookId(primaryBook.getId());
-        entry.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
-        entry.setForeignAmount(100);
-        entry.setRelatedBookForeignAmount(133.89);
-        entry.setRelatedBookId(relatedBook.getId());
-
-        var repository = mock(BookRepository.class);
-        when(repository.findByIdIn(anyCollection()))
-                .thenReturn(List.of(primaryBook, relatedBook));
-
-        new BookService(null, repository, null).updateMetaData(entry);
-
-        var booksCaptor = ArgumentCaptor.forClass(List.class);
+        var booksCaptor = ArgumentCaptor.forClass(Set.class);
         verify(repository).saveAll(booksCaptor.capture());
-        Assert.assertTrue(CollectionUtils.isEqualCollection(
-                List.of(primaryBook, relatedBook), booksCaptor.getValue()));
-    }
 
-    @Test(expected = InsufficientBalanceException.class)
-    public void testUpdateMetaDataForPrimaryBookWhenTransferOutButInsufficient() {
-        var primaryBook = new Book();
-        primaryBook.setId(ObjectId.get().toString());
-        primaryBook.setBalance(621.77);
-        primaryBook.setRemainingTwdFund(23877);
-        primaryBook.setBreakEvenPoint(38.4017);
-        primaryBook.setLastForeignInvest(78.44);
-        primaryBook.setLastTwdInvest(3000);
-
-        var relatedBook = new Book();
-        relatedBook.setId(ObjectId.get().toString());
-
-        var entry = new Entry();
-        entry.setBookId(primaryBook.getId());
-        entry.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
-        entry.setForeignAmount(700);
-        entry.setRelatedBookForeignAmount(523.0);
-        entry.setRelatedBookId(relatedBook.getId());
-
-        var repository = mock(BookRepository.class);
-        when(repository.findByIdIn(anyCollection()))
-                .thenReturn(List.of(primaryBook, relatedBook));
-
-        new BookService(null, repository, null).updateMetaData(entry);
+        Assert.assertTrue(booksCaptor.getValue().contains(book));
     }
 
     private Book createEmptyBook(String creator, BankType bank, CurrencyType currencyType) {

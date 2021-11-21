@@ -30,9 +30,8 @@ public class EntryService {
         this.bookService = bookService;
     }
 
-    // TODO: unit test
     @Transactional
-    public String createEntry2(CreateEntryRequest request) {
+    public String createEntry(CreateEntryRequest request) {
         validate(request);
 
         var involvedBookIds = Stream.of(request.getBookId(), request.getRelatedBookId())
@@ -61,24 +60,9 @@ public class EntryService {
 
         var bookToEntryMap = entries.stream()
                 .collect(Collectors.toMap(entry -> bookMap.get(entry.getBookId()), Function.identity()));
-        bookService.updateMetaData2(bookToEntryMap);
+        bookService.updateMetaData(bookToEntryMap);
 
         return primaryEntry.getId();
-    }
-
-    @Deprecated
-    @Transactional
-    public String createEntry(CreateEntryRequest request) {
-        validate(request);
-
-        var entry = EntryConverter.toEntry(request);
-        entry.setCreator(userIdentity.getId());
-        entry.setCreatedTime(new Date());
-        repository.insert(entry);
-
-        bookService.updateMetaData(entry);
-
-        return entry.getId();
     }
 
     private Entry toRelatedBookEntry(Book relatedBook, Entry primaryBookEntry) {

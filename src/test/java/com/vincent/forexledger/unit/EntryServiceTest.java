@@ -59,7 +59,7 @@ public class EntryServiceTest {
         request.setTransactionDate(new Date());
         request.setForeignAmount(78.44);
         request.setTwdAmount(3000);
-        var actualEntryId = entryService.createEntry2(request);
+        var actualEntryId = entryService.createEntry(request);
 
         var insertEntryCaptor = ArgumentCaptor.forClass(Entry.class);
         verify(repository).insert(insertEntryCaptor.capture());
@@ -76,7 +76,7 @@ public class EntryServiceTest {
         Assert.assertEquals(userId, actualEntry.getCreator());
         Assert.assertNotNull(actualEntry.getCreatedTime());
 
-        verify(bookService).updateMetaData2(Map.of(book, actualEntry));
+        verify(bookService).updateMetaData(Map.of(book, actualEntry));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class EntryServiceTest {
         request.setRelatedBookId(relatedBookId);
         request.setRelatedBookForeignAmount(133.89);
 
-        entryService.createEntry2(request);
+        entryService.createEntry(request);
 
         var insertEntriesCaptor = ArgumentCaptor.forClass(List.class);
         verify(repository).insert(insertEntriesCaptor.capture());
@@ -151,7 +151,7 @@ public class EntryServiceTest {
         var expectedBookToEntryMap = new HashMap<Book, Entry>();
         expectedBookToEntryMap.put(primaryBook, primaryEntry);
         expectedBookToEntryMap.put(relatedBook,relatedEntry);
-        verify(bookService).updateMetaData2(expectedBookToEntryMap);
+        verify(bookService).updateMetaData(expectedBookToEntryMap);
     }
 
     @Test(expected = BadRequestException.class)
