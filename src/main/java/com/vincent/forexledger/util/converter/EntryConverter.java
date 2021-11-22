@@ -23,7 +23,6 @@ public class EntryConverter {
         return entry;
     }
 
-    // TODO: unit test enhance
     public static Entry toRelatedBookEntry(Book transferOutBook, Entry primaryBookEntry) {
         var entry = new Entry();
         entry.setBookId(primaryBookEntry.getRelatedBookId());
