@@ -85,13 +85,17 @@ public class EntryService {
             case TRANSFER_IN_FROM_TWD:
             case TRANSFER_OUT_TO_TWD:
                 var twdAmount = request.getTwdAmount();
-                isNotValid = twdAmount == null || twdAmount <= 0;
+                isNotValid = twdAmount == null ||
+                        twdAmount <= 0 ||
+                        StringUtils.isNotBlank(request.getRelatedBookId()) ||
+                        request.getRelatedBookForeignAmount() != null;
                 break;
             case TRANSFER_IN_FROM_FOREIGN:
             case TRANSFER_OUT_TO_FOREIGN:
                 isNotValid = request.getTwdAmount() != null ||
-                        StringUtils.isBlank(request.getRelatedBookId())||
-                        request.getRelatedBookForeignAmount() == null;
+                        StringUtils.isBlank(request.getRelatedBookId()) ||
+                        request.getRelatedBookForeignAmount() == null ||
+                        request.getRelatedBookForeignAmount() < 0;
                 break;
             case TRANSFER_IN_FROM_INTEREST:
                 isNotValid = request.getTwdAmount() != null ||
