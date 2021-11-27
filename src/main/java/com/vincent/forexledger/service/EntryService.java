@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -76,7 +77,6 @@ public class EntryService {
                 .toRelatedBookEntry(transferOutBook, primaryBookEntry);
     }
 
-    // TODO: enhance
     private void validate(CreateEntryRequest request) {
         var isNotValid = false;
         var transactionType = request.getTransactionType();
@@ -92,10 +92,12 @@ public class EntryService {
                 break;
             case TRANSFER_IN_FROM_FOREIGN:
             case TRANSFER_OUT_TO_FOREIGN:
+                var relatedBookForeignAmount =
+                        Optional.ofNullable(request.getRelatedBookForeignAmount())
+                                .orElse(0.0);
                 isNotValid = request.getTwdAmount() != null ||
-                        StringUtils.isBlank(request.getRelatedBookId()) ||
-                        request.getRelatedBookForeignAmount() == null ||
-                        request.getRelatedBookForeignAmount() < 0;
+                        (StringUtils.isBlank(request.getRelatedBookId()) ^
+                        relatedBookForeignAmount <= 0);
                 break;
             case TRANSFER_IN_FROM_INTEREST:
                 isNotValid = request.getTwdAmount() != null ||
@@ -105,8 +107,8 @@ public class EntryService {
             case TRANSFER_IN_FROM_OTHER:
             case TRANSFER_OUT_TO_OTHER:
                 isNotValid = request.getTwdAmount() != null ||
-                        StringUtils.isNotBlank(request.getRelatedBookId())
-                        || request.getRelatedBookForeignAmount() != null;
+                        StringUtils.isNotBlank(request.getRelatedBookId()) ||
+                        request.getRelatedBookForeignAmount() != null;
                 break;
         }
 
