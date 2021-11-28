@@ -3,6 +3,7 @@ package com.vincent.forexledger.util;
 import com.vincent.forexledger.exception.InsufficientBalanceException;
 import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.entry.Entry;
+import com.vincent.forexledger.model.entry.TransactionType;
 
 public class SingleBookMetaDataUpdater {
     private Book book;
@@ -15,13 +16,23 @@ public class SingleBookMetaDataUpdater {
         var balance = calcBalance(entry);
         book.setBalance(balance);
 
-        var remainingTwdFund = calcRemainingTwdFund(entry);
-        book.setRemainingTwdFund(remainingTwdFund);
+        var transactionType = entry.getTransactionType();
+        if (transactionType != TransactionType.TRANSFER_IN_FROM_INTEREST) {
+            var remainingTwdFund = calcRemainingTwdFund(entry);
+            book.setRemainingTwdFund(remainingTwdFund);
+        }
 
-        var breakEvenPoint = CalcUtil.divideToDouble(book.getRemainingTwdFund(), book.getBalance(), 4);
-        book.setBreakEvenPoint(breakEvenPoint);
+        // TODO: unit test
+        if (book.getBalance() == 0) {
+            book.setBreakEvenPoint(null);
+        } else {
+            var breakEvenPoint = CalcUtil.divideToDouble(book.getRemainingTwdFund(), book.getBalance(), 4);
+            book.setBreakEvenPoint(breakEvenPoint);
+        }
 
-        if (entry.getTransactionType().isTransferIn()) {
+        // TODO: unit test
+        if (entry.getTransactionType().isTransferIn()
+                && transactionType != TransactionType.TRANSFER_IN_FROM_INTEREST) {
             book.setLastForeignInvest(entry.getForeignAmount());
             book.setLastTwdInvest(entry.getTwdAmount());
         }
@@ -41,8 +52,10 @@ public class SingleBookMetaDataUpdater {
     }
 
     private int calcRemainingTwdFund(Entry entry) {
-        return entry.getTransactionType().isTransferIn()
+        var result =  entry.getTransactionType().isTransferIn()
                 ? book.getRemainingTwdFund() + entry.getTwdAmount()
                 : book.getRemainingTwdFund() - entry.getTwdAmount();
+        // TODO: unit test for down to 0
+        return result > 0 ? result : 0;
     }
 }

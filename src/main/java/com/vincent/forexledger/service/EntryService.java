@@ -77,6 +77,7 @@ public class EntryService {
                 .toRelatedBookEntry(transferOutBook, primaryBookEntry);
     }
 
+    // TODO: refactor
     private void validate(CreateEntryRequest request) {
         var isNotValid = false;
         var transactionType = request.getTransactionType();
@@ -95,9 +96,12 @@ public class EntryService {
                 var relatedBookForeignAmount =
                         Optional.ofNullable(request.getRelatedBookForeignAmount())
                                 .orElse(0.0);
-                isNotValid = request.getTwdAmount() != null ||
-                        (StringUtils.isBlank(request.getRelatedBookId()) ^
-                        relatedBookForeignAmount <= 0);
+                twdAmount = Optional.ofNullable(request.getTwdAmount()).orElse(0);
+                var isNotRelatingBook = StringUtils.isBlank(request.getRelatedBookId()) ||
+                        request.getRelatedBookForeignAmount() == null;
+                isNotValid = (StringUtils.isBlank(request.getRelatedBookId()) ^
+                        relatedBookForeignAmount <= 0) ||
+                        (isNotRelatingBook && twdAmount <= 0);
                 break;
             case TRANSFER_IN_FROM_INTEREST:
                 isNotValid = request.getTwdAmount() != null ||

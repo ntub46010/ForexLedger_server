@@ -155,7 +155,7 @@ public class EntryServiceTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void createTransferInFromForeignEntryWithoutRelatedBookId() {
+    public void createTransferInFromForeignBookWithoutRelatedBookId() {
         var userIdentity = mock(UserIdentity.class);
         var repository = mock(EntryRepository.class);
         var bookService = mock(BookService.class);
@@ -165,15 +165,14 @@ public class EntryServiceTest {
         request.setBookId(ObjectId.get().toString());
         request.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
         request.setTransactionDate(new Date());
-        request.setForeignAmount(12487.5);
-        request.setTwdAmount(null);
-        request.setRelatedBookId(null);
+        request.setForeignAmount(100);
+        request.setRelatedBookForeignAmount(133.89);
 
         service.createEntry(request);
     }
 
     @Test(expected = BadRequestException.class)
-    public void createTransferOutToForeignEntryWithoutRelatedBookId() {
+    public void createTransferOutToForeignBookWithoutRelatedForeignAmount() {
         var userIdentity = mock(UserIdentity.class);
         var repository = mock(EntryRepository.class);
         var bookService = mock(BookService.class);
@@ -183,9 +182,8 @@ public class EntryServiceTest {
         request.setBookId(ObjectId.get().toString());
         request.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
         request.setTransactionDate(new Date());
-        request.setForeignAmount(150);
-        request.setTwdAmount(null);
-        request.setRelatedBookId(null);
+        request.setForeignAmount(133.89);
+        request.setRelatedBookForeignAmount(100.0);
 
         service.createEntry(request);
     }
