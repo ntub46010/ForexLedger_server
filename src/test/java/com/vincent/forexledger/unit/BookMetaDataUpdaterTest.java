@@ -75,6 +75,74 @@ public class BookMetaDataUpdaterTest {
         Assert.assertEquals(92531, book.getLastTwdInvest(), 0);
     }
 
+    @Test
+    public void testBalanceReturnZero() {
+        var book = new Book();
+        book.setBalance(100);
+        book.setRemainingTwdFund(2785);
+        book.setBreakEvenPoint(27.85);
+        book.setLastForeignInvest(100.0);
+        book.setLastTwdInvest(2785);
+        var updater = new SingleBookMetaDataUpdater(book);
+
+        var entry = new Entry();
+        entry.setTransactionType(TransactionType.TRANSFER_OUT_TO_TWD);
+        entry.setForeignAmount(100);
+        entry.setTwdAmount(2775);
+
+        updater.update(entry);
+        Assert.assertEquals(0, book.getBalance(), 0);
+        Assert.assertEquals(10, book.getRemainingTwdFund());
+        Assert.assertNull(book.getBreakEvenPoint());
+        Assert.assertEquals(100.0, book.getLastForeignInvest(), 0);
+        Assert.assertEquals(2785, book.getLastTwdInvest(), 0);
+    }
+
+    @Test
+    public void testTransferInFromInterest() {
+        var book = new Book();
+        book.setBalance(2500);
+        book.setRemainingTwdFund(5504);
+        book.setBreakEvenPoint(2.2016);
+        book.setLastForeignInvest(2500.0);
+        book.setLastTwdInvest(5504);
+        var updater = new SingleBookMetaDataUpdater(book);
+
+        var entry = new Entry();
+        entry.setTransactionType(TransactionType.TRANSFER_IN_FROM_INTEREST);
+        entry.setForeignAmount(0.27);
+
+        updater.update(entry);
+        Assert.assertEquals(2500.27, book.getBalance(), 0);
+        Assert.assertEquals(5504, book.getRemainingTwdFund());
+        Assert.assertEquals(2.2014, book.getBreakEvenPoint(), 0);
+        Assert.assertEquals(2500, book.getLastForeignInvest(), 0);
+        Assert.assertEquals(5504, book.getLastTwdInvest(), 0);
+    }
+
+    @Test
+    public void testRecoverAllTwdFund() {
+        var book = new Book();
+        book.setBalance(100);
+        book.setRemainingTwdFund(2785);
+        book.setBreakEvenPoint(27.85);
+        book.setLastForeignInvest(100.0);
+        book.setLastTwdInvest(2785);
+        var updater = new SingleBookMetaDataUpdater(book);
+
+        var entry = new Entry();
+        entry.setTransactionType(TransactionType.TRANSFER_OUT_TO_TWD);
+        entry.setForeignAmount(95);
+        entry.setTwdAmount(2945);
+
+        updater.update(entry);
+        Assert.assertEquals(5, book.getBalance(), 0);
+        Assert.assertEquals(0, book.getRemainingTwdFund());
+        Assert.assertEquals(0, book.getBreakEvenPoint(), 0);
+        Assert.assertEquals(100.0, book.getLastForeignInvest(), 0);
+        Assert.assertEquals(2785, book.getLastTwdInvest(), 0);
+    }
+
     @Test(expected = InsufficientBalanceException.class)
     public void testSingleBookTransferOutButBalanceIsInsufficient() {
         var book = new Book();

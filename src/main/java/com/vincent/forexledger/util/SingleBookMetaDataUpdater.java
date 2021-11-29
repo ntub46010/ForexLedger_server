@@ -22,7 +22,6 @@ public class SingleBookMetaDataUpdater {
             book.setRemainingTwdFund(remainingTwdFund);
         }
 
-        // TODO: unit test
         if (book.getBalance() == 0) {
             book.setBreakEvenPoint(null);
         } else {
@@ -30,7 +29,6 @@ public class SingleBookMetaDataUpdater {
             book.setBreakEvenPoint(breakEvenPoint);
         }
 
-        // TODO: unit test
         if (entry.getTransactionType().isTransferIn()
                 && transactionType != TransactionType.TRANSFER_IN_FROM_INTEREST) {
             book.setLastForeignInvest(entry.getForeignAmount());
@@ -55,7 +53,6 @@ public class SingleBookMetaDataUpdater {
         var result =  entry.getTransactionType().isTransferIn()
                 ? book.getRemainingTwdFund() + entry.getTwdAmount()
                 : book.getRemainingTwdFund() - entry.getTwdAmount();
-        // TODO: unit test for down to 0
         return result > 0 ? result : 0;
     }
 }
