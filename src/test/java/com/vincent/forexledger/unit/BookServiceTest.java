@@ -5,6 +5,8 @@ import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.book.BookListResponse;
 import com.vincent.forexledger.model.book.CreateBookRequest;
+import com.vincent.forexledger.model.entry.Entry;
+import com.vincent.forexledger.model.entry.TransactionType;
 import com.vincent.forexledger.repository.BookRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.service.BookService;
@@ -16,8 +18,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -106,6 +107,28 @@ public class BookServiceTest {
                 .map(BookListResponse::getId)
                 .collect(Collectors.toList());
         Assert.assertTrue(CollectionUtils.isEqualCollection(bookIds1, responseIds));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testUpdateMetaDataForBook() {
+        var book = new Book();
+        book.setId(ObjectId.get().toString());
+
+        var entry = new Entry();
+        entry.setBookId(ObjectId.get().toString());
+        entry.setTransactionType(TransactionType.TRANSFER_IN_FROM_TWD);
+        entry.setForeignAmount(350);
+        entry.setTwdAmount(13011);
+
+        var repository = mock(BookRepository.class);
+        var service = new BookService(null, repository, null);
+        service.updateMetaData(Collections.singletonMap(book, entry));
+
+        var booksCaptor = ArgumentCaptor.forClass(Set.class);
+        verify(repository).saveAll(booksCaptor.capture());
+
+        Assert.assertTrue(booksCaptor.getValue().contains(book));
     }
 
     private Book createEmptyBook(String creator, BankType bank, CurrencyType currencyType) {

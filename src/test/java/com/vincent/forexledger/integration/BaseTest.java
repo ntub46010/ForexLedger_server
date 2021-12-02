@@ -6,9 +6,11 @@ import com.vincent.forexledger.constants.APIPathConstants;
 import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.book.CreateBookRequest;
+import com.vincent.forexledger.model.entry.CreateEntryRequest;
 import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import com.vincent.forexledger.repository.AppUserRepository;
 import com.vincent.forexledger.repository.BookRepository;
+import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.repository.ExchangeRateRepository;
 import com.vincent.forexledger.security.SpringUser;
 import com.vincent.forexledger.service.ExchangeRateTable;
@@ -53,6 +55,9 @@ public class BaseTest {
     @Autowired
     protected BookRepository bookRepository;
 
+    @Autowired
+    protected EntryRepository entryRepository;
+
     @Before
     public void init() {
         httpHeaders = new HttpHeaders();
@@ -66,6 +71,7 @@ public class BaseTest {
         appUserRepository.deleteAll();
         exchangeRateRepository.deleteAll();
         bookRepository.deleteAll();
+        entryRepository.deleteAll();
     }
 
     private void insertDefaultExchangeRate() {
@@ -129,6 +135,13 @@ public class BaseTest {
         var location = mvcResult.getResponse().getHeader(HttpHeaders.LOCATION);
 
         return StringUtils.substringAfterLast(location, '/');
+    }
+
+    protected void createEntry(CreateEntryRequest request) throws Exception {
+        mockMvc.perform(post(APIPathConstants.ENTRIES)
+                .headers(httpHeaders)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
     }
 
     private ExchangeRate genExchangeRate(BankType bank, CurrencyType currencyType, double sellingRate, double buyingRate) {
