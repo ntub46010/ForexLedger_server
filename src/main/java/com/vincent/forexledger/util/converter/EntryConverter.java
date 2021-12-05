@@ -3,6 +3,7 @@ package com.vincent.forexledger.util.converter;
 import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.entry.CreateEntryRequest;
 import com.vincent.forexledger.model.entry.Entry;
+import com.vincent.forexledger.model.entry.EntryListResponse;
 import com.vincent.forexledger.model.entry.TransactionType;
 import com.vincent.forexledger.util.CalcUtil;
 
@@ -49,5 +50,24 @@ public class EntryConverter {
         entry.setTwdAmount(twdAmount);
 
         return entry;
+    }
+
+    // TODO: unit test
+    public static EntryListResponse toEntryListResponse(Entry entry) {
+        var response = new EntryListResponse();
+
+        response.setId(entry.getId());
+        response.setTransactionDate(entry.getTransactionDate());
+        response.setTransactionType(entry.getTransactionType());
+        response.setPrimaryAmount(entry.getForeignAmount());
+        response.setDescription(entry.getDescription());
+
+        if (entry.getTransactionType().isRelatedToTwd()) {
+            response.setRelatedAmount(entry.getTwdAmount().doubleValue());
+        } else if (entry.getTransactionType().canRelateBook()) {
+            response.setRelatedAmount(entry.getRelatedBookForeignAmount());
+        }
+
+        return response;
     }
 }
