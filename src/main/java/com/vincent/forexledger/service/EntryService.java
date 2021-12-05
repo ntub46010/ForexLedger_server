@@ -9,6 +9,7 @@ import com.vincent.forexledger.model.entry.EntryListResponse;
 import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.util.converter.EntryConverter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,8 +66,32 @@ public class EntryService {
         return primaryEntry.getId();
     }
 
+    // TODO: unit test
     public List<EntryListResponse> loadBookEntries(String bookId) {
-        return null;
+        var entries = repository.findByBookIdOrderByTransactionDateDesc(bookId);
+        if (CollectionUtils.isEmpty(entries)) {
+            return Collections.emptyList();
+        }
+
+        var involvedBookIds = entries.stream()
+                .map(Entry::getRelatedBookId)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toSet());
+        involvedBookIds.add(bookId);
+        var involvedBooks = bookService.loadBooksByIds(involvedBookIds);
+        var bookToCurrencyTypeMap = involvedBooks.stream()
+                .collect(Collectors.toMap(Book::getId, Book::getCurrencyType));
+
+        return entries.stream()
+                .map(entry -> {
+                    var response = EntryConverter.toEntryListResponse(entry);
+                    response.setPrimaryCurrencyType(bookToCurrencyTypeMap.get(entry.getBookId()));
+                    if (StringUtils.isNotBlank(entry.getRelatedBookId())) {
+                        response.setRelatedCurrencyType(bookToCurrencyTypeMap.get(entry.getRelatedBookId()));
+                    }
+                    return response;
+                })
+                .collect(Collectors.toList());
     }
 
     private Entry toRelatedBookEntry(Book transferOutBook, Entry primaryBookEntry) {

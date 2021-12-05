@@ -7,6 +7,8 @@ import com.vincent.forexledger.model.entry.EntryListResponse;
 import com.vincent.forexledger.model.entry.TransactionType;
 import com.vincent.forexledger.util.CalcUtil;
 
+import java.util.Optional;
+
 public class EntryConverter {
     private EntryConverter() {
     }
@@ -55,7 +57,6 @@ public class EntryConverter {
     // TODO: unit test
     public static EntryListResponse toEntryListResponse(Entry entry) {
         var response = new EntryListResponse();
-
         response.setId(entry.getId());
         response.setTransactionDate(entry.getTransactionDate());
         response.setTransactionType(entry.getTransactionType());
@@ -65,7 +66,10 @@ public class EntryConverter {
         if (entry.getTransactionType().isRelatedToTwd()) {
             response.setRelatedAmount(entry.getTwdAmount().doubleValue());
         } else if (entry.getTransactionType().canRelateBook()) {
-            response.setRelatedAmount(entry.getRelatedBookForeignAmount());
+            // if entry didn't related to another book, then TWD cost should be provided when creating entry
+            var relatedAmount = Optional.ofNullable(entry.getRelatedBookForeignAmount())
+                    .orElse(entry.getTwdAmount().doubleValue());
+            response.setRelatedAmount(relatedAmount);
         }
 
         return response;
