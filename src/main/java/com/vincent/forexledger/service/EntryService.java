@@ -5,16 +5,14 @@ import com.vincent.forexledger.exception.InsufficientBalanceException;
 import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.entry.CreateEntryRequest;
 import com.vincent.forexledger.model.entry.Entry;
+import com.vincent.forexledger.model.entry.EntryListResponse;
 import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.util.converter.EntryConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -65,6 +63,10 @@ public class EntryService {
         bookService.updateMetaData(bookToEntryMap);
 
         return primaryEntry.getId();
+    }
+
+    public List<EntryListResponse> loadBookEntries(String bookId) {
+        return null;
     }
 
     private Entry toRelatedBookEntry(Book transferOutBook, Entry primaryBookEntry) {
