@@ -89,7 +89,7 @@ public class EntryValidatorTest {
     public void testTransferInFromForeign() {
         var validator = EntryValidatorFactory
                 .getCreateEntryValidator(TransactionType.TRANSFER_IN_FROM_FOREIGN);
-        assertEquals(ForeignEntryValidator.class, validator.getClass());
+        assertEquals(ForeignTransferInEntryValidator.class, validator.getClass());
 
         var baseRequest = new CreateEntryRequest();
         baseRequest.setBookId(ObjectId.get().toString());
@@ -135,6 +135,48 @@ public class EntryValidatorTest {
         request.setRelatedBookId(ObjectId.get().toString());
         request.setRelatedBookForeignAmount(-5000.0);
         assertFalse(validator.validate(request));
+    }
+
+    @Test
+    public void testTransferOutToForeign() {
+        var validator = EntryValidatorFactory
+                .getCreateEntryValidator(TransactionType.TRANSFER_OUT_TO_FOREIGN);
+        assertEquals(ForeignTransferOutEntryValidator.class, validator.getClass());
+
+        var request1 = new CreateEntryRequest();
+        request1.setBookId(ObjectId.get().toString());
+        request1.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
+        request1.setTransactionDate(new Date());
+        request1.setForeignAmount(5000);
+        assertTrue(validator.validate(request1));
+
+        var request2 = new CreateEntryRequest();
+        BeanUtils.copyProperties(request1, request2);
+        request2.setRelatedBookId(ObjectId.get().toString());
+        request2.setRelatedBookForeignAmount(514.0);
+        assertTrue(validator.validate(request2));
+
+        request2 = new CreateEntryRequest();
+        BeanUtils.copyProperties(request1, request2);
+        request2.setTwdAmount(16637);
+        assertFalse(validator.validate(request2));
+
+        request2 = new CreateEntryRequest();
+        BeanUtils.copyProperties(request1, request2);
+        request2.setRelatedBookId(ObjectId.get().toString());
+        assertFalse(validator.validate(request2));
+
+        request2 = new CreateEntryRequest();
+        BeanUtils.copyProperties(request1, request2);
+        request2.setRelatedBookForeignAmount(514.0);
+        assertFalse(validator.validate(request2));
+
+        request2 = new CreateEntryRequest();
+        BeanUtils.copyProperties(request1, request2);
+        request2.setTwdAmount(16637);
+        request2.setRelatedBookId(ObjectId.get().toString());
+        request2.setRelatedBookForeignAmount(514.0);
+        assertFalse(validator.validate(request2));
     }
 
     @Test

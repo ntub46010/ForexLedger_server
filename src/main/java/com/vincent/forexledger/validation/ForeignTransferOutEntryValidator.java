@@ -5,11 +5,15 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
 
-public class ForeignEntryValidator implements ICreateEntryValidator {
+public class ForeignTransferOutEntryValidator implements ICreateEntryValidator {
 
     @Override
     public boolean validate(CreateEntryRequest request) {
         var isValid = true;
+
+        if (request.getTwdAmount() != null) {
+            isValid = false;
+        }
 
         var hasRelatedBookId = StringUtils.isNotBlank(request.getRelatedBookId());
         var hasRelatedForeignAmount = request.getRelatedBookForeignAmount() != null;
@@ -18,19 +22,9 @@ public class ForeignEntryValidator implements ICreateEntryValidator {
         }
 
         var isRelatingBook = hasRelatedBookId && hasRelatedForeignAmount;
-        if (isRelatingBook ^ request.getTwdAmount() == null) {
-            isValid = false;
-        }
-
         var relatedForeignAmount = Optional.ofNullable(request.getRelatedBookForeignAmount())
                 .orElse(0.0);
         if (isRelatingBook && relatedForeignAmount <= 0) {
-            isValid = false;
-        }
-
-        var twdAmount = Optional.ofNullable(request.getTwdAmount())
-                .orElse(0);
-        if (!isRelatingBook && twdAmount <= 0) {
             isValid = false;
         }
 
