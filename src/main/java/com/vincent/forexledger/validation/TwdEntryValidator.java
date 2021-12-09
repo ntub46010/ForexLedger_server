@@ -7,20 +7,14 @@ public class TwdEntryValidator implements ICreateEntryValidator {
 
     @Override
     public boolean validate(CreateEntryRequest request) {
-        var isValid = true;
-
         if (request.getTwdAmount() == null || request.getTwdAmount() <= 0) {
-            isValid = false;
-        }
-
-        if (StringUtils.isNotBlank(request.getRelatedBookId())) {
-            isValid = false;
+            return false;
         }
 
         if (request.getRelatedBookForeignAmount() != null) {
-            isValid = false;
+            return false;
         }
 
-        return isValid;
+        return StringUtils.isBlank(request.getRelatedBookId());
     }
 }

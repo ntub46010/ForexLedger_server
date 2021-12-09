@@ -9,31 +9,24 @@ public class ForeignTransferInEntryValidator implements ICreateEntryValidator {
 
     @Override
     public boolean validate(CreateEntryRequest request) {
-        var isValid = true;
-
         var hasRelatedBookId = StringUtils.isNotBlank(request.getRelatedBookId());
         var hasRelatedForeignAmount = request.getRelatedBookForeignAmount() != null;
         if (hasRelatedBookId ^ hasRelatedForeignAmount) {
-            isValid = false;
+            return false;
         }
 
-        var isRelatingBook = hasRelatedBookId && hasRelatedForeignAmount;
-        if (isRelatingBook ^ request.getTwdAmount() == null) {
-            isValid = false;
+        if (hasRelatedBookId ^ request.getTwdAmount() == null) {
+            return false;
         }
 
         var relatedForeignAmount = Optional.ofNullable(request.getRelatedBookForeignAmount())
                 .orElse(0.0);
-        if (isRelatingBook && relatedForeignAmount <= 0) {
-            isValid = false;
+        if (hasRelatedBookId && relatedForeignAmount <= 0) {
+            return false;
         }
 
         var twdAmount = Optional.ofNullable(request.getTwdAmount())
                 .orElse(0);
-        if (!isRelatingBook && twdAmount <= 0) {
-            isValid = false;
-        }
-
-        return isValid;
+        return hasRelatedBookId || twdAmount > 0;
     }
 }
