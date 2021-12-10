@@ -137,11 +137,15 @@ public class BaseTest {
         return StringUtils.substringAfterLast(location, '/');
     }
 
-    protected void createEntry(CreateEntryRequest request) throws Exception {
-        mockMvc.perform(post(APIPathConstants.ENTRIES)
+    protected String createEntry(CreateEntryRequest request) throws Exception {
+        var mvcResult = mockMvc.perform(post(APIPathConstants.ENTRIES)
                 .headers(httpHeaders)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andReturn();
+        var location = mvcResult.getResponse().getHeader(HttpHeaders.LOCATION);
+
+        return StringUtils.substringAfterLast(location, '/');
     }
 
     private ExchangeRate genExchangeRate(BankType bank, CurrencyType currencyType, double sellingRate, double buyingRate) {
