@@ -8,6 +8,7 @@ import com.vincent.forexledger.model.entry.Entry;
 import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.util.converter.EntryConverter;
+import com.vincent.forexledger.validation.EntryValidatorFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,47 +78,14 @@ public class EntryService {
                 .toRelatedBookEntry(transferOutBook, primaryBookEntry);
     }
 
-    // TODO: refactor
     private void validate(CreateEntryRequest request) {
-        var isNotValid = false;
-        var transactionType = request.getTransactionType();
-
-        switch (transactionType) {
-            case TRANSFER_IN_FROM_TWD:
-            case TRANSFER_OUT_TO_TWD:
-                var twdAmount = request.getTwdAmount();
-                isNotValid = twdAmount == null ||
-                        twdAmount <= 0 ||
-                        StringUtils.isNotBlank(request.getRelatedBookId()) ||
-                        request.getRelatedBookForeignAmount() != null;
-                break;
-            case TRANSFER_IN_FROM_FOREIGN:
-            case TRANSFER_OUT_TO_FOREIGN:
-                var relatedBookForeignAmount =
-                        Optional.ofNullable(request.getRelatedBookForeignAmount())
-                                .orElse(0.0);
-                twdAmount = Optional.ofNullable(request.getTwdAmount()).orElse(0);
-                var isNotRelatingBook = StringUtils.isBlank(request.getRelatedBookId()) ||
-                        request.getRelatedBookForeignAmount() == null;
-                isNotValid = (StringUtils.isBlank(request.getRelatedBookId()) ^
-                        relatedBookForeignAmount <= 0) ||
-                        (isNotRelatingBook && twdAmount <= 0);
-                break;
-            case TRANSFER_IN_FROM_INTEREST:
-                isNotValid = request.getTwdAmount() != null ||
-                        StringUtils.isNotBlank(request.getRelatedBookId()) ||
-                        request.getRelatedBookForeignAmount() != null;
-                break;
-            case TRANSFER_IN_FROM_OTHER:
-            case TRANSFER_OUT_TO_OTHER:
-                isNotValid = request.getTwdAmount() != null ||
-                        StringUtils.isNotBlank(request.getRelatedBookId()) ||
-                        request.getRelatedBookForeignAmount() != null;
-                break;
-        }
+        var validator = EntryValidatorFactory
+                .getCreateEntryValidator(request.getTransactionType());
+        var isNotValid = !validator.validate(request);
 
         if (isNotValid) {
-            var msg = String.format("Incorrect data for entry of %s type.", transactionType.name());
+            var msg = String.format("Incorrect data for entry of %s type.",
+                    request.getTransactionType().name());
             throw new BadRequestException(msg);
         }
     }
