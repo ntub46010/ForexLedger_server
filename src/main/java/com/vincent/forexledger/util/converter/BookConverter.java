@@ -10,6 +10,7 @@ import com.vincent.forexledger.util.CalcUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class BookConverter {
@@ -81,5 +82,22 @@ public class BookConverter {
         }
 
         return detail;
+    }
+
+    public static int calcCorrespondTwdFund(Book book, int foreignAmount) {
+        Objects.requireNonNull(book);
+
+        if (foreignAmount < 0) {
+            throw new IllegalArgumentException("The representing foreign amount shouldn't be negative.");
+        }
+
+        if (foreignAmount > book.getBalance()) {
+            throw new IllegalArgumentException("The representing foreign amount shouldn't be greater than book balance");
+        }
+
+        return CalcUtil.divideToInt(
+                CalcUtil.multiplyToDecimal(book.getRemainingTwdFund(), foreignAmount),
+                book.getBalance()
+        );
     }
 }
