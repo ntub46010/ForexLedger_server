@@ -5,12 +5,12 @@ import com.vincent.forexledger.exception.InsufficientBalanceException;
 import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.entry.CreateEntryRequest;
 import com.vincent.forexledger.model.entry.Entry;
-import com.vincent.forexledger.model.entry.TransactionType;
 import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.util.converter.BookConverter;
 import com.vincent.forexledger.util.converter.EntryConverter;
 import com.vincent.forexledger.validation.EntryValidatorFactory;
+import org.springframework.data.util.Pair;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -55,29 +55,32 @@ public class EntryService {
         validateBalanceIsSufficient(bookToEntryMap);
         repository.insert(bookToEntryMap.values());
 
-        if (request.getRelatedBookId() != null ||
-                request.getTransactionType() == TransactionType.TRANSFER_OUT_TO_FOREIGN) {
-            assignRepresentingTwdFund(bookToEntryMap);
-        }
+        assignRepresentingTwdFundIfAbsent(bookToEntryMap);
         bookService.updateMetaData(bookToEntryMap);
 
         return primaryEntry.getId();
     }
 
-    private void assignRepresentingTwdFund(Map<Book, Entry> bookToEntryMap) {
-        Integer twdFund = null;
-        for (Map.Entry<Book, Entry> pair : bookToEntryMap.entrySet()) {
+    private void assignRepresentingTwdFundIfAbsent(Map<Book, Entry> bookToEntryMap) {
+        Pair<Book, Entry> transferOutInfo = null;
+        for (var pair : bookToEntryMap.entrySet()) {
             var entry = pair.getValue();
-            if (entry.getTransactionType() == TransactionType.TRANSFER_OUT_TO_FOREIGN) {
-                var book = pair.getKey();
-                twdFund = BookConverter.calcRepresentingTwdFund(book, entry.getForeignAmount());
-                break;
+            if (!entry.getTransactionType().isTransferIn() && entry.getTwdAmount() == null) {
+                transferOutInfo = Pair.of(pair.getKey(), entry);
             }
         }
 
-        for (Entry entry : bookToEntryMap.values()) {
-            entry.setTwdAmount(twdFund);
+        if (transferOutInfo == null) {
+            return;
         }
+
+        var twdFund = BookConverter.calcRepresentingTwdFund(
+                transferOutInfo.getFirst(),
+                transferOutInfo.getSecond().getForeignAmount());
+
+        bookToEntryMap.values().stream()
+                .filter(entry -> entry.getTwdAmount() == null)
+                .forEach(entry -> entry.setTwdAmount(twdFund));
     }
 
     private void validate(CreateEntryRequest request) {

@@ -428,7 +428,7 @@ public class EntryTest extends BaseTest {
         var resultBook = bookRepository.findById(bookId).orElseThrow();
         assertEquals(1000, resultBook.getBalance(), 0);
         assertEquals(30844, resultBook.getRemainingTwdFund());
-        assertEquals(38.844, resultBook.getBreakEvenPoint(), 0);
+        assertEquals(30.844, resultBook.getBreakEvenPoint(), 0);
         assertEquals(book.getLastForeignInvest(), resultBook.getLastForeignInvest(), 0);
         assertEquals((int) book.getLastTwdInvest(), (int) resultBook.getLastTwdInvest());
     }
