@@ -55,7 +55,8 @@ public class EntryService {
         validateBalanceIsSufficient(bookToEntryMap);
         repository.insert(bookToEntryMap.values());
 
-        if (request.getRelatedBookId() != null) {
+        if (request.getRelatedBookId() != null ||
+                request.getTransactionType() == TransactionType.TRANSFER_OUT_TO_FOREIGN) {
             assignRepresentingTwdFund(bookToEntryMap);
         }
         bookService.updateMetaData(bookToEntryMap);

@@ -288,5 +288,176 @@ public class EntryTest extends BaseTest {
                 .andExpect(status().isUnprocessableEntity());
     }
 
-    // TODO: (1) transfer in/out without foreign (2) interest (3) transfer in/out with other
+    @SuppressWarnings({"java:S3415"})
+    @Test
+    public void testTransferInFromForeignWithoutRelation() throws Exception {
+        appendAccessToken(ObjectId.get().toString(), "Vincent");
+        var bookId = createBook("My Book", BankType.FUBON, CurrencyType.USD);
+
+        var entryReq = new CreateEntryRequest();
+        entryReq.setBookId(bookId);
+        entryReq.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
+        entryReq.setTransactionDate(new Date());
+        entryReq.setForeignAmount(514);
+        entryReq.setTwdAmount(16637);
+
+        var entryId = createEntry(entryReq);
+        var entry = entryRepository.findById(entryId).orElseThrow();
+        assertEquals(entryReq.getBookId(), entry.getBookId());
+        assertEquals(entryReq.getTransactionType(), entry.getTransactionType());
+        assertEquals(entryReq.getTransactionDate(), entry.getTransactionDate());
+        assertEquals(entryReq.getForeignAmount(), entry.getForeignAmount(), 0);
+        assertEquals(entryReq.getTwdAmount(), entry.getTwdAmount());
+        assertNull(entry.getRelatedBookId());
+        assertNull(entry.getRelatedBookForeignAmount());
+
+        var book = bookRepository.findById(bookId).orElseThrow();
+        assertEquals(entryReq.getForeignAmount(), book.getBalance(), 0);
+        assertEquals((int) entryReq.getTwdAmount(), book.getRemainingTwdFund());
+        assertEquals(32.3677, book.getBreakEvenPoint(), 0);
+        assertEquals(entryReq.getForeignAmount(), book.getLastForeignInvest(), 0);
+        assertEquals((int) entryReq.getTwdAmount(), (int) book.getLastTwdInvest());
+    }
+
+    @SuppressWarnings({"java:S3415"})
+    @Test
+    public void testTransferOutToForeignWithoutRelation() throws Exception {
+        appendAccessToken(ObjectId.get().toString(), "Vincent");
+        var bookId = createBook("My Book", BankType.FUBON, CurrencyType.GBP);
+
+        var book = bookRepository.findById(bookId).orElseThrow();
+        book.setBalance(621.77);
+        book.setRemainingTwdFund(23877);
+        book.setBreakEvenPoint(38.4017);
+        book.setLastForeignInvest(78.44);
+        book.setLastTwdInvest(3000);
+        bookRepository.save(book);
+
+        var entryReq = new CreateEntryRequest();
+        entryReq.setBookId(bookId);
+        entryReq.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
+        entryReq.setTransactionDate(new Date());
+        entryReq.setForeignAmount(75.02);
+
+        var entryId = createEntry(entryReq);
+        var entry = entryRepository.findById(entryId).orElseThrow();
+        assertEquals(entryReq.getBookId(), entry.getBookId());
+        assertEquals(entryReq.getTransactionType(), entry.getTransactionType());
+        assertEquals(entryReq.getTransactionDate(), entry.getTransactionDate());
+        assertEquals(entryReq.getForeignAmount(), entry.getForeignAmount(), 0);
+        assertEquals(entryReq.getTwdAmount(), entry.getTwdAmount());
+        assertNull(entry.getRelatedBookId());
+        assertNull(entry.getRelatedBookForeignAmount());
+
+        var resultBook = bookRepository.findById(bookId).orElseThrow();
+        assertEquals(546.75, resultBook.getBalance(), 0);
+        assertEquals(20996, resultBook.getRemainingTwdFund());
+        assertEquals(38.4015, resultBook.getBreakEvenPoint(), 0);
+        assertEquals(book.getLastForeignInvest(), resultBook.getLastForeignInvest(), 0);
+        assertEquals((int) book.getLastTwdInvest(), (int) resultBook.getLastTwdInvest());
+    }
+
+    @SuppressWarnings({"java:S3415"})
+    @Test
+    public void testTransferInFromInterest() throws Exception {
+        appendAccessToken(ObjectId.get().toString(), "Vincent");
+        var bookId = createBook("My Book", BankType.FUBON, CurrencyType.USD);
+
+        var book = bookRepository.findById(bookId).orElseThrow();
+        book.setBalance(3000);
+        book.setRemainingTwdFund(92531);
+        book.setBreakEvenPoint(30.8437);
+        book.setLastForeignInvest(3000.0);
+        book.setLastTwdInvest(92531);
+        bookRepository.save(book);
+
+        var entryReq = new CreateEntryRequest();
+        entryReq.setBookId(bookId);
+        entryReq.setTransactionType(TransactionType.TRANSFER_IN_FROM_INTEREST);
+        entryReq.setTransactionDate(new Date());
+        entryReq.setForeignAmount(27.5);
+
+        var entryId = createEntry(entryReq);
+        var entry = entryRepository.findById(entryId).orElseThrow();
+        assertEquals(entryReq.getBookId(), entry.getBookId());
+        assertEquals(entryReq.getTransactionType(), entry.getTransactionType());
+        assertEquals(entryReq.getTransactionDate(), entry.getTransactionDate());
+        assertEquals(entryReq.getForeignAmount(), entry.getForeignAmount(), 0);
+        assertNull(entry.getTwdAmount());
+        assertNull(entry.getRelatedBookId());
+        assertNull(entry.getRelatedBookForeignAmount());
+
+        var resultBook = bookRepository.findById(bookId).orElseThrow();
+        assertEquals(3027.5, resultBook.getBalance(), 0);
+        assertEquals(book.getRemainingTwdFund(), resultBook.getRemainingTwdFund());
+        assertEquals(30.5635, resultBook.getBreakEvenPoint(), 0);
+        assertEquals(book.getLastForeignInvest(), resultBook.getLastForeignInvest(), 0);
+        assertEquals((int) book.getLastTwdInvest(), (int) resultBook.getLastTwdInvest());
+    }
+
+    @SuppressWarnings({"java:S3415"})
+    @Test
+    public void testTransferOutToOther() throws Exception {
+        appendAccessToken(ObjectId.get().toString(), "Vincent");
+        var bookId = createBook("My Book", BankType.FUBON, CurrencyType.USD);
+
+        var book = bookRepository.findById(bookId).orElseThrow();
+        book.setBalance(3000);
+        book.setRemainingTwdFund(92531);
+        book.setBreakEvenPoint(30.8437);
+        book.setLastForeignInvest(3000.0);
+        book.setLastTwdInvest(92531);
+        bookRepository.save(book);
+
+        var entryReq = new CreateEntryRequest();
+        entryReq.setBookId(bookId);
+        entryReq.setTransactionType(TransactionType.TRANSFER_OUT_TO_OTHER);
+        entryReq.setTransactionDate(new Date());
+        entryReq.setForeignAmount(2000);
+
+        var entryId = createEntry(entryReq);
+        var entry = entryRepository.findById(entryId).orElseThrow();
+        assertEquals(entryReq.getBookId(), entry.getBookId());
+        assertEquals(entryReq.getTransactionType(), entry.getTransactionType());
+        assertEquals(entryReq.getTransactionDate(), entry.getTransactionDate());
+        assertEquals(entryReq.getForeignAmount(), entry.getForeignAmount(), 0);
+        assertNull(entry.getTwdAmount());
+        assertNull(entry.getRelatedBookId());
+        assertNull(entry.getRelatedBookForeignAmount());
+
+        var resultBook = bookRepository.findById(bookId).orElseThrow();
+        assertEquals(1000, resultBook.getBalance(), 0);
+        assertEquals(30844, resultBook.getRemainingTwdFund());
+        assertEquals(38.844, resultBook.getBreakEvenPoint(), 0);
+        assertEquals(book.getLastForeignInvest(), resultBook.getLastForeignInvest(), 0);
+        assertEquals((int) book.getLastTwdInvest(), (int) resultBook.getLastTwdInvest());
+    }
+
+    @Test
+    public void testTransferInFromOther() throws Exception {
+        appendAccessToken(ObjectId.get().toString(), "Vincent");
+        var bookId = createBook("My Book", BankType.FUBON, CurrencyType.USD);
+
+        var entryReq = new CreateEntryRequest();
+        entryReq.setBookId(bookId);
+        entryReq.setTransactionType(TransactionType.TRANSFER_IN_FROM_OTHER);
+        entryReq.setTransactionDate(new Date());
+        entryReq.setForeignAmount(2100);
+        entryReq.setTwdAmount(61687);
+
+        var entryId = createEntry(entryReq);
+        var entry = entryRepository.findById(entryId).orElseThrow();
+        assertEquals(entryReq.getBookId(), entry.getBookId());
+        assertEquals(entryReq.getTransactionType(), entry.getTransactionType());
+        assertEquals(entryReq.getTransactionDate(), entry.getTransactionDate());
+        assertEquals(entryReq.getForeignAmount(), entry.getForeignAmount(), 0);
+        assertEquals(entryReq.getTwdAmount(), entry.getTwdAmount());
+        assertNull(entry.getRelatedBookId());
+        assertNull(entry.getRelatedBookForeignAmount());
+
+        var resultBook = bookRepository.findById(bookId).orElseThrow();
+        assertEquals(entryReq.getForeignAmount(), resultBook.getBalance(), 0);
+        assertEquals((int) entryReq.getTwdAmount(), resultBook.getRemainingTwdFund());
+        assertEquals(29.3748, resultBook.getBreakEvenPoint(), 0);
+    }
 }
