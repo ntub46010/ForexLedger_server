@@ -59,6 +59,7 @@ public class BookService {
 
     public void updateMetaData(Map<Book, Entry> bookToEntryMap) {
         assignRepresentingTwdFundIfAbsent(bookToEntryMap);
+
         bookToEntryMap.forEach((book, entry) ->
                 new SingleBookMetaDataUpdater(book).update(entry));
         repository.saveAll(bookToEntryMap.keySet());
@@ -80,6 +81,7 @@ public class BookService {
             var entry = pair.getValue();
             if (!entry.getTransactionType().isTransferIn() && entry.getTwdAmount() == null) {
                 transferOutInfo = Pair.of(pair.getKey(), entry);
+                break;
             }
         }
 
