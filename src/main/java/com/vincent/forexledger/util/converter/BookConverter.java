@@ -84,7 +84,6 @@ public class BookConverter {
         return detail;
     }
 
-    // TODO: unit test
     public static int calcRepresentingTwdFund(Book book, double foreignAmount) {
         Objects.requireNonNull(book);
 

@@ -48,7 +48,7 @@ public class EntryService {
 
         if (request.getRelatedBookId() != null) {
             var relatedBook = bookMap.get(request.getRelatedBookId());
-            var relatedEntry = EntryConverter.toRelatedEntry2(primaryEntry);
+            var relatedEntry = EntryConverter.toRelatedEntry(primaryEntry);
             bookToEntryMap.put(relatedBook, relatedEntry);
         }
 
