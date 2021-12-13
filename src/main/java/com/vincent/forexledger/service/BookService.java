@@ -58,6 +58,7 @@ public class BookService {
     }
 
     public void updateMetaData(Map<Book, Entry> bookToEntryMap) {
+        assignRepresentingTwdFundIfAbsent(bookToEntryMap);
         bookToEntryMap.forEach((book, entry) ->
                 new SingleBookMetaDataUpdater(book).update(entry));
         repository.saveAll(bookToEntryMap.keySet());
@@ -72,4 +73,27 @@ public class BookService {
     public List<Book> loadBooksByIds(Collection<String> bookIds) {
         return repository.findByIdIn(bookIds);
     }
+
+    private void assignRepresentingTwdFundIfAbsent(Map<Book, Entry> bookToEntryMap) {
+        Pair<Book, Entry> transferOutInfo = null;
+        for (var pair : bookToEntryMap.entrySet()) {
+            var entry = pair.getValue();
+            if (!entry.getTransactionType().isTransferIn() && entry.getTwdAmount() == null) {
+                transferOutInfo = Pair.of(pair.getKey(), entry);
+            }
+        }
+
+        if (transferOutInfo == null) {
+            return;
+        }
+
+        var twdFund = BookConverter.calcRepresentingTwdFund(
+                transferOutInfo.getFirst(),
+                transferOutInfo.getSecond().getForeignAmount());
+
+        bookToEntryMap.values().stream()
+                .filter(entry -> entry.getTwdAmount() == null)
+                .forEach(entry -> entry.setTwdAmount(twdFund));
+    }
+
 }

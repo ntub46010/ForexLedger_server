@@ -7,10 +7,8 @@ import com.vincent.forexledger.model.entry.CreateEntryRequest;
 import com.vincent.forexledger.model.entry.Entry;
 import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.security.UserIdentity;
-import com.vincent.forexledger.util.converter.BookConverter;
 import com.vincent.forexledger.util.converter.EntryConverter;
 import com.vincent.forexledger.validation.EntryValidatorFactory;
-import org.springframework.data.util.Pair;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -54,33 +52,9 @@ public class EntryService {
 
         validateBalanceIsSufficient(bookToEntryMap);
         repository.insert(bookToEntryMap.values());
-
-        assignRepresentingTwdFundIfAbsent(bookToEntryMap);
         bookService.updateMetaData(bookToEntryMap);
 
         return primaryEntry.getId();
-    }
-
-    private void assignRepresentingTwdFundIfAbsent(Map<Book, Entry> bookToEntryMap) {
-        Pair<Book, Entry> transferOutInfo = null;
-        for (var pair : bookToEntryMap.entrySet()) {
-            var entry = pair.getValue();
-            if (!entry.getTransactionType().isTransferIn() && entry.getTwdAmount() == null) {
-                transferOutInfo = Pair.of(pair.getKey(), entry);
-            }
-        }
-
-        if (transferOutInfo == null) {
-            return;
-        }
-
-        var twdFund = BookConverter.calcRepresentingTwdFund(
-                transferOutInfo.getFirst(),
-                transferOutInfo.getSecond().getForeignAmount());
-
-        bookToEntryMap.values().stream()
-                .filter(entry -> entry.getTwdAmount() == null)
-                .forEach(entry -> entry.setTwdAmount(twdFund));
     }
 
     private void validate(CreateEntryRequest request) {

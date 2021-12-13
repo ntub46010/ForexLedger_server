@@ -10,19 +10,14 @@ import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.service.BookService;
 import com.vincent.forexledger.service.EntryService;
 import org.bson.types.ObjectId;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.stubbing.Answer;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.*;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,10 +25,10 @@ import static org.mockito.Mockito.when;
 public class EntryServiceTest {
 
     @Test
+    @SuppressWarnings("unchecked")
     public void createEntryForSingleBook() {
         var userId = ObjectId.get().toString();
         var bookId = ObjectId.get().toString();
-        var entryId = ObjectId.get().toString();
 
         var book = new Book();
         book.setId(bookId);
@@ -43,15 +38,9 @@ public class EntryServiceTest {
         var bookService = mock(BookService.class);
         var entryService = new EntryService(userIdentity, repository, bookService);
 
-        when(bookService.loadBooksByIds(List.of(bookId)))
+        when(bookService.loadBooksByIds(Set.of(bookId)))
                 .thenReturn(List.of(book));
         when(userIdentity.getId()).thenReturn(userId);
-        when(repository.insert(any(Entry.class)))
-                .then((Answer<Entry>) invocationOnMock -> {
-                    var entry = (Entry) invocationOnMock.getArgument(0);
-                    entry.setId(entryId);
-                    return entry;
-                });
 
         var request = new CreateEntryRequest();
         request.setBookId(bookId);
@@ -59,22 +48,21 @@ public class EntryServiceTest {
         request.setTransactionDate(new Date());
         request.setForeignAmount(78.44);
         request.setTwdAmount(3000);
-        var actualEntryId = entryService.createEntry(request);
+        entryService.createEntry(request);
 
-        var insertEntryCaptor = ArgumentCaptor.forClass(Entry.class);
+        var insertEntryCaptor = ArgumentCaptor.forClass(Iterable.class);
         verify(repository).insert(insertEntryCaptor.capture());
 
-        var actualEntry = insertEntryCaptor.getValue();
-        Assert.assertEquals(entryId, actualEntryId);
-        Assert.assertEquals(request.getBookId(), actualEntry.getBookId());
-        Assert.assertEquals(request.getTransactionType(), actualEntry.getTransactionType());
-        Assert.assertEquals(request.getTransactionDate(), actualEntry.getTransactionDate());
-        Assert.assertEquals(request.getForeignAmount(), actualEntry.getForeignAmount(), 0);
-        Assert.assertEquals(request.getTwdAmount(), actualEntry.getTwdAmount());
-        Assert.assertNull(actualEntry.getRelatedBookId());
-        Assert.assertNull(actualEntry.getRelatedBookForeignAmount());
-        Assert.assertEquals(userId, actualEntry.getCreator());
-        Assert.assertNotNull(actualEntry.getCreatedTime());
+        var actualEntry = (Entry) insertEntryCaptor.getValue().iterator().next();
+        assertEquals(request.getBookId(), actualEntry.getBookId());
+        assertEquals(request.getTransactionType(), actualEntry.getTransactionType());
+        assertEquals(request.getTransactionDate(), actualEntry.getTransactionDate());
+        assertEquals(request.getForeignAmount(), actualEntry.getForeignAmount(), 0);
+        assertEquals(request.getTwdAmount(), actualEntry.getTwdAmount());
+        assertNull(actualEntry.getRelatedBookId());
+        assertNull(actualEntry.getRelatedBookForeignAmount());
+        assertEquals(userId, actualEntry.getCreator());
+        assertNotNull(actualEntry.getCreatedTime());
 
         verify(bookService).updateMetaData(Map.of(book, actualEntry));
     }
@@ -102,7 +90,7 @@ public class EntryServiceTest {
         relatedBook.setLastTwdInvest(3000);
 
         when(userIdentity.getId()).thenReturn(userId);
-        when(bookService.loadBooksByIds(List.of(primaryBookId, relatedBookId)))
+        when(bookService.loadBooksByIds(Set.of(primaryBookId, relatedBookId)))
                 .thenReturn(List.of(primaryBook, relatedBook));
 
         var request = new CreateEntryRequest();
@@ -111,11 +99,11 @@ public class EntryServiceTest {
         request.setTransactionDate(new Date());
         request.setForeignAmount(100);
         request.setRelatedBookId(relatedBookId);
-        request.setRelatedBookForeignAmount(133.89);
+        request.setRelatedBookForeignAmount(75.02);
 
         entryService.createEntry(request);
 
-        var insertEntriesCaptor = ArgumentCaptor.forClass(List.class);
+        var insertEntriesCaptor = ArgumentCaptor.forClass(Iterable.class);
         verify(repository).insert(insertEntriesCaptor.capture());
 
         var bookIdToEntryMap = new HashMap<String, Entry>();
@@ -125,32 +113,32 @@ public class EntryServiceTest {
         });
         var primaryEntry = bookIdToEntryMap.get(request.getBookId());
         var relatedEntry = bookIdToEntryMap.get(request.getRelatedBookId());
-        Assert.assertEquals(primaryEntry.getTransactionDate(), relatedEntry.getTransactionDate());
-        Assert.assertEquals(primaryEntry.getCreatedTime(), relatedEntry.getCreatedTime());
+        assertEquals(primaryEntry.getTransactionDate(), relatedEntry.getTransactionDate());
+        assertEquals(primaryEntry.getCreatedTime(), relatedEntry.getCreatedTime());
 
-        Assert.assertEquals(primaryBookId, primaryEntry.getBookId());
-        Assert.assertEquals(TransactionType.TRANSFER_IN_FROM_FOREIGN, primaryEntry.getTransactionType());
-        Assert.assertNotNull(primaryEntry.getTransactionDate());
-        Assert.assertEquals(request.getForeignAmount(), primaryEntry.getForeignAmount(), 0);
-        Assert.assertNotNull(primaryEntry.getTwdAmount());
-        Assert.assertEquals(relatedBookId, primaryEntry.getRelatedBookId());
-        Assert.assertEquals(request.getRelatedBookForeignAmount(), primaryEntry.getRelatedBookForeignAmount(), 0);
-        Assert.assertEquals(userId, primaryEntry.getCreator());
-        Assert.assertNotNull(primaryEntry.getCreatedTime());
+        assertEquals(primaryBookId, primaryEntry.getBookId());
+        assertEquals(TransactionType.TRANSFER_IN_FROM_FOREIGN, primaryEntry.getTransactionType());
+        assertNotNull(primaryEntry.getTransactionDate());
+        assertEquals(request.getForeignAmount(), primaryEntry.getForeignAmount(), 0);
+        assertNull(primaryEntry.getTwdAmount());
+        assertEquals(relatedBookId, primaryEntry.getRelatedBookId());
+        assertEquals(request.getRelatedBookForeignAmount(), primaryEntry.getRelatedBookForeignAmount(), 0);
+        assertEquals(userId, primaryEntry.getCreator());
+        assertNotNull(primaryEntry.getCreatedTime());
 
-        Assert.assertEquals(relatedBookId, relatedEntry.getBookId());
-        Assert.assertEquals(TransactionType.TRANSFER_OUT_TO_FOREIGN, relatedEntry.getTransactionType());
-        Assert.assertNotNull(relatedEntry.getTransactionDate());
-        Assert.assertEquals(request.getRelatedBookForeignAmount(), relatedEntry.getForeignAmount(), 0);
-        Assert.assertNotNull(relatedEntry.getTwdAmount());
-        Assert.assertEquals(primaryBookId, relatedEntry.getRelatedBookId());
-        Assert.assertEquals(request.getForeignAmount(), relatedEntry.getRelatedBookForeignAmount(), 0);
-        Assert.assertEquals(userId, relatedEntry.getCreator());
-        Assert.assertNotNull(relatedEntry.getCreatedTime());
+        assertEquals(relatedBookId, relatedEntry.getBookId());
+        assertEquals(TransactionType.TRANSFER_OUT_TO_FOREIGN, relatedEntry.getTransactionType());
+        assertNotNull(relatedEntry.getTransactionDate());
+        assertEquals(request.getRelatedBookForeignAmount(), relatedEntry.getForeignAmount(), 0);
+        assertNull(relatedEntry.getTwdAmount());
+        assertEquals(primaryBookId, relatedEntry.getRelatedBookId());
+        assertEquals(request.getForeignAmount(), relatedEntry.getRelatedBookForeignAmount(), 0);
+        assertEquals(userId, relatedEntry.getCreator());
+        assertNotNull(relatedEntry.getCreatedTime());
 
         var expectedBookToEntryMap = new HashMap<Book, Entry>();
         expectedBookToEntryMap.put(primaryBook, primaryEntry);
-        expectedBookToEntryMap.put(relatedBook,relatedEntry);
+        expectedBookToEntryMap.put(relatedBook, relatedEntry);
         verify(bookService).updateMetaData(expectedBookToEntryMap);
     }
 
