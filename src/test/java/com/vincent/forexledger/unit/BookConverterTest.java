@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import static org.junit.Assert.assertEquals;
+
 public class BookConverterTest {
 
     @Test
@@ -121,4 +123,23 @@ public class BookConverterTest {
         Assert.assertEquals(95266, detail.getTwdCurrentValue(), 1);
         Assert.assertEquals(1.8971, detail.getLastSellingRate(), 0.0001);
     }
+
+    @Test
+    public void testCalcRepresentingTwdFund () {
+        var book = new Book();
+        book.setBalance(3000);
+        book.setRemainingTwdFund(92531);
+
+        assertEquals(61687, BookConverter.calcRepresentingTwdFund(book, 2000));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCalcRepresentingTwdFundButForeignAmountExceeds() {
+        var book = new Book();
+        book.setBalance(3000);
+        book.setRemainingTwdFund(92531);
+
+        BookConverter.calcRepresentingTwdFund(book, 6000);
+    }
+
 }

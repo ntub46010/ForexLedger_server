@@ -1,6 +1,5 @@
 package com.vincent.forexledger.unit;
 
-import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.entry.CreateEntryRequest;
 import com.vincent.forexledger.model.entry.Entry;
 import com.vincent.forexledger.model.entry.TransactionType;
@@ -10,6 +9,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Date;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class EntryConvertTest {
 
@@ -36,64 +38,27 @@ public class EntryConvertTest {
     }
 
     @Test
-    public void testConvertToRelatedBookEntryWhenTransferIn() {
-        var relatedBook = new Book();
-        relatedBook.setId(ObjectId.get().toString());
-        relatedBook.setBalance(621.77);
-        relatedBook.setRemainingTwdFund(23877);
+    public void testConvertToRelatedEntry() {
+        var primaryEntry = new Entry();
+        primaryEntry.setBookId(ObjectId.get().toString());
+        primaryEntry.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
+        primaryEntry.setTransactionDate(new Date());
+        primaryEntry.setForeignAmount(100);
+        primaryEntry.setRelatedBookId(ObjectId.get().toString());
+        primaryEntry.setRelatedBookForeignAmount(75.02);
+        primaryEntry.setCreator(ObjectId.get().toString());
+        primaryEntry.setCreatedTime(new Date());
 
-        var primaryBookEntry = new Entry();
-        primaryBookEntry.setBookId(ObjectId.get().toString());
-        primaryBookEntry.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
-        primaryBookEntry.setTransactionDate(new Date(1));
-        primaryBookEntry.setForeignAmount(100);
-        primaryBookEntry.setRelatedBookId(relatedBook.getId());
-        primaryBookEntry.setRelatedBookForeignAmount(133.89);
-        primaryBookEntry.setCreator(ObjectId.get().toString());
-        primaryBookEntry.setCreatedTime(new Date(2));
-
-        var relatedBookEntry = EntryConverter
-                .toRelatedBookEntry(relatedBook, primaryBookEntry);
-
-        Assert.assertEquals(primaryBookEntry.getRelatedBookId(), relatedBookEntry.getBookId());
-        Assert.assertEquals(TransactionType.TRANSFER_OUT_TO_FOREIGN, relatedBookEntry.getTransactionType());
-        Assert.assertEquals(primaryBookEntry.getTransactionDate(), relatedBookEntry.getTransactionDate());
-        Assert.assertEquals(primaryBookEntry.getRelatedBookForeignAmount(), relatedBookEntry.getForeignAmount(), 0);
-        Assert.assertEquals(primaryBookEntry.getBookId(), relatedBookEntry.getRelatedBookId());
-        Assert.assertEquals(primaryBookEntry.getForeignAmount(), relatedBookEntry.getRelatedBookForeignAmount(), 0);
-        Assert.assertEquals(5142, relatedBookEntry.getTwdAmount(), 0);
-        Assert.assertEquals(primaryBookEntry.getCreator(), relatedBookEntry.getCreator());
-        Assert.assertEquals(primaryBookEntry.getCreatedTime(), relatedBookEntry.getCreatedTime());
+        var relatedEntry = EntryConverter.toRelatedEntry(primaryEntry);
+        assertEquals(primaryEntry.getRelatedBookId(), relatedEntry.getBookId());
+        assertEquals(TransactionType.TRANSFER_OUT_TO_FOREIGN, relatedEntry.getTransactionType());
+        assertEquals(primaryEntry.getTransactionDate(), relatedEntry.getTransactionDate());
+        assertEquals(primaryEntry.getRelatedBookForeignAmount(), relatedEntry.getForeignAmount(), 0);
+        assertNull(relatedEntry.getTwdAmount());
+        assertEquals(primaryEntry.getBookId(), relatedEntry.getRelatedBookId());
+        assertEquals(primaryEntry.getForeignAmount(), relatedEntry.getRelatedBookForeignAmount(), 0);
+        assertEquals(primaryEntry.getCreator(), relatedEntry.getCreator());
+        assertEquals(primaryEntry.getCreatedTime(), relatedEntry.getCreatedTime());
     }
 
-    @Test
-    public void testConvertToRelatedBookEntryWhenTransferOut() {
-        var primaryBook = new Book();
-        primaryBook.setId(ObjectId.get().toString());
-        primaryBook.setBalance(621.77);
-        primaryBook.setRemainingTwdFund(23877);
-
-        var primaryBookEntry = new Entry();
-        primaryBookEntry.setBookId(primaryBook.getId());
-        primaryBookEntry.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
-        primaryBookEntry.setTransactionDate(new Date(1));
-        primaryBookEntry.setForeignAmount(133.89);
-        primaryBookEntry.setRelatedBookId(ObjectId.get().toString());
-        primaryBookEntry.setRelatedBookForeignAmount(100.0);
-        primaryBookEntry.setCreator(ObjectId.get().toString());
-        primaryBookEntry.setCreatedTime(new Date(2));
-
-        var relatedBookEntry = EntryConverter
-                .toRelatedBookEntry(primaryBook, primaryBookEntry);
-
-        Assert.assertEquals(primaryBookEntry.getRelatedBookId(), relatedBookEntry.getBookId());
-        Assert.assertEquals(TransactionType.TRANSFER_IN_FROM_FOREIGN, relatedBookEntry.getTransactionType());
-        Assert.assertEquals(primaryBookEntry.getTransactionDate(), relatedBookEntry.getTransactionDate());
-        Assert.assertEquals(primaryBookEntry.getRelatedBookForeignAmount(), relatedBookEntry.getForeignAmount(), 0);
-        Assert.assertEquals(primaryBookEntry.getBookId(), relatedBookEntry.getRelatedBookId());
-        Assert.assertEquals(primaryBookEntry.getForeignAmount(), relatedBookEntry.getRelatedBookForeignAmount(), 0);
-        Assert.assertEquals(5142, relatedBookEntry.getTwdAmount(), 0);
-        Assert.assertEquals(primaryBookEntry.getCreator(), relatedBookEntry.getCreator());
-        Assert.assertEquals(primaryBookEntry.getCreatedTime(), relatedBookEntry.getCreatedTime());
-    }
 }

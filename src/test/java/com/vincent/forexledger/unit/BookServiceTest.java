@@ -21,6 +21,8 @@ import org.mockito.stubbing.Answer;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -106,12 +108,12 @@ public class BookServiceTest {
         var responseIds = responses.stream()
                 .map(BookListResponse::getId)
                 .collect(Collectors.toList());
-        Assert.assertTrue(CollectionUtils.isEqualCollection(bookIds1, responseIds));
+        assertTrue(CollectionUtils.isEqualCollection(bookIds1, responseIds));
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testUpdateMetaDataForBook() {
+    public void testUpdateSingleBookMetaDataByTwdEntry() {
         var book = new Book();
         book.setId(ObjectId.get().toString());
 
@@ -128,7 +130,80 @@ public class BookServiceTest {
         var booksCaptor = ArgumentCaptor.forClass(Set.class);
         verify(repository).saveAll(booksCaptor.capture());
 
-        Assert.assertTrue(booksCaptor.getValue().contains(book));
+        assertTrue(booksCaptor.getValue().contains(book));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testUpdateDoubleBookMetaDataByForeignEntry() {
+        var repository = mock(BookRepository.class);
+        var service = new BookService(null, repository, null);
+
+        var primaryBook = new Book();
+        primaryBook.setId(ObjectId.get().toString());
+        primaryBook.setBalance(621.77);
+        primaryBook.setRemainingTwdFund(23877);
+
+        var relatedBook = new Book();
+        relatedBook.setId(ObjectId.get().toString());
+
+        var primaryEntry = new Entry();
+        primaryEntry.setTransactionType(TransactionType.TRANSFER_OUT_TO_FOREIGN);
+        primaryEntry.setForeignAmount(75.02);
+
+        var relatedEntry = new Entry();
+        relatedEntry.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
+        relatedEntry.setForeignAmount(100);
+
+        var bookToEntryMap = new HashMap<Book, Entry>();
+        bookToEntryMap.put(primaryBook, primaryEntry);
+        bookToEntryMap.put(relatedBook, relatedEntry);
+        service.updateMetaData(bookToEntryMap);
+
+        var saveBookCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(repository).saveAll(saveBookCaptor.capture());
+
+        var actualBookMap = new HashMap<String, Book>();
+        saveBookCaptor.getValue().forEach(elem -> {
+            var book = (Book) elem;
+            actualBookMap.put(book.getId(), book);
+        });
+
+        primaryBook = actualBookMap.get(primaryBook.getId());
+        assertEquals(546.75, primaryBook.getBalance(), 0);
+        assertEquals(20996, primaryBook.getRemainingTwdFund());
+        assertEquals(38.4015, primaryBook.getBreakEvenPoint(), 0);
+
+        relatedBook = actualBookMap.get(relatedBook.getId());
+        assertEquals(100, relatedBook.getBalance(), 0);
+        assertEquals(2881, relatedBook.getRemainingTwdFund());
+        assertEquals(28.81, relatedBook.getBreakEvenPoint(), 0);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testUpdateSingleBookMetaDataWhenTransferOutToOther() {
+        var repository = mock(BookRepository.class);
+        var service = new BookService(null, repository, null);
+
+        var book = new Book();
+        book.setBalance(3000);
+        book.setRemainingTwdFund(92531);
+
+        var entry = new Entry();
+        entry.setTransactionType(TransactionType.TRANSFER_OUT_TO_OTHER);
+        entry.setForeignAmount(2000);
+
+        var bookToEntryMap = Map.of(book, entry);
+        service.updateMetaData(bookToEntryMap);
+
+        var saveBookCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(repository).saveAll(saveBookCaptor.capture());
+
+        book = (Book) saveBookCaptor.getValue().iterator().next();
+        assertEquals(1000, book.getBalance(), 0);
+        assertEquals(30844, book.getRemainingTwdFund());
+        assertEquals(30.844, book.getBreakEvenPoint(), 0);
     }
 
     private Book createEmptyBook(String creator, BankType bank, CurrencyType currencyType) {

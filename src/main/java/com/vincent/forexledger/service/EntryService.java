@@ -8,13 +8,10 @@ import com.vincent.forexledger.model.entry.Entry;
 import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.util.converter.EntryConverter;
-import org.apache.commons.lang3.StringUtils;
+import com.vincent.forexledger.validation.EntryValidatorFactory;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,89 +33,51 @@ public class EntryService {
 
         var involvedBookIds = Stream.of(request.getBookId(), request.getRelatedBookId())
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        var entries = new ArrayList<Entry>(involvedBookIds.size());
-        var books = bookService.loadBooksByIds(involvedBookIds);
-        var bookMap = books.stream()
+                .collect(Collectors.toSet());
+        var bookMap = bookService.loadBooksByIds(involvedBookIds)
+                .stream()
                 .collect(Collectors.toMap(Book::getId, Function.identity()));
+        var bookToEntryMap = new HashMap<Book, Entry>();
 
         var primaryEntry = EntryConverter.toEntry(request);
         primaryEntry.setCreator(userIdentity.getId());
         primaryEntry.setCreatedTime(new Date());
-        entries.add(primaryEntry);
+        bookToEntryMap.put(bookMap.get(request.getBookId()), primaryEntry);
 
-        if (involvedBookIds.size() > 1) {
-            var transferOutBook = primaryEntry.getTransactionType().isTransferIn()
-                    ? bookMap.get(request.getRelatedBookId())
-                    : bookMap.get(request.getBookId());
-            var relatedEntry = toRelatedBookEntry(transferOutBook, primaryEntry);
-            primaryEntry.setTwdAmount(relatedEntry.getTwdAmount());
-            entries.add(relatedEntry);
-            repository.insert(entries);
-        } else {
-            repository.insert(primaryEntry);
+        if (request.getRelatedBookId() != null) {
+            var relatedBook = bookMap.get(request.getRelatedBookId());
+            var relatedEntry = EntryConverter.toRelatedEntry(primaryEntry);
+            bookToEntryMap.put(relatedBook, relatedEntry);
         }
 
-        var bookToEntryMap = entries.stream()
-                .collect(Collectors.toMap(entry -> bookMap.get(entry.getBookId()), Function.identity()));
+        validateBalanceIsSufficient(bookToEntryMap);
+        repository.insert(bookToEntryMap.values());
         bookService.updateMetaData(bookToEntryMap);
 
         return primaryEntry.getId();
     }
 
-    private Entry toRelatedBookEntry(Book transferOutBook, Entry primaryBookEntry) {
-        if (primaryBookEntry.getTransactionType().isTransferIn()
-                && transferOutBook.getBalance() < primaryBookEntry.getRelatedBookForeignAmount()) {
-            throw new InsufficientBalanceException(transferOutBook.getBalance(), primaryBookEntry.getRelatedBookForeignAmount());
-        }
-
-        return EntryConverter
-                .toRelatedBookEntry(transferOutBook, primaryBookEntry);
-    }
-
-    // TODO: refactor
     private void validate(CreateEntryRequest request) {
-        var isNotValid = false;
-        var transactionType = request.getTransactionType();
-
-        switch (transactionType) {
-            case TRANSFER_IN_FROM_TWD:
-            case TRANSFER_OUT_TO_TWD:
-                var twdAmount = request.getTwdAmount();
-                isNotValid = twdAmount == null ||
-                        twdAmount <= 0 ||
-                        StringUtils.isNotBlank(request.getRelatedBookId()) ||
-                        request.getRelatedBookForeignAmount() != null;
-                break;
-            case TRANSFER_IN_FROM_FOREIGN:
-            case TRANSFER_OUT_TO_FOREIGN:
-                var relatedBookForeignAmount =
-                        Optional.ofNullable(request.getRelatedBookForeignAmount())
-                                .orElse(0.0);
-                twdAmount = Optional.ofNullable(request.getTwdAmount()).orElse(0);
-                var isNotRelatingBook = StringUtils.isBlank(request.getRelatedBookId()) ||
-                        request.getRelatedBookForeignAmount() == null;
-                isNotValid = (StringUtils.isBlank(request.getRelatedBookId()) ^
-                        relatedBookForeignAmount <= 0) ||
-                        (isNotRelatingBook && twdAmount <= 0);
-                break;
-            case TRANSFER_IN_FROM_INTEREST:
-                isNotValid = request.getTwdAmount() != null ||
-                        StringUtils.isNotBlank(request.getRelatedBookId()) ||
-                        request.getRelatedBookForeignAmount() != null;
-                break;
-            case TRANSFER_IN_FROM_OTHER:
-            case TRANSFER_OUT_TO_OTHER:
-                isNotValid = request.getTwdAmount() != null ||
-                        StringUtils.isNotBlank(request.getRelatedBookId()) ||
-                        request.getRelatedBookForeignAmount() != null;
-                break;
-        }
+        var validator = EntryValidatorFactory
+                .getCreateEntryValidator(request.getTransactionType());
+        var isNotValid = !validator.validate(request);
 
         if (isNotValid) {
-            var msg = String.format("Incorrect data for entry of %s type.", transactionType.name());
+            var msg = String.format("Incorrect data for entry of %s type.",
+                    request.getTransactionType().name());
             throw new BadRequestException(msg);
+        }
+    }
+
+    private void validateBalanceIsSufficient(Map<Book, Entry> bookToEntryMap) {
+        for (Map.Entry<Book, Entry> pair : bookToEntryMap.entrySet()) {
+            var entry = pair.getValue();
+            if (!entry.getTransactionType().isTransferIn()) {
+                var book = pair.getKey();
+                if (entry.getForeignAmount() > book.getBalance()) {
+                    throw new InsufficientBalanceException(book.getBalance(), entry.getForeignAmount());
+                }
+            }
         }
     }
 }
