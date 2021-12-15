@@ -1,10 +1,15 @@
 package com.vincent.forexledger.util.converter;
 
+import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.entry.CreateEntryRequest;
 import com.vincent.forexledger.model.entry.Entry;
 import com.vincent.forexledger.model.entry.EntryListResponse;
 import com.vincent.forexledger.model.entry.TransactionType;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class EntryConverter {
@@ -16,6 +21,7 @@ public class EntryConverter {
         entry.setBookId(request.getBookId());
         entry.setTransactionType(request.getTransactionType());
         entry.setTransactionDate(request.getTransactionDate());
+        entry.setDescription(request.getDescription());
         entry.setForeignAmount(request.getForeignAmount());
         entry.setTwdAmount(request.getTwdAmount());
         entry.setRelatedBookId(request.getRelatedBookId());
@@ -46,23 +52,29 @@ public class EntryConverter {
     }
 
     // TODO: unit test
-    public static EntryListResponse toEntryListResponse(Entry entry) {
-        var response = new EntryListResponse();
-        response.setId(entry.getId());
-        response.setTransactionDate(entry.getTransactionDate());
-        response.setTransactionType(entry.getTransactionType());
-        response.setPrimaryAmount(entry.getForeignAmount());
-        response.setDescription(entry.getDescription());
+    public static List<EntryListResponse> toEntryListResponses(List<Entry> entries, Map<String, CurrencyType> bookToCurrencyTypeMap) {
+        var responses = new ArrayList<EntryListResponse>(entries.size());
 
-        if (entry.getTransactionType().isRelatedToTwd()) {
-            response.setRelatedAmount(entry.getTwdAmount().doubleValue());
-        } else if (entry.getTransactionType().canRelateBook()) {
-            // if entry didn't related to another book, then TWD cost should be provided when creating entry
-            var relatedAmount = Optional.ofNullable(entry.getRelatedBookForeignAmount())
-                    .orElse(entry.getTwdAmount().doubleValue());
-            response.setRelatedAmount(relatedAmount);
+        for (var entry : entries) {
+            var response = new EntryListResponse();
+            response.setId(entry.getId());
+            response.setTransactionDate(entry.getTransactionDate());
+            response.setTransactionType(entry.getTransactionType());
+            response.setPrimaryAmount(entry.getForeignAmount());
+            response.setDescription(entry.getDescription());
+            response.setPrimaryCurrencyType(bookToCurrencyTypeMap.get(entry.getBookId()));
+
+            if (StringUtils.isNotBlank(entry.getRelatedBookId())) {
+                response.setRelatedCurrencyType(bookToCurrencyTypeMap.get(entry.getRelatedBookId()));
+                response.setRelatedAmount(entry.getRelatedBookForeignAmount());
+            } else {
+                Optional.ofNullable(entry.getTwdAmount())
+                        .ifPresent(x -> response.setRelatedAmount(x.doubleValue()));
+            }
+
+            responses.add(response);
         }
 
-        return response;
+        return responses;
     }
 }

@@ -345,40 +345,58 @@ public class EntryTest extends BaseTest {
         entryReq5.setForeignAmount(35);
         createEntry(entryReq5);
 
+        var entryReq6 = new CreateEntryRequest();
+        entryReq6.setBookId(usdBookId);
+        entryReq6.setTransactionType(TransactionType.TRANSFER_IN_FROM_OTHER);
+        entryReq6.setTransactionDate(new Date(6));
+        entryReq6.setForeignAmount(50);
+        entryReq6.setTwdAmount(1995);
+        createEntry(entryReq6);
+
         mockMvc.perform(get(APIPathConstants.ENTRIES)
                 .param("bookId", usdBookId)
                 .headers(httpHeaders))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(5)))
-                .andExpect(jsonPath("$[0].transactionDate").value(entryReq5.getTransactionDate().getTime()))
-                .andExpect(jsonPath("$[0].transactionType").value(entryReq5.getTransactionType().name()))
-                .andExpect(jsonPath("$[0].primaryAmount").value(entryReq5.getForeignAmount()))
+                .andExpect(jsonPath("$", hasSize(6)))
+                .andExpect(jsonPath("$[0].transactionType").value(entryReq6.getTransactionType().name()))
+                .andExpect(jsonPath("$[0].primaryAmount").value(entryReq6.getForeignAmount()))
                 .andExpect(jsonPath("$[0].primaryCurrencyType").value(CurrencyType.USD.name()))
-
-                .andExpect(jsonPath("$[1].transactionDate").value(entryReq4.getTransactionDate().getTime()))
-                .andExpect(jsonPath("$[1].transactionType").value(entryReq4.getTransactionType().name()))
-                .andExpect(jsonPath("$[1].primaryAmount").value(entryReq4.getForeignAmount()))
+                .andExpect(jsonPath("$[1].transactionType").value(entryReq5.getTransactionType().name()))
+                .andExpect(jsonPath("$[1].primaryAmount").value(entryReq5.getForeignAmount()))
                 .andExpect(jsonPath("$[1].primaryCurrencyType").value(CurrencyType.USD.name()))
-                .andExpect(jsonPath("$[1].relatedAmount").value(entryReq4.getRelatedBookForeignAmount()))
-                .andExpect(jsonPath("$[1].relatedCurrencyType").value(CurrencyType.GBP.name()))
-
-                .andExpect(jsonPath("$[2].transactionDate").value(entryReq3.getTransactionDate().getTime()))
-                .andExpect(jsonPath("$[2].transactionType").value(entryReq3.getTransactionType().name()))
-                .andExpect(jsonPath("$[2].primaryAmount").value(entryReq3.getForeignAmount()))
+                .andExpect(jsonPath("$[2].transactionType").value(entryReq4.getTransactionType().name()))
+                .andExpect(jsonPath("$[2].primaryAmount").value(entryReq4.getForeignAmount()))
                 .andExpect(jsonPath("$[2].primaryCurrencyType").value(CurrencyType.USD.name()))
-                .andExpect(jsonPath("$[2].relatedAmount").value(entryReq4.getTwdAmount()))
-
-                .andExpect(jsonPath("$[3].transactionDate").value(entryReq2.getTransactionDate().getTime()))
-                .andExpect(jsonPath("$[3].transactionType").value(entryReq2.getTransactionType().name()))
-                .andExpect(jsonPath("$[3].primaryAmount").value(entryReq2.getForeignAmount()))
+                .andExpect(jsonPath("$[2].relatedAmount").value(entryReq4.getRelatedBookForeignAmount()))
+                .andExpect(jsonPath("$[2].relatedCurrencyType").value(CurrencyType.GBP.name()))
+                .andExpect(jsonPath("$[3].transactionType").value(entryReq3.getTransactionType().name()))
+                .andExpect(jsonPath("$[3].primaryAmount").value(entryReq3.getForeignAmount()))
                 .andExpect(jsonPath("$[3].primaryCurrencyType").value(CurrencyType.USD.name()))
-
-                .andExpect(jsonPath("$[4].transactionDate").value(entryReq1.getTransactionDate().getTime()))
-                .andExpect(jsonPath("$[4].transactionType").value(entryReq1.getTransactionType().name()))
-                .andExpect(jsonPath("$[4].primaryAmount").value(entryReq1.getForeignAmount()))
+                .andExpect(jsonPath("$[3].relatedAmount").value(entryReq3.getTwdAmount()))
+                .andExpect(jsonPath("$[4].transactionType").value(entryReq2.getTransactionType().name()))
+                .andExpect(jsonPath("$[4].primaryAmount").value(entryReq2.getForeignAmount()))
                 .andExpect(jsonPath("$[4].primaryCurrencyType").value(CurrencyType.USD.name()))
-                .andExpect(jsonPath("$[4].relatedAmount").value(entryReq1.getTwdAmount()));
+                .andExpect(jsonPath("$[5].transactionType").value(entryReq1.getTransactionType().name()))
+                .andExpect(jsonPath("$[5].primaryAmount").value(entryReq1.getForeignAmount()))
+                .andExpect(jsonPath("$[5].primaryCurrencyType").value(CurrencyType.USD.name()))
+                .andExpect(jsonPath("$[5].relatedAmount").value(entryReq1.getTwdAmount()));
+
+        mockMvc.perform(get(APIPathConstants.ENTRIES)
+                .param("bookId", gbpBookId)
+                .headers(httpHeaders))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].transactionType").value(TransactionType.TRANSFER_OUT_TO_FOREIGN.name()))
+                .andExpect(jsonPath("$[0].primaryAmount").value(entryReq4.getRelatedBookForeignAmount()))
+                .andExpect(jsonPath("$[0].primaryCurrencyType").value(CurrencyType.GBP.name()))
+                .andExpect(jsonPath("$[0].relatedAmount").value(entryReq4.getForeignAmount()))
+                .andExpect(jsonPath("$[0].relatedCurrencyType").value(CurrencyType.USD.name()))
+                .andExpect(jsonPath("$[1].transactionType").value(gbpEntryReq.getTransactionType().name()))
+                .andExpect(jsonPath("$[1].primaryAmount").value(gbpEntryReq.getForeignAmount()))
+                .andExpect(jsonPath("$[1].primaryCurrencyType").value(CurrencyType.GBP.name()))
+                .andExpect(jsonPath("$[1].relatedAmount").value(gbpEntryReq.getTwdAmount()));
     }
 
     @SuppressWarnings({"java:S3415"})

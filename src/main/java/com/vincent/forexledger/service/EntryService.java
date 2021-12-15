@@ -73,19 +73,11 @@ public class EntryService {
                 .collect(Collectors.toSet());
         involvedBookIds.add(bookId);
         var involvedBooks = bookService.loadBooksByIds(involvedBookIds);
+
         var bookToCurrencyTypeMap = involvedBooks.stream()
                 .collect(Collectors.toMap(Book::getId, Book::getCurrencyType));
 
-        return entries.stream()
-                .map(entry -> {
-                    var response = EntryConverter.toEntryListResponse(entry);
-                    response.setPrimaryCurrencyType(bookToCurrencyTypeMap.get(entry.getBookId()));
-                    if (StringUtils.isNotBlank(entry.getRelatedBookId())) {
-                        response.setRelatedCurrencyType(bookToCurrencyTypeMap.get(entry.getRelatedBookId()));
-                    }
-                    return response;
-                })
-                .collect(Collectors.toList());
+        return EntryConverter.toEntryListResponses(entries, bookToCurrencyTypeMap);
     }
 
     private void validate(CreateEntryRequest request) {
