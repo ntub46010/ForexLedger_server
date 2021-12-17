@@ -48,9 +48,12 @@ public class BookConverter {
         var currentValue = CalcUtil.multiplyToInt(book.getBalance(), bankBuyingRate);
         if (book.getBalance() > 0) {
             var profit = currentValue - book.getRemainingTwdFund();
-            var profitRate = CalcUtil.divideToDouble(profit, book.getRemainingTwdFund(), 4);
             response.setTwdProfit(profit);
-            response.setProfitRate(profitRate);
+
+            if (book.getRemainingTwdFund() > 0) {
+                var profitRate = CalcUtil.divideToDouble(profit, book.getRemainingTwdFund(), 4);
+                response.setProfitRate(profitRate);
+            }
         }
 
         return response;
@@ -71,9 +74,12 @@ public class BookConverter {
 
         if (book.getBalance() > 0) {
             var profit = currentValue - book.getRemainingTwdFund();
-            var profitRate = CalcUtil.divideToDouble(profit, book.getRemainingTwdFund(), 4);
             detail.setTwdProfit(profit);
-            detail.setTwdProfitRate(profitRate);
+
+            if (book.getRemainingTwdFund() > 0) {
+                var profitRate = CalcUtil.divideToDouble(profit, book.getRemainingTwdFund(), 4);
+                detail.setTwdProfitRate(profitRate);
+            }
         }
 
         if (detail.getLastTwdInvest() != null && detail.getLastForeignInvest() != null) {
