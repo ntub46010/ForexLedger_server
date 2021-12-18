@@ -5,9 +5,12 @@ import com.vincent.forexledger.exception.InsufficientBalanceException;
 import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.entry.CreateEntryRequest;
 import com.vincent.forexledger.model.entry.Entry;
+import com.vincent.forexledger.model.entry.EntryListResponse;
 import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.util.converter.EntryConverter;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.vincent.forexledger.validation.EntryValidatorFactory;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +58,26 @@ public class EntryService {
         bookService.updateMetaData(bookToEntryMap);
 
         return primaryEntry.getId();
+    }
+
+    // TODO: unit test
+    public List<EntryListResponse> loadBookEntries(String bookId) {
+        var entries = repository.findByBookIdOrderByTransactionDateDesc(bookId);
+        if (CollectionUtils.isEmpty(entries)) {
+            return Collections.emptyList();
+        }
+
+        var involvedBookIds = entries.stream()
+                .map(Entry::getRelatedBookId)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toSet());
+        involvedBookIds.add(bookId);
+        var involvedBooks = bookService.loadBooksByIds(involvedBookIds);
+
+        var bookToCurrencyTypeMap = involvedBooks.stream()
+                .collect(Collectors.toMap(Book::getId, Book::getCurrencyType));
+
+        return EntryConverter.toEntryListResponses(entries, bookToCurrencyTypeMap);
     }
 
     private void validate(CreateEntryRequest request) {

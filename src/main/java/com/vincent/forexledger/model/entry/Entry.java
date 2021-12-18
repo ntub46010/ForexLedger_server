@@ -12,6 +12,7 @@ public class Entry {
     private Date transactionDate;
     private double foreignAmount;
     private Integer twdAmount;
+    private String description;
     private String relatedBookId;
     private Double relatedBookForeignAmount;
     private String creator;
@@ -63,6 +64,14 @@ public class Entry {
 
     public void setTwdAmount(Integer twdAmount) {
         this.twdAmount = twdAmount;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getRelatedBookId() {

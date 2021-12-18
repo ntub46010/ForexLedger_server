@@ -15,9 +15,13 @@ import java.util.Date;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -286,6 +290,113 @@ public class EntryTest extends BaseTest {
                 .headers(httpHeaders)
                 .content(objectMapper.writeValueAsString(entryReq)))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    public void testLoadEntryList() throws Exception {
+        appendAccessToken(ObjectId.get().toString(), "Vincent");
+        var usdBookId = createBook("My USD Book", BankType.FUBON, CurrencyType.USD);
+        var gbpBookId = createBook("My GBP Book", BankType.FUBON, CurrencyType.GBP);
+
+        var gbpEntryReq = new CreateEntryRequest();
+        gbpEntryReq.setBookId(gbpBookId);
+        gbpEntryReq.setTransactionType(TransactionType.TRANSFER_IN_FROM_TWD);
+        gbpEntryReq.setTransactionDate(new Date(0));
+        gbpEntryReq.setForeignAmount(150);
+        gbpEntryReq.setTwdAmount(5700);
+        createEntry(gbpEntryReq);
+
+        var entryReq1 = new CreateEntryRequest();
+        entryReq1.setBookId(usdBookId);
+        entryReq1.setTransactionType(TransactionType.TRANSFER_IN_FROM_TWD);
+        entryReq1.setTransactionDate(new Date(1));
+        entryReq1.setForeignAmount(3000);
+        entryReq1.setTwdAmount(92531);
+        createEntry(entryReq1);
+
+        var entryReq2 = new CreateEntryRequest();
+        entryReq2.setBookId(usdBookId);
+        entryReq2.setTransactionType(TransactionType.TRANSFER_IN_FROM_INTEREST);
+        entryReq2.setTransactionDate(new Date(2));
+        entryReq2.setForeignAmount(27.63);
+        createEntry(entryReq2);
+
+        var entryReq3 = new CreateEntryRequest();
+        entryReq3.setBookId(usdBookId);
+        entryReq3.setTransactionType(TransactionType.TRANSFER_OUT_TO_TWD);
+        entryReq3.setTransactionDate(new Date(3));
+        entryReq3.setForeignAmount(3027.63);
+        entryReq3.setTwdAmount(93317);
+        createEntry(entryReq3);
+
+        var entryReq4 = new CreateEntryRequest();
+        entryReq4.setBookId(usdBookId);
+        entryReq4.setTransactionType(TransactionType.TRANSFER_IN_FROM_FOREIGN);
+        entryReq4.setTransactionDate(new Date(4));
+        entryReq4.setForeignAmount(100);
+        entryReq4.setRelatedBookId(gbpBookId);
+        entryReq4.setRelatedBookForeignAmount(75.02);
+        createEntry(entryReq4);
+
+        var entryReq5 = new CreateEntryRequest();
+        entryReq5.setBookId(usdBookId);
+        entryReq5.setTransactionType(TransactionType.TRANSFER_OUT_TO_OTHER);
+        entryReq5.setTransactionDate(new Date(5));
+        entryReq5.setForeignAmount(35);
+        createEntry(entryReq5);
+
+        var entryReq6 = new CreateEntryRequest();
+        entryReq6.setBookId(usdBookId);
+        entryReq6.setTransactionType(TransactionType.TRANSFER_IN_FROM_OTHER);
+        entryReq6.setTransactionDate(new Date(6));
+        entryReq6.setForeignAmount(50);
+        entryReq6.setTwdAmount(1995);
+        createEntry(entryReq6);
+
+        mockMvc.perform(get(APIPathConstants.ENTRIES)
+                .param("bookId", usdBookId)
+                .headers(httpHeaders))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(6)))
+                .andExpect(jsonPath("$[0].transactionType").value(entryReq6.getTransactionType().name()))
+                .andExpect(jsonPath("$[0].primaryAmount").value(entryReq6.getForeignAmount()))
+                .andExpect(jsonPath("$[0].primaryCurrencyType").value(CurrencyType.USD.name()))
+                .andExpect(jsonPath("$[1].transactionType").value(entryReq5.getTransactionType().name()))
+                .andExpect(jsonPath("$[1].primaryAmount").value(entryReq5.getForeignAmount()))
+                .andExpect(jsonPath("$[1].primaryCurrencyType").value(CurrencyType.USD.name()))
+                .andExpect(jsonPath("$[2].transactionType").value(entryReq4.getTransactionType().name()))
+                .andExpect(jsonPath("$[2].primaryAmount").value(entryReq4.getForeignAmount()))
+                .andExpect(jsonPath("$[2].primaryCurrencyType").value(CurrencyType.USD.name()))
+                .andExpect(jsonPath("$[2].relatedAmount").value(entryReq4.getRelatedBookForeignAmount()))
+                .andExpect(jsonPath("$[2].relatedCurrencyType").value(CurrencyType.GBP.name()))
+                .andExpect(jsonPath("$[3].transactionType").value(entryReq3.getTransactionType().name()))
+                .andExpect(jsonPath("$[3].primaryAmount").value(entryReq3.getForeignAmount()))
+                .andExpect(jsonPath("$[3].primaryCurrencyType").value(CurrencyType.USD.name()))
+                .andExpect(jsonPath("$[3].relatedAmount").value(entryReq3.getTwdAmount()))
+                .andExpect(jsonPath("$[4].transactionType").value(entryReq2.getTransactionType().name()))
+                .andExpect(jsonPath("$[4].primaryAmount").value(entryReq2.getForeignAmount()))
+                .andExpect(jsonPath("$[4].primaryCurrencyType").value(CurrencyType.USD.name()))
+                .andExpect(jsonPath("$[5].transactionType").value(entryReq1.getTransactionType().name()))
+                .andExpect(jsonPath("$[5].primaryAmount").value(entryReq1.getForeignAmount()))
+                .andExpect(jsonPath("$[5].primaryCurrencyType").value(CurrencyType.USD.name()))
+                .andExpect(jsonPath("$[5].relatedAmount").value(entryReq1.getTwdAmount()));
+
+        mockMvc.perform(get(APIPathConstants.ENTRIES)
+                .param("bookId", gbpBookId)
+                .headers(httpHeaders))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].transactionType").value(TransactionType.TRANSFER_OUT_TO_FOREIGN.name()))
+                .andExpect(jsonPath("$[0].primaryAmount").value(entryReq4.getRelatedBookForeignAmount()))
+                .andExpect(jsonPath("$[0].primaryCurrencyType").value(CurrencyType.GBP.name()))
+                .andExpect(jsonPath("$[0].relatedAmount").value(entryReq4.getForeignAmount()))
+                .andExpect(jsonPath("$[0].relatedCurrencyType").value(CurrencyType.USD.name()))
+                .andExpect(jsonPath("$[1].transactionType").value(gbpEntryReq.getTransactionType().name()))
+                .andExpect(jsonPath("$[1].primaryAmount").value(gbpEntryReq.getForeignAmount()))
+                .andExpect(jsonPath("$[1].primaryCurrencyType").value(CurrencyType.GBP.name()))
+                .andExpect(jsonPath("$[1].relatedAmount").value(gbpEntryReq.getTwdAmount()));
     }
 
     @SuppressWarnings({"java:S3415"})

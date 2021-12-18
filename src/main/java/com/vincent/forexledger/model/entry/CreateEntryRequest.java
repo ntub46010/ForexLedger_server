@@ -15,6 +15,8 @@ public class CreateEntryRequest {
     @NotNull
     private Date transactionDate;
 
+    private String description;
+
     @Positive
     private double foreignAmount;
     private Integer twdAmount;
@@ -43,6 +45,14 @@ public class CreateEntryRequest {
 
     public void setTransactionDate(Date transactionDate) {
         this.transactionDate = transactionDate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public double getForeignAmount() {
