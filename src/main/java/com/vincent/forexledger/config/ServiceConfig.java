@@ -47,6 +47,12 @@ public class ServiceConfig {
     }
 
     @Bean
+    public RefreshBookMetaDataTask refreshBookMetaDataTask(
+            BookRepository bookRepository, EntryRepository entryRepository) {
+        return new RefreshBookMetaDataTask(bookRepository, entryRepository);
+    }
+
+    @Bean
     public DownloadExchangeRateClient downloadExchangeRateClient() {
         var restTemplate = new RestTemplateBuilder()
                 .setConnectTimeout(Duration.ofSeconds(10))
