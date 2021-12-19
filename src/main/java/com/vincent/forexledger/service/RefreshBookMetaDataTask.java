@@ -8,8 +8,10 @@ import com.vincent.forexledger.util.CalcUtil;
 import com.vincent.forexledger.util.converter.BookConverter;
 import org.springframework.data.util.Pair;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -32,57 +34,66 @@ public class RefreshBookMetaDataTask {
                 .map(Entry::getBookId)
                 .collect(Collectors.toSet());
 
-        var booksIterable = bookRepository.findAllById(bookIds);
-        var bookMap = StreamSupport.stream(booksIterable.spliterator(), false)
-                .collect(Collectors.toMap(Book::getId, Function.identity()));
-
+        var bookMap = loadBookMap(bookIds);
         var balanceMap = new HashMap<String, Double>();
         var twdFundMap = new HashMap<String, Integer>();
         var lastInvestMap = new HashMap<String, Pair<Double, Integer>>();
+
         entries.forEach(entry -> {
             // balance
             var balance = balanceMap.getOrDefault(entry.getBookId(), 0.0);
-            if (entry.getTransactionType().isTransferIn()) {
-                balance += entry.getForeignAmount();
-            } else {
-                balance -= entry.getForeignAmount();
-            }
+            var deltaBalance = calcDeltaBalance(entry);
+            balance += deltaBalance;
             balanceMap.put(entry.getBookId(), balance);
 
             // remaining TWD fund
             var twdFund = twdFundMap.get(entry.getBookId());
-            int deltaTwdFund;
-            if (entry.getTwdAmount() != null) {
-                deltaTwdFund = entry.getTransactionType().isTransferIn()
-                        ? entry.getTwdAmount()
-                        : -entry.getTwdAmount();
-            } else {
-                var relatedBook = bookMap.get(entry.getRelatedBookId());
-                deltaTwdFund = entry.getTransactionType().isTransferIn()
-                        ? BookConverter.calcRepresentingTwdFund(relatedBook, entry.getRelatedBookForeignAmount())
-                        : -BookConverter.calcRepresentingTwdFund(relatedBook, entry.getRelatedBookForeignAmount());
-            }
+            int deltaTwdFund = calcDeltaTwdFund(entry, bookMap);
             twdFund += deltaTwdFund;
             twdFundMap.put(entry.getBookId(), twdFund);
 
-            // break even point
-            var breakEvenPoint = CalcUtil.divideToDouble(twdFund, balance, 4);
-
             // last invest
             if (entry.getTransactionType().isTransferIn()) {
-                lastInvestMap.put(entry.getBookId(), Pair.of(entry.getForeignAmount(), deltaTwdFund));
+                lastInvestMap.put(entry.getBookId(), Pair.of(deltaBalance, deltaTwdFund));
             }
+        });
 
-            var book = bookMap.get(entry.getBookId());
-            book.setBalance(balance);
-            book.setRemainingTwdFund(twdFund);
-            book.setBreakEvenPoint(breakEvenPoint);
+        bookMap.values().forEach(book -> {
+            book.setBalance(balanceMap.get(book.getId()));
+            book.setRemainingTwdFund(twdFundMap.get(book.getId()));
+            book.setBreakEvenPoint(
+                    CalcUtil.divideToDouble(book.getRemainingTwdFund(), book.getBalance(), 4));
 
-            var lastInvestInfo = lastInvestMap.get(entry.getBookId());
+            var lastInvestInfo = lastInvestMap.get(book.getId());
             book.setLastForeignInvest(lastInvestInfo.getFirst());
             book.setLastTwdInvest(lastInvestInfo.getSecond());
         });
 
         bookRepository.saveAll(bookMap.values());
+    }
+
+    private Map<String, Book> loadBookMap(Collection<String> bookIds) {
+        var booksIterable = bookRepository.findAllById(bookIds);
+        return StreamSupport.stream(booksIterable.spliterator(), false)
+                .collect(Collectors.toMap(Book::getId, Function.identity()));
+    }
+
+    private double calcDeltaBalance(Entry entry) {
+        return entry.getTransactionType().isTransferIn()
+                ? entry.getForeignAmount()
+                : -entry.getForeignAmount();
+    }
+
+    private int calcDeltaTwdFund(Entry entry, Map<String, Book> bookMap) {
+        if (entry.getTwdAmount() != null) {
+            return entry.getTransactionType().isTransferIn()
+                    ? entry.getTwdAmount()
+                    : -entry.getTwdAmount();
+        } else {
+            var relatedBook = bookMap.get(entry.getRelatedBookId());
+            return entry.getTransactionType().isTransferIn()
+                    ? BookConverter.calcRepresentingTwdFund(relatedBook, entry.getRelatedBookForeignAmount())
+                    : -BookConverter.calcRepresentingTwdFund(relatedBook, entry.getRelatedBookForeignAmount());
+        }
     }
 }
