@@ -2,6 +2,7 @@ package com.vincent.forexledger.service;
 
 import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.entry.Entry;
+import com.vincent.forexledger.model.entry.TransactionType;
 import com.vincent.forexledger.repository.BookRepository;
 import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.util.CalcUtil;
@@ -28,7 +29,8 @@ public class RefreshBookMetaDataTask {
     public void process() {
         var entries = entryRepository.findAll()
                 .stream()
-                .sorted(Comparator.comparing(Entry::getTransactionDate))
+                .sorted(Comparator.comparing(Entry::getTransactionDate)
+                        .thenComparing(Entry::getCreatedTime))
                 .collect(Collectors.toList());
         var bookIds = entries.stream()
                 .map(Entry::getBookId)
@@ -53,7 +55,8 @@ public class RefreshBookMetaDataTask {
             twdFundMap.put(entry.getBookId(), twdFund);
 
             // last invest
-            if (entry.getTransactionType().isTransferIn()) {
+            if (entry.getTransactionType().isTransferIn()
+                    || entry.getTransactionType() != TransactionType.TRANSFER_IN_FROM_INTEREST) {
                 lastInvestMap.put(entry.getBookId(), Pair.of(deltaBalance, deltaTwdFund));
             }
         });
