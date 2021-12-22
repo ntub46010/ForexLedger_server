@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -30,7 +31,7 @@ public class RefreshBookMetaDataTask {
         var entries = entryRepository.findAll()
                 .stream()
                 .sorted(Comparator.comparing(Entry::getTransactionDate)
-                        .thenComparing(Entry::getCreatedTime))
+                        .thenComparing(e -> !e.getTransactionType().isTransferIn()))
                 .collect(Collectors.toList());
         var bookIds = entries.stream()
                 .map(Entry::getBookId)
@@ -45,18 +46,18 @@ public class RefreshBookMetaDataTask {
             // balance
             var balance = balanceMap.getOrDefault(entry.getBookId(), 0.0);
             var deltaBalance = calcDeltaBalance(entry);
-            balance += deltaBalance;
+            balance = CalcUtil.addToDouble(balance, deltaBalance);
             balanceMap.put(entry.getBookId(), balance);
 
             // remaining TWD fund
-            var twdFund = twdFundMap.get(entry.getBookId());
-            int deltaTwdFund = calcDeltaTwdFund(entry, bookMap);
+            var twdFund = twdFundMap.getOrDefault(entry.getBookId(), 0);
+            int deltaTwdFund = calcDeltaTwdFund(entry, balanceMap, twdFundMap);
             twdFund += deltaTwdFund;
             twdFundMap.put(entry.getBookId(), twdFund);
 
             // last invest
             if (entry.getTransactionType().isTransferIn()
-                    || entry.getTransactionType() != TransactionType.TRANSFER_IN_FROM_INTEREST) {
+                    && entry.getTransactionType() != TransactionType.TRANSFER_IN_FROM_INTEREST) {
                 lastInvestMap.put(entry.getBookId(), Pair.of(deltaBalance, deltaTwdFund));
             }
         });
@@ -87,16 +88,21 @@ public class RefreshBookMetaDataTask {
                 : -entry.getForeignAmount();
     }
 
-    private int calcDeltaTwdFund(Entry entry, Map<String, Book> bookMap) {
+    private int calcDeltaTwdFund(Entry entry, Map<String, Double> balanceMap, Map<String, Integer> twdFundMap) {
+        if (entry.getTransactionType() == TransactionType.TRANSFER_IN_FROM_INTEREST) {
+            return 0;
+        }
+
         if (entry.getTwdAmount() != null) {
             return entry.getTransactionType().isTransferIn()
                     ? entry.getTwdAmount()
                     : -entry.getTwdAmount();
         } else {
-            var relatedBook = bookMap.get(entry.getRelatedBookId());
+            var relatedBookBalance = balanceMap.get(entry.getRelatedBookId());
+            var relatedBookTwdFund = twdFundMap.get(entry.getRelatedBookId());
             return entry.getTransactionType().isTransferIn()
-                    ? BookConverter.calcRepresentingTwdFund(relatedBook, entry.getRelatedBookForeignAmount())
-                    : -BookConverter.calcRepresentingTwdFund(relatedBook, entry.getRelatedBookForeignAmount());
+                    ? BookConverter.calcRepresentingTwdFund(relatedBookTwdFund, relatedBookBalance, entry.getRelatedBookForeignAmount())
+                    : -BookConverter.calcRepresentingTwdFund(relatedBookTwdFund, relatedBookBalance, entry.getRelatedBookForeignAmount());
         }
     }
 }
