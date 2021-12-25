@@ -8,4 +8,6 @@ public class APIPathConstants {
     public static final String EXCHANGE_RATES = "/exchange-rates";
     public static final String BOOKS = "/books";
     public static final String ENTRIES = "/entries";
+    public static final String BACKUP = "/backup";
+    public static final String BOOK = "/book";
 }
