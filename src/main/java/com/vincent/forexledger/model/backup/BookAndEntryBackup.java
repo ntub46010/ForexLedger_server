@@ -43,6 +43,10 @@ public class BookAndEntryBackup {
     }
 
     public static class BookBackup {
+
+        @NotBlank
+        private String id;
+
         @NotBlank
         private String name;
 
@@ -54,6 +58,14 @@ public class BookAndEntryBackup {
 
         @NotNull
         private Date createdTime;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
 
         public String getName() {
             return name;
@@ -89,6 +101,10 @@ public class BookAndEntryBackup {
     }
 
     public static class EntryBackup {
+
+        @NotBlank
+        private String id;
+
         @NotNull
         private TransactionType transactionType;
 
@@ -105,6 +121,14 @@ public class BookAndEntryBackup {
 
         @NotNull
         private Date createdTime;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
 
         public TransactionType getTransactionType() {
             return transactionType;

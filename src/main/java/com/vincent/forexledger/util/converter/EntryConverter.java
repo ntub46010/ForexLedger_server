@@ -32,6 +32,7 @@ public class EntryConverter {
     // TODO: unit test
     public static Entry toEntry(BookAndEntryBackup.EntryBackup backup) {
         var entry = new Entry();
+        entry.setId(backup.getId());
         entry.setTransactionType(backup.getTransactionType());
         entry.setTransactionDate(backup.getTransactionDate());
         entry.setForeignAmount(backup.getForeignAmount());
@@ -105,6 +106,7 @@ public class EntryConverter {
 
     private static BookAndEntryBackup.EntryBackup toEntryBackup(Entry entry) {
         var backup = new BookAndEntryBackup.EntryBackup();
+        backup.setId(entry.getId());
         backup.setTransactionType(entry.getTransactionType());
         backup.setTransactionDate(entry.getTransactionDate());
         backup.setForeignAmount(entry.getForeignAmount());
