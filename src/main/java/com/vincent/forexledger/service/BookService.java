@@ -75,6 +75,11 @@ public class BookService {
         return repository.findByIdIn(bookIds);
     }
 
+    // TODO: unit test
+    public void saveBook(Book book) {
+        repository.save(book);
+    }
+
     private void assignRepresentingTwdFundIfAbsent(Map<Book, Entry> bookToEntryMap) {
         Pair<Book, Entry> transferOutInfo = null;
         for (var pair : bookToEntryMap.entrySet()) {

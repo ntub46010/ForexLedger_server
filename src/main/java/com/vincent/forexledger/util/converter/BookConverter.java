@@ -29,6 +29,17 @@ public class BookConverter {
         return book;
     }
 
+    // TODO: unit test
+    public static Book toBook(BookAndEntryBackup.BookBackup backup) {
+        var book = new Book();
+        book.setName(backup.getName());
+        book.setBank(backup.getBank());
+        book.setCurrencyType(backup.getCurrencyType());
+        book.setCreatedTime(backup.getCreatedTime());
+
+        return book;
+    }
+
     public static List<BookListResponse> toBookListResponses(
             List<Book> books, Map<BankType, Map<CurrencyType, Double>> bankBuyingRateMap) {
         return books.stream()

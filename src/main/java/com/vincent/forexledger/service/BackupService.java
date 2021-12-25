@@ -5,6 +5,9 @@ import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.security.UserIdentity;
 import com.vincent.forexledger.util.converter.BookConverter;
 import com.vincent.forexledger.util.converter.EntryConverter;
+import org.apache.commons.collections4.CollectionUtils;
+
+import java.util.stream.Collectors;
 
 public class BackupService {
     private UserIdentity userIdentity;
@@ -26,5 +29,25 @@ public class BackupService {
         var entriesBackup = EntryConverter.toEntryBackup(entries);
 
         return new BookAndEntryBackup(bookBackup, entriesBackup);
+    }
+
+    public void restoreBookAndEntry(BookAndEntryBackup backup) {
+        var book = BookConverter.toBook(backup.getBook());
+        book.setCreator(userIdentity.getId());
+        bookService.saveBook(book);
+
+        if (CollectionUtils.isEmpty(backup.getEntries())) {
+            return;
+        }
+
+        var entries = backup.getEntries().stream()
+                .map(EntryConverter::toEntry)
+                .peek(entry -> {
+                    entry.setBookId(book.getId());
+                    entry.setCreator(userIdentity.getId());
+                })
+                .collect(Collectors.toList());
+        
+        entryRepository.saveAll(entries);
     }
 }

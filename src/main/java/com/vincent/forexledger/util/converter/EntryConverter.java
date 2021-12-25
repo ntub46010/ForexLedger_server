@@ -29,6 +29,21 @@ public class EntryConverter {
         return entry;
     }
 
+    // TODO: unit test
+    public static Entry toEntry(BookAndEntryBackup.EntryBackup backup) {
+        var entry = new Entry();
+        entry.setTransactionType(backup.getTransactionType());
+        entry.setTransactionDate(backup.getTransactionDate());
+        entry.setForeignAmount(backup.getForeignAmount());
+        entry.setTwdAmount(backup.getTwdAmount());
+        entry.setDescription(backup.getDescription());
+        entry.setRelatedBookId(backup.getRelatedBookId());
+        entry.setRelatedBookForeignAmount(backup.getRelatedBookForeignAmount());
+        entry.setCreatedTime(backup.getCreatedTime());
+
+        return entry;
+    }
+
     public static Entry toRelatedEntry(Entry primaryEntry) {
         var entry = new Entry();
         if (primaryEntry.getTransactionType() == TransactionType.TRANSFER_IN_FROM_FOREIGN) {

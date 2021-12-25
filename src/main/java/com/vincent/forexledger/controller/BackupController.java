@@ -19,11 +19,11 @@ public class BackupController {
     private BackupService backupService;
 
     @Operation(
-            summary = "Create book for login user.",
+            summary = "N/A",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Book and related entries are exported successfully."),
+                            description = "Book and related entries are backup successfully."),
                     @ApiResponse(
                             responseCode = "401",
                             description = "The API caller doesn't have effective authorization.",
@@ -41,11 +41,15 @@ public class BackupController {
     }
 
     @Operation(
-            summary = "Create book for login user.",
+            summary = "N/A",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Book and related entries are imported successfully."),
+                            description = "Book and related entries are restored successfully."),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Data format in request body isn't expected.",
+                            content = @Content),
                     @ApiResponse(
                             responseCode = "401",
                             description = "The API caller doesn't have effective authorization.",
@@ -53,7 +57,8 @@ public class BackupController {
             }
     )
     @PostMapping
-    public ResponseEntity<Void> importBookAndEntry(@RequestBody BookAndEntryBackup backup) {
+    public ResponseEntity<Void> restoreBookAndEntry(@RequestBody BookAndEntryBackup backup) {
+        backupService.restoreBookAndEntry(backup);
         return ResponseEntity.noContent().build();
     }
 }
