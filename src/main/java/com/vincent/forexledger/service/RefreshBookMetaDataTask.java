@@ -31,7 +31,9 @@ public class RefreshBookMetaDataTask {
         var entries = entryRepository.findAll()
                 .stream()
                 .sorted(Comparator.comparing(Entry::getTransactionDate)
-                        .thenComparing(e -> !e.getTransactionType().isTransferIn()))
+                        .thenComparing(Entry::getCreatedTime)
+                        .thenComparing(e -> !e.getTransactionType().isTransferIn())
+                )
                 .collect(Collectors.toList());
         var bookIds = entries.stream()
                 .map(Entry::getBookId)
@@ -47,12 +49,13 @@ public class RefreshBookMetaDataTask {
             var balance = balanceMap.getOrDefault(entry.getBookId(), 0.0);
             var deltaBalance = calcDeltaBalance(entry);
             balance = CalcUtil.addToDouble(balance, deltaBalance);
-            balanceMap.put(entry.getBookId(), balance);
 
             // remaining TWD fund
             var twdFund = twdFundMap.getOrDefault(entry.getBookId(), 0);
             int deltaTwdFund = calcDeltaTwdFund(entry, balanceMap, twdFundMap);
             twdFund += deltaTwdFund;
+
+            balanceMap.put(entry.getBookId(), balance);
             twdFundMap.put(entry.getBookId(), twdFund);
 
             // last invest
@@ -98,11 +101,15 @@ public class RefreshBookMetaDataTask {
                     ? entry.getTwdAmount()
                     : -entry.getTwdAmount();
         } else {
-            var relatedBookBalance = balanceMap.get(entry.getRelatedBookId());
-            var relatedBookTwdFund = twdFundMap.get(entry.getRelatedBookId());
-            return entry.getTransactionType().isTransferIn()
-                    ? BookConverter.calcRepresentingTwdFund(relatedBookTwdFund, relatedBookBalance, entry.getRelatedBookForeignAmount())
-                    : -BookConverter.calcRepresentingTwdFund(relatedBookTwdFund, relatedBookBalance, entry.getRelatedBookForeignAmount());
+            if (entry.getTransactionType().isTransferIn()) {
+                var relatedBookBalance = balanceMap.get(entry.getRelatedBookId());
+                var relatedBookTwdFund = twdFundMap.get(entry.getRelatedBookId());
+                return BookConverter.calcRepresentingTwdFund(relatedBookTwdFund, relatedBookBalance, entry.getRelatedBookForeignAmount());
+            } else {
+                var primaryBookBalance = balanceMap.get(entry.getBookId());
+                var primaryBookTwdFund = twdFundMap.get(entry.getBookId());
+                return -BookConverter.calcRepresentingTwdFund(primaryBookTwdFund, primaryBookBalance, entry.getForeignAmount());
+            }
         }
     }
 }
