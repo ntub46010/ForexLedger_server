@@ -9,13 +9,13 @@ import com.vincent.forexledger.util.CalcUtil;
 import com.vincent.forexledger.util.converter.BookConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.util.Pair;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -28,6 +28,7 @@ public class RefreshBookMetaDataTask {
         this.entryRepository = entryRepository;
     }
 
+    @Scheduled(cron = "${cron.book.metadata.refresh}")
     public void process() {
         var entries = entryRepository.findAll()
                 .stream()
