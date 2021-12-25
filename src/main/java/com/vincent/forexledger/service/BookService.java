@@ -65,7 +65,7 @@ public class BookService {
         repository.saveAll(bookToEntryMap.keySet());
     }
 
-    private Book loadBookById(String id) {
+    public Book loadBookById(String id) {
         return repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Can't find book."));
     }

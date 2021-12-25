@@ -9,5 +9,7 @@ import java.util.List;
 @Repository
 public interface EntryRepository extends MongoRepository<Entry, String> {
 
+    List<Entry> findByBookId(String bookId);
+
     List<Entry> findByBookIdOrderByTransactionDateDesc(String bookId);
 }

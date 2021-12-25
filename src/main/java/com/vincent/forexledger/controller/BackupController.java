@@ -1,10 +1,12 @@
 package com.vincent.forexledger.controller;
 
 import com.vincent.forexledger.constants.APIPathConstants;
-import com.vincent.forexledger.model.BookAndEntryBackup;
+import com.vincent.forexledger.model.backup.BookAndEntryBackup;
+import com.vincent.forexledger.service.BackupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = APIPathConstants.BACKUP, produces = MediaType.APPLICATION_JSON_VALUE)
 public class BackupController {
+
+    @Autowired
+    private BackupService backupService;
 
     @Operation(
             summary = "Create book for login user.",
@@ -31,7 +36,7 @@ public class BackupController {
     )
     @PostMapping(APIPathConstants.BOOK + "/{bookId}")
     public ResponseEntity<BookAndEntryBackup> backupBookAndEntry(@PathVariable("bookId") String bookId) {
-        var backup = new BookAndEntryBackup();
+        var backup = backupService.backupBookAndEntry(bookId);
         return ResponseEntity.ok(backup);
     }
 

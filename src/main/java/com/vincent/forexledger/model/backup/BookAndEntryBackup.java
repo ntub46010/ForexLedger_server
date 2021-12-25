@@ -1,5 +1,6 @@
-package com.vincent.forexledger.model;
+package com.vincent.forexledger.model.backup;
 
+import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.entry.TransactionType;
 
@@ -20,6 +21,11 @@ public class BookAndEntryBackup {
     @NotNull
     private List<EntryBackup> entries;
 
+    public BookAndEntryBackup(BookBackup book, List<EntryBackup> entries) {
+        this.book = book;
+        this.entries = entries;
+    }
+
     public BookBackup getBook() {
         return book;
     }
@@ -36,7 +42,7 @@ public class BookAndEntryBackup {
         this.entries = entries;
     }
 
-    private static class BookBackup {
+    public static class BookBackup {
         @NotBlank
         private String name;
 
@@ -45,6 +51,9 @@ public class BookAndEntryBackup {
 
         @NotNull
         private CurrencyType currencyType;
+
+        @NotNull
+        private Date createdTime;
 
         public String getName() {
             return name;
@@ -69,9 +78,17 @@ public class BookAndEntryBackup {
         public void setCurrencyType(CurrencyType currencyType) {
             this.currencyType = currencyType;
         }
+
+        public Date getCreatedTime() {
+            return createdTime;
+        }
+
+        public void setCreatedTime(Date createdTime) {
+            this.createdTime = createdTime;
+        }
     }
 
-    private static class EntryBackup {
+    public static class EntryBackup {
         @NotNull
         private TransactionType transactionType;
 

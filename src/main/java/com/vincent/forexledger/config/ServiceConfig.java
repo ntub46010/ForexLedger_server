@@ -53,6 +53,12 @@ public class ServiceConfig {
     }
 
     @Bean
+    public BackupService backupService(UserIdentity userIdentity, BookService bookService,
+                                       EntryRepository entryRepository) {
+        return new BackupService(userIdentity, bookService, entryRepository);
+    }
+
+    @Bean
     public DownloadExchangeRateClient downloadExchangeRateClient() {
         var restTemplate = new RestTemplateBuilder()
                 .setConnectTimeout(Duration.ofSeconds(10))
