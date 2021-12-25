@@ -92,18 +92,26 @@ public class BookConverter {
 
     public static int calcRepresentingTwdFund(Book book, double foreignAmount) {
         Objects.requireNonNull(book);
+        return calcRepresentingTwdFund(book.getRemainingTwdFund(), book.getBalance(), foreignAmount);
+    }
+
+    // TODO: unit test
+    public static int calcRepresentingTwdFund(int totalTwdFund, double totalBalance, double foreignAmount) {
+        if (totalTwdFund == 0) {
+            return 0;
+        }
 
         if (foreignAmount < 0) {
             throw new IllegalArgumentException("The representing foreign amount shouldn't be negative.");
         }
 
-        if (foreignAmount > book.getBalance()) {
+        if (foreignAmount > totalBalance) {
             throw new IllegalArgumentException("The representing foreign amount shouldn't be greater than book balance");
         }
 
         return CalcUtil.divideToInt(
-                CalcUtil.multiplyToDecimal(book.getRemainingTwdFund(), foreignAmount),
-                book.getBalance()
+                CalcUtil.multiplyToDecimal(totalTwdFund, foreignAmount),
+                totalBalance
         );
     }
 }

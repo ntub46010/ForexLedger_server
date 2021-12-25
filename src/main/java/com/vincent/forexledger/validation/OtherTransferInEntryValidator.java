@@ -7,7 +7,7 @@ public class OtherTransferInEntryValidator implements ICreateEntryValidator {
     
     @Override
     public boolean validate(CreateEntryRequest request) {
-        if (request.getTwdAmount() == null || request.getTwdAmount() < 0) {
+        if (request.getTwdAmount() == null || request.getTwdAmount() <= 0) {
             return false;
         }
 
