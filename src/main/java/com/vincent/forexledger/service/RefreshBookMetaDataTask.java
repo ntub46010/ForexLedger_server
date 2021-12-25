@@ -7,6 +7,7 @@ import com.vincent.forexledger.repository.BookRepository;
 import com.vincent.forexledger.repository.EntryRepository;
 import com.vincent.forexledger.util.CalcUtil;
 import com.vincent.forexledger.util.converter.BookConverter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.util.Pair;
 
 import java.util.Collection;
@@ -96,7 +97,7 @@ public class RefreshBookMetaDataTask {
             return 0;
         }
 
-        if (entry.getTwdAmount() != null) {
+        if (StringUtils.isBlank(entry.getRelatedBookId())) {
             return entry.getTransactionType().isTransferIn()
                     ? entry.getTwdAmount()
                     : -entry.getTwdAmount();

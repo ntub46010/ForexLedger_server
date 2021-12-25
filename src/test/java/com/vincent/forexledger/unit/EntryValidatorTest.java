@@ -217,7 +217,7 @@ public class EntryValidatorTest {
         request1.setTransactionDate(new Date());
         request1.setForeignAmount(2100);
         request1.setTwdAmount(0);
-        assertTrue(validator.validate(request1));
+        assertFalse(validator.validate(request1));
 
         request1 = new CreateEntryRequest();
         request1.setTwdAmount(56000);
