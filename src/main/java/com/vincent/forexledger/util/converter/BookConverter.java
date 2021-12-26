@@ -1,6 +1,7 @@
 package com.vincent.forexledger.util.converter;
 
 import com.vincent.forexledger.model.CurrencyType;
+import com.vincent.forexledger.model.backup.BookAndEntryBackup;
 import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.book.Book;
 import com.vincent.forexledger.model.book.BookDetailResponse;
@@ -24,6 +25,17 @@ public class BookConverter {
         book.setCurrencyType(request.getCurrencyType());
         book.setBalance(0);
         book.setRemainingTwdFund(0);
+
+        return book;
+    }
+
+    // TODO: unit test
+    public static Book toBook(BookAndEntryBackup.BookBackup backup) {
+        var book = new Book();
+        book.setName(backup.getName());
+        book.setBank(backup.getBank());
+        book.setCurrencyType(backup.getCurrencyType());
+        book.setCreatedTime(backup.getCreatedTime());
 
         return book;
     }
@@ -90,6 +102,17 @@ public class BookConverter {
         return detail;
     }
 
+    // TODO: unit test
+    public static BookAndEntryBackup.BookBackup toBookBackup(Book book) {
+        var backup = new BookAndEntryBackup.BookBackup();
+        backup.setName(book.getName());
+        backup.setBank(book.getBank());
+        backup.setCurrencyType(book.getCurrencyType());
+        backup.setCreatedTime(book.getCreatedTime());
+
+        return backup;
+    }
+
     public static int calcRepresentingTwdFund(Book book, double foreignAmount) {
         Objects.requireNonNull(book);
         return calcRepresentingTwdFund(book.getRemainingTwdFund(), book.getBalance(), foreignAmount);
@@ -114,4 +137,5 @@ public class BookConverter {
                 totalBalance
         );
     }
+
 }

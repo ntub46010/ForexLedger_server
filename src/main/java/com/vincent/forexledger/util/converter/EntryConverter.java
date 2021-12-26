@@ -1,16 +1,15 @@
 package com.vincent.forexledger.util.converter;
 
 import com.vincent.forexledger.model.CurrencyType;
+import com.vincent.forexledger.model.backup.BookAndEntryBackup;
 import com.vincent.forexledger.model.entry.CreateEntryRequest;
 import com.vincent.forexledger.model.entry.Entry;
 import com.vincent.forexledger.model.entry.EntryListResponse;
 import com.vincent.forexledger.model.entry.TransactionType;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class EntryConverter {
     private EntryConverter() {
@@ -26,6 +25,21 @@ public class EntryConverter {
         entry.setTwdAmount(request.getTwdAmount());
         entry.setRelatedBookId(request.getRelatedBookId());
         entry.setRelatedBookForeignAmount(request.getRelatedBookForeignAmount());
+
+        return entry;
+    }
+
+    // TODO: unit test
+    public static Entry toEntry(BookAndEntryBackup.EntryBackup backup) {
+        var entry = new Entry();
+        entry.setTransactionType(backup.getTransactionType());
+        entry.setTransactionDate(backup.getTransactionDate());
+        entry.setForeignAmount(backup.getForeignAmount());
+        entry.setTwdAmount(backup.getTwdAmount());
+        entry.setDescription(backup.getDescription());
+        entry.setRelatedBookId(backup.getRelatedBookId());
+        entry.setRelatedBookForeignAmount(backup.getRelatedBookForeignAmount());
+        entry.setCreatedTime(backup.getCreatedTime());
 
         return entry;
     }
@@ -76,5 +90,30 @@ public class EntryConverter {
         }
 
         return responses;
+    }
+
+    // TODO: unit test
+    public static List<BookAndEntryBackup.EntryBackup> toEntryBackup(List<Entry> entries) {
+        return entries.stream()
+                .sorted(Comparator.comparing(Entry::getTransactionDate)
+                        .thenComparing(Entry::getCreatedTime)
+                        .thenComparing(e -> !e.getTransactionType().isTransferIn())
+                )
+                .map(EntryConverter::toEntryBackup)
+                .collect(Collectors.toList());
+    }
+
+    private static BookAndEntryBackup.EntryBackup toEntryBackup(Entry entry) {
+        var backup = new BookAndEntryBackup.EntryBackup();
+        backup.setTransactionType(entry.getTransactionType());
+        backup.setTransactionDate(entry.getTransactionDate());
+        backup.setForeignAmount(entry.getForeignAmount());
+        backup.setTwdAmount(entry.getTwdAmount());
+        backup.setDescription(entry.getDescription());
+        backup.setRelatedBookId(entry.getRelatedBookId());
+        backup.setRelatedBookForeignAmount(entry.getRelatedBookForeignAmount());
+        backup.setCreatedTime(entry.getCreatedTime());
+
+        return backup;
     }
 }

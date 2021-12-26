@@ -65,7 +65,7 @@ public class BookService {
         repository.saveAll(bookToEntryMap.keySet());
     }
 
-    private Book loadBookById(String id) {
+    public Book loadBookById(String id) {
         return repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Can't find book."));
     }
@@ -73,6 +73,11 @@ public class BookService {
     // TODO: unit test
     public List<Book> loadBooksByIds(Collection<String> bookIds) {
         return repository.findByIdIn(bookIds);
+    }
+
+    // TODO: unit test
+    public void saveBook(Book book) {
+        repository.save(book);
     }
 
     private void assignRepresentingTwdFundIfAbsent(Map<Book, Entry> bookToEntryMap) {
