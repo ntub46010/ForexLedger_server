@@ -19,7 +19,7 @@ public class BackupController {
     private BackupService backupService;
 
     @Operation(
-            summary = "N/A",
+            summary = "Backup book and related entries as JSON format.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -41,7 +41,7 @@ public class BackupController {
     }
 
     @Operation(
-            summary = "N/A",
+            summary = "Use JSON format data to restore book and related entries.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -56,7 +56,7 @@ public class BackupController {
                             content = @Content)
             }
     )
-    @PostMapping
+    @PostMapping(APIPathConstants.BOOK + APIPathConstants.RESTORE)
     public ResponseEntity<Void> restoreBookAndEntry(@RequestBody BookAndEntryBackup backup) {
         backupService.restoreBookAndEntry(backup);
         return ResponseEntity.noContent().build();

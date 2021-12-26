@@ -32,7 +32,6 @@ public class BookConverter {
     // TODO: unit test
     public static Book toBook(BookAndEntryBackup.BookBackup backup) {
         var book = new Book();
-        book.setId(backup.getId());
         book.setName(backup.getName());
         book.setBank(backup.getBank());
         book.setCurrencyType(backup.getCurrencyType());
@@ -106,7 +105,6 @@ public class BookConverter {
     // TODO: unit test
     public static BookAndEntryBackup.BookBackup toBookBackup(Book book) {
         var backup = new BookAndEntryBackup.BookBackup();
-        backup.setId(book.getId());
         backup.setName(book.getName());
         backup.setBank(book.getBank());
         backup.setCurrencyType(book.getCurrencyType());

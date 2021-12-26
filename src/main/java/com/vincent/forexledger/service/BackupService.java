@@ -13,12 +13,14 @@ public class BackupService {
     private UserIdentity userIdentity;
     private BookService bookService;
     private EntryRepository entryRepository;
+    private RefreshBookMetaDataTask refreshBookMetaDataTask;
 
     public BackupService(UserIdentity userIdentity, BookService bookService,
-                         EntryRepository entryRepository) {
+                         EntryRepository entryRepository, RefreshBookMetaDataTask task) {
         this.userIdentity = userIdentity;
         this.bookService = bookService;
         this.entryRepository = entryRepository;
+        this.refreshBookMetaDataTask = task;
     }
 
     public BookAndEntryBackup backupBookAndEntry(String bookId) {
@@ -49,5 +51,8 @@ public class BackupService {
                 .collect(Collectors.toList());
         
         entryRepository.saveAll(entries);
+
+        // TODO: single book
+        refreshBookMetaDataTask.process();
     }
 }

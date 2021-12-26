@@ -54,8 +54,8 @@ public class ServiceConfig {
 
     @Bean
     public BackupService backupService(UserIdentity userIdentity, BookService bookService,
-                                       EntryRepository entryRepository) {
-        return new BackupService(userIdentity, bookService, entryRepository);
+                                       EntryRepository entryRepository, RefreshBookMetaDataTask task) {
+        return new BackupService(userIdentity, bookService, entryRepository, task);
     }
 
     @Bean

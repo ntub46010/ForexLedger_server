@@ -10,4 +10,5 @@ public class APIPathConstants {
     public static final String ENTRIES = "/entries";
     public static final String BACKUP = "/backup";
     public static final String BOOK = "/book";
+    public static final String RESTORE = "/restore";
 }
