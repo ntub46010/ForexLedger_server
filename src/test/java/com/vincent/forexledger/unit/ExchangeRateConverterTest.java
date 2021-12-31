@@ -5,6 +5,7 @@ import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.exchangerate.ExchangeRate;
 import com.vincent.forexledger.model.exchangerate.ExchangeRateResponse;
 import com.vincent.forexledger.model.exchangerate.FindRateResponse;
+import com.vincent.forexledger.util.ExchangeRateDiscountTable;
 import com.vincent.forexledger.util.converter.ExchangeRateConverter;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,6 +16,8 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertNull;
 
 public class ExchangeRateConverterTest {
 
@@ -36,8 +39,8 @@ public class ExchangeRateConverterTest {
                 createFindRateResponse(CurrencyType.SEK, BankType.RICHART,3.24, 3.18)
         );
 
+        taishinExRates.forEach(ExchangeRateDiscountTable::updatedToDiscountedRate);
         var currencyToRichartRateMap = taishinExRates.stream()
-                .map(ExchangeRateConverter::toRichartExRate)
                 .collect(Collectors.toMap(FindRateResponse::getCurrencyType, Function.identity()));
 
         assertExchangeRate(currencyToRichartRateMap.get(CurrencyType.USD), 27.73, 27.69);
