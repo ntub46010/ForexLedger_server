@@ -25,18 +25,12 @@ public class DownloadExchangeRateClient {
                 .select("tbody tr")
                 .next();
 
-        var tableRowOfExRatesStream = tableRowsOfExRates
-                .stream()
-                .map(ExchangeRateConverter::toFindRateResponse);
+        var responses = tableRowsOfExRates.stream()
+                .map(row -> ExchangeRateConverter.toFindRateResponse(bank, row))
+                .collect(Collectors.toList());
 
-        if (bank == BankType.RICHART) {
-            tableRowOfExRatesStream = tableRowOfExRatesStream
-                    .filter(r -> r.getCurrencyType() != CurrencyType.THB)
-                    .map(ExchangeRateConverter::toRichartExRate);
-        }
-
-        var responses = tableRowOfExRatesStream.collect(Collectors.toList());
-        responses.forEach(r -> r.setBankType(bank));
+        responses.removeIf(rate ->
+                rate.getBankType() == BankType.RICHART || rate.getCurrencyType() == CurrencyType.THB);
 
         return responses;
     }

@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 public class ExchangeRateConverterTest {
 
+    /*
     @Test
     public void testConvertToRichartRate() {
         var taishinExRates = Arrays.asList(
@@ -54,6 +55,7 @@ public class ExchangeRateConverterTest {
         assertExchangeRate(currencyToRichartRateMap.get(CurrencyType.NZD), 19.785, 19.641);
         assertExchangeRate(currencyToRichartRateMap.get(CurrencyType.SEK), 3.228, 3.192);
     }
+    */
 
     @Test
     public void testConvertFindRateResponseToExchangeRate() {

@@ -3,7 +3,6 @@ package com.vincent.forexledger.util;
 import com.vincent.forexledger.model.CurrencyType;
 import com.vincent.forexledger.model.bank.BankType;
 import com.vincent.forexledger.model.exchangerate.FindRateResponse;
-import com.vincent.forexledger.util.CalcUtil;
 
 import java.math.BigDecimal;
 import java.util.EnumMap;
@@ -34,6 +33,7 @@ public class ExchangeRateDiscountTable {
         table.put(BankType.RICHART, richartDiscountMap);
     }
 
+    // TODO: unit test
     public static void updatedToDiscountedRate(FindRateResponse rate) {
         var sellingRate = rate.getSellingRate();
         var buyingRate = rate.getBuyingRate();
