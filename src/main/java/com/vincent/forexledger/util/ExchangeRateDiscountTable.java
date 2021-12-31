@@ -33,7 +33,6 @@ public class ExchangeRateDiscountTable {
         table.put(BankType.RICHART, richartDiscountMap);
     }
 
-    // TODO: unit test
     public static void updatedToDiscountedRate(FindRateResponse rate) {
         var sellingRate = rate.getSellingRate();
         var buyingRate = rate.getBuyingRate();
