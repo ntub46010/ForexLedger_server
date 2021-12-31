@@ -103,6 +103,22 @@ public class RefreshBookMetaDataTest extends BaseTest {
         assertEquals(22.8551, actualBook.getBreakEvenPoint(), 0);
         assertEquals(100, actualBook.getLastForeignInvest(), 0);
         assertEquals(2851, actualBook.getLastTwdInvest(), 0);
+
+        // entry 5
+        entryReq = new CreateEntryRequest();
+        entryReq.setBookId(usdBookId);
+        entryReq.setTransactionType(TransactionType.TRANSFER_OUT_TO_OTHER);
+        entryReq.setTransactionDate(new Date(4));
+        entryReq.setForeignAmount(50);
+        createEntry(entryReq);
+
+        task.process();
+        actualBook = bookRepository.findById(usdBookId).orElseThrow();
+        assertEquals(77.63, actualBook.getBalance(), 0);
+        assertEquals(1774, actualBook.getRemainingTwdFund());
+        assertEquals(22.852, actualBook.getBreakEvenPoint(), 0);
+        assertEquals(100, actualBook.getLastForeignInvest(), 0);
+        assertEquals(2851, actualBook.getLastTwdInvest(), 0);
     }
 
     @SuppressWarnings({"java:S3415"})

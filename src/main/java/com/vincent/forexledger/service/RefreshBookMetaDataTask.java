@@ -98,20 +98,26 @@ public class RefreshBookMetaDataTask {
             return 0;
         }
 
+        if (entry.getTransactionType() == TransactionType.TRANSFER_OUT_TO_OTHER) {
+            var balance = balanceMap.get(entry.getBookId());
+            var twdFund = twdFundMap.get(entry.getBookId());
+            return -BookConverter.calcRepresentingTwdFund(twdFund, balance, entry.getForeignAmount());
+        }
+
         if (StringUtils.isBlank(entry.getRelatedBookId())) {
             return entry.getTransactionType().isTransferIn()
                     ? entry.getTwdAmount()
                     : -entry.getTwdAmount();
+        }
+
+        if (entry.getTransactionType().isTransferIn()) {
+            var relatedBookBalance = balanceMap.get(entry.getRelatedBookId());
+            var relatedBookTwdFund = twdFundMap.get(entry.getRelatedBookId());
+            return BookConverter.calcRepresentingTwdFund(relatedBookTwdFund, relatedBookBalance, entry.getRelatedBookForeignAmount());
         } else {
-            if (entry.getTransactionType().isTransferIn()) {
-                var relatedBookBalance = balanceMap.get(entry.getRelatedBookId());
-                var relatedBookTwdFund = twdFundMap.get(entry.getRelatedBookId());
-                return BookConverter.calcRepresentingTwdFund(relatedBookTwdFund, relatedBookBalance, entry.getRelatedBookForeignAmount());
-            } else {
-                var primaryBookBalance = balanceMap.get(entry.getBookId());
-                var primaryBookTwdFund = twdFundMap.get(entry.getBookId());
-                return -BookConverter.calcRepresentingTwdFund(primaryBookTwdFund, primaryBookBalance, entry.getForeignAmount());
-            }
+            var primaryBookBalance = balanceMap.get(entry.getBookId());
+            var primaryBookTwdFund = twdFundMap.get(entry.getBookId());
+            return -BookConverter.calcRepresentingTwdFund(primaryBookTwdFund, primaryBookBalance, entry.getForeignAmount());
         }
     }
 }
