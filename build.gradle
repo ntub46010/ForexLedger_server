@@ -1,0 +1,19 @@
+buildscript {
+    ext {
+    }
+
+    repositories {
+        google()
+        mavenCentral()
+        mavenLocal()
+        maven {
+            url = uri('https://repo.maven.apache.org/maven2/')
+        }
+    }
+    dependencies {
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
