@@ -13,3 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = 'forexledger'
+include ':app'
